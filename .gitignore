@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+.next/
+vendor/
+
+.env
+.env.*
+!.env.example
+
+# Kredensial PHP asli (pola project ini pakai config.php/config.local.php, bukan .env) —
+# JANGAN PERNAH commit. svashtahome/config.php & svashtahome-cms/config.php TIDAK kena
+# (cuma jembatan require ke shared/config.php, gak ada kredensial di situ).
+/shared/config.php
+/backoffice-shared/config.php
+/backoffice-shared/config.local.php
+
+.DS_Store
+*.log

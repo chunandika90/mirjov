@@ -1,0 +1,512 @@
+<title>Wujud ERP — Prototipe Fungsional Penawaran</title>
+<style>
+  :root{
+    --bg:#f6f1e7; --surface:#fffcf6; --surface-2:#efe6d4; --border:#e3d8c2;
+    --ink:#2a211a; --ink-dim:#8a7a63;
+    --sales:#a2481f; --sales-soft:#f3e2d3;
+    --proc:#274b52; --proc-soft:#dfe9e7;
+    --ok:#3f7d4f; --ok-soft:#e1efe2;
+    --warn:#b07a1f; --warn-soft:#f6e8d0;
+    --danger:#a23a2f; --danger-soft:#f5ded9;
+    --shadow: 0 1px 2px rgba(42,33,26,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1b1611; --surface:#241d17; --surface-2:#2c241c; --border:#3a3025;
+      --ink:#ece2d3; --ink-dim:#a3937b;
+      --sales:#d97a45; --sales-soft:#3a2618;
+      --proc:#6fa39f; --proc-soft:#1e302f;
+      --ok:#7fbf8f; --ok-soft:#1f3324;
+      --warn:#dcab5a; --warn-soft:#3a2f18;
+      --danger:#e08b7c; --danger-soft:#3a211d;
+      --shadow: 0 1px 2px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1b1611; --surface:#241d17; --surface-2:#2c241c; --border:#3a3025;
+    --ink:#ece2d3; --ink-dim:#a3937b;
+    --sales:#d97a45; --sales-soft:#3a2618;
+    --proc:#6fa39f; --proc-soft:#1e302f;
+    --ok:#7fbf8f; --ok-soft:#1f3324;
+    --warn:#dcab5a; --warn-soft:#3a2f18;
+    --danger:#e08b7c; --danger-soft:#3a211d;
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f1e7; --surface:#fffcf6; --surface-2:#efe6d4; --border:#e3d8c2;
+    --ink:#2a211a; --ink-dim:#8a7a63;
+    --sales:#a2481f; --sales-soft:#f3e2d3;
+    --proc:#274b52; --proc-soft:#dfe9e7;
+    --ok:#3f7d4f; --ok-soft:#e1efe2;
+    --warn:#b07a1f; --warn-soft:#f6e8d0;
+    --danger:#a23a2f; --danger-soft:#f5ded9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); min-height:100vh; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .num{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .app-shell{display:grid; grid-template-columns:250px 1fr; height:100vh; min-height:640px;}
+
+  /* Sidebar */
+  .sidebar{background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:16px 12px; overflow-y:auto;}
+  .brand{display:flex; align-items:center; gap:9px; margin-bottom:18px; padding:2px 4px;}
+  .brand .mark{width:29px;height:29px;border-radius:8px; background:linear-gradient(135deg,var(--sales) 0%, var(--proc) 130%); display:flex;align-items:center;justify-content:center; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:16px; color:#fffaf0; flex-shrink:0;}
+  .brand .name{font-family:Georgia,"Times New Roman",serif; font-size:17px;}
+  .brand .name i{font-style:italic; color:var(--sales);}
+  .section-label{font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-dim); margin:12px 4px 6px; font-weight:700;}
+  .nav-item{display:flex;align-items:center;justify-content:space-between; padding:8px 10px; border-radius:8px; font-size:13px; margin-bottom:1px; cursor:pointer; color:var(--ink);}
+  .nav-item .lane{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:9px; flex-shrink:0;}
+  .nav-item.active{background:var(--surface-2); font-weight:700;}
+  .nav-item.disabled{color:var(--ink-dim); cursor:default;}
+  .nav-item .badge{font-size:10px; background:var(--sales); color:#fffaf0; border-radius:999px; padding:1px 7px;}
+  .sidebar-foot{margin-top:auto; padding:12px 9px 2px; border-top:1px solid var(--border); font-size:11px; color:var(--ink-dim); line-height:1.5;}
+
+  /* Main */
+  .main{display:flex; flex-direction:column; min-width:0; overflow:hidden;}
+  .topbar{display:flex;align-items:center;justify-content:space-between; padding:12px 26px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0;}
+  .chip{display:flex;align-items:center;gap:6px; font-size:12.5px; font-weight:600; background:var(--surface-2); border:1px solid var(--border); border-radius:7px; padding:6px 10px;}
+  .avatar{width:29px;height:29px;border-radius:50%; background:var(--sales); color:#fffaf0; display:flex;align-items:center;justify-content:center; font-size:11.5px; font-weight:700;}
+
+  #app{flex:1; overflow-y:auto; padding:26px 34px 40px;}
+  .form-shell{max-width:760px;}
+  .page-head{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:16px;}
+  .page-head h1{font-family:Georgia,"Times New Roman",serif; font-size:21px; font-weight:600;}
+  .page-head .sub{font-size:12.5px; color:var(--ink-dim); margin-top:4px;}
+
+  .btn{font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; display:inline-flex; align-items:center; gap:6px;}
+  .btn-primary{background:var(--sales); color:#fffaf0;}
+  .btn-secondary{background:var(--surface); border-color:var(--border); color:var(--ink);}
+  .btn-ghost{background:transparent; color:var(--ink-dim); border:none; font-weight:600;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+
+  table.list-table{width:100%; border-collapse:collapse; font-size:13px; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden;}
+  table.list-table th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); padding:11px 14px; font-weight:700; background:var(--surface-2); border-bottom:1px solid var(--border);}
+  table.list-table td{padding:12px 14px; border-bottom:1px solid var(--border);}
+  table.list-table tr:last-child td{border-bottom:none;}
+  table.list-table tbody tr:hover{background:var(--surface-2);}
+  .status-pill{font-size:10.5px; font-weight:700; padding:3px 10px; border-radius:999px; display:inline-block;}
+  .status-pill.draft{background:var(--surface-2); color:var(--ink-dim);}
+  .status-pill.terkirim{background:var(--warn-soft); color:var(--warn);}
+  .status-pill.disetujui{background:var(--ok-soft); color:var(--ok);}
+  .empty-state{text-align:center; padding:40px 20px; color:var(--ink-dim); font-size:13px;}
+
+  /* Form */
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); font-weight:700;}
+  .field input, .field select{border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-size:13.5px; background:var(--surface); color:var(--ink); font-family:inherit;}
+  .field input:focus, .field select:focus{outline:2px solid var(--sales); outline-offset:1px;}
+
+  .item-card{border:1px solid var(--border); border-radius:12px; padding:15px 16px; margin-bottom:12px; background:var(--surface);}
+  .item-card .item-top{display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;}
+  .item-card .item-top .field{flex:2;}
+  .item-card .item-top .field.qty{flex:0 0 90px;}
+  .item-card .remove-btn{flex-shrink:0; width:34px;height:34px;border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--danger); cursor:pointer; font-size:14px;}
+  .tier-pills{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+  .tier-pill{font-size:11.5px; font-weight:700; padding:7px 12px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; color:var(--ink-dim);}
+  .tier-pill .lvl{font-size:9px; opacity:.7; display:block; font-weight:600; margin-bottom:1px;}
+  .tier-pill.active{border-color:var(--sales); background:var(--sales-soft); color:var(--sales);}
+  .tier-pill:disabled{opacity:.4; cursor:not-allowed;}
+  .line-summary{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; background:var(--surface-2); border-radius:8px; padding:9px 12px;}
+  .line-summary .spec{color:var(--ink-dim);}
+  .line-summary .lt{font-weight:700;}
+
+  .add-item-btn{width:100%; border:1.5px dashed var(--border); border-radius:12px; padding:13px; text-align:center; font-size:12.5px; font-weight:700; color:var(--ink-dim); cursor:pointer; background:transparent; margin-bottom:20px;}
+  .add-item-btn:hover{border-color:var(--sales); color:var(--sales);}
+
+  .total-bar{display:flex; justify-content:space-between; align-items:center; background:var(--surface-2); border-radius:12px; padding:16px 18px; margin-bottom:20px;}
+  .total-bar .lbl{font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.04em;}
+  .total-bar .val{font-size:22px; font-weight:700;}
+  .form-actions{display:flex; gap:10px; justify-content:flex-end;}
+  .validation-note{font-size:11.5px; color:var(--danger); margin-top:-8px; margin-bottom:16px;}
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ok); color:#fff; font-size:13px; font-weight:600; padding:11px 20px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.2); z-index:300; display:none;}
+  .toast.show{display:block;}
+  .bom-note{font-size:10.5px; color:var(--ink-dim); margin-top:8px; line-height:1.5;}
+
+  /* Org picker overlay */
+  .org-overlay{position:fixed; inset:0; background:rgba(20,14,9,0.55); display:none; align-items:center; justify-content:center; z-index:200; padding:24px;}
+  .org-overlay.open{display:flex;}
+  .org-overlay-inner{background:var(--bg); border:1px solid var(--border); border-radius:16px; width:660px; max-width:100%; max-height:88vh; overflow-y:auto; padding:26px 28px 22px; box-shadow:0 30px 80px rgba(20,14,9,0.35);}
+  .oo-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
+  .oo-eyebrow{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); font-weight:700;}
+  .oo-user{font-family:Georgia,"Times New Roman",serif; font-size:20px; font-weight:600; margin-top:2px;}
+  .oo-close{width:28px;height:28px;border-radius:8px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-dim); font-size:13px; flex-shrink:0;}
+  .oo-sub{font-size:12.5px; color:var(--ink-dim); margin:8px 0 18px; line-height:1.5;}
+  .org-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .org-card{border:1.5px solid var(--border); border-radius:13px; padding:15px; cursor:pointer; background:var(--surface); transition:border-color .12s;}
+  .org-card:hover{border-color:var(--sales);}
+  .org-card.current{border-color:var(--sales); background:var(--sales-soft);}
+  .org-card .oc-top{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .org-card .oc-mark{width:34px;height:34px;border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:16px; color:#fffaf0; flex-shrink:0;}
+  .org-card .oc-name{font-size:13.5px; font-weight:700; line-height:1.3;}
+  .org-card .oc-legal{font-size:10.5px; color:var(--ink-dim); margin-top:1px;}
+  .org-card .oc-role{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-bottom:8px;}
+  .org-card .oc-meta{font-size:11px; color:var(--ink-dim); display:flex; justify-content:space-between; border-top:1px dashed var(--border); padding-top:8px;}
+</style>
+
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="brand"><div class="mark">W</div><div class="name">Wujud<i>.erp</i></div></div>
+
+    <p class="section-label">Jalur Penjualan</p>
+    <div class="nav-item" data-nav="dashboard"><span><span class="lane" style="background:var(--sales)"></span>Dashboard</span></div>
+    <div class="nav-item active" data-nav="penawaran-list"><span><span class="lane" style="background:var(--sales)"></span>Penawaran</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--sales)"></span>Invoicing</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--sales)"></span>Kuitansi</span></div>
+
+    <p class="section-label">Jalur Pengadaan</p>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--proc)"></span>Purchase Order</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--proc)"></span>SPK Produksi</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--proc)"></span>Penerimaan Barang</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span><span class="lane" style="background:var(--proc)"></span>Delivery Order</span></div>
+
+    <p class="section-label">Data Induk</p>
+    <div class="nav-item disabled" data-nav="soon"><span>Kontak</span></div>
+    <div class="nav-item disabled" data-nav="soon"><span>Struktur &amp; Akses</span></div>
+
+    <div class="sidebar-foot">Prototipe fungsional — modul lain masih placeholder, fokus dulu buktiin pola tier-lock &amp; state di Penawaran.</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="chip" id="org-switch-btn" style="cursor:pointer;">⇄ <span id="org-chip-label">PT Wujud Karya Konstruksi</span></div>
+      <div class="avatar">RA</div>
+    </div>
+    <div id="app"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="org-overlay open" id="org-overlay">
+  <div class="org-overlay-inner">
+    <div class="oo-head">
+      <div><div class="oo-eyebrow">Login sebagai</div><div class="oo-user">Bayu Suluh</div></div>
+      <div class="oo-close" id="org-overlay-close">✕</div>
+    </div>
+    <p class="oo-sub">Satu akun, beberapa organisasi — data (termasuk Penawaran) terpisah penuh per organisasi.</p>
+    <div class="org-grid" id="org-grid"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------
+  // Katalog produk & tier — BOM/harga terkunci per tier (bukan kombinasi bebas)
+  // ---------------------------------------------------------------
+  var PRODUCTS = {
+    'kitchen-set': { name: 'Kitchen Set HPL 3.6m', tiers: {
+      1: { label: 'Ekonomis', price: 52000000, spec: 'HPL lokal 18mm, engsel standar' },
+      2: { label: 'Standard', price: 63000000, spec: 'HPL lokal grade A, engsel + soft-close biasa' },
+      3: { label: 'Premium',  price: 78000000, spec: 'HPL import, engsel Hettich soft-close' },
+      4: { label: 'Deluxe',   price: 96000000, spec: 'Multipleks + HPL import, engsel Blum, handle kuningan' },
+      5: { label: 'Bespoke',  price: null,     spec: 'Sesuai RAB proyek — custom quote' }
+    }},
+    'kabinet-dinding': { name: 'Kabinet Dinding + Laci', tiers: {
+      1: { label: 'Ekonomis', price: 31000000, spec: 'HPL lokal, engsel standar' },
+      2: { label: 'Standard', price: 43000000, spec: 'HPL lokal grade A, rel laci biasa' },
+      3: { label: 'Premium',  price: 55000000, spec: 'HPL import, rel laci soft-close' },
+      4: { label: 'Deluxe',   price: 68000000, spec: 'Multipleks + HPL import, rel full-extension' },
+      5: { label: 'Bespoke',  price: null,     spec: 'Sesuai RAB proyek — custom quote' }
+    }},
+    'meja-meeting': { name: 'Meja Meeting Kayu Jati 3.2m', tiers: {
+      1: { label: 'Ekonomis', price: 22000000, spec: 'Kayu jati muda, finishing melamik' },
+      2: { label: 'Standard', price: 30000000, spec: 'Kayu jati tua, finishing melamik' },
+      3: { label: 'Premium',  price: 38000000, spec: 'Kayu jati tua pilihan, finishing duco matte' },
+      4: { label: 'Deluxe',   price: 47000000, spec: 'Kayu jati tua super, finishing duco + kaca tempered' },
+      5: { label: 'Bespoke',  price: null,     spec: 'Sesuai RAB proyek — custom quote' }
+    }},
+    'sofa-adhum': { name: 'Sofa Adhum (Koleksi Adhum)', tiers: {
+      1: { label: 'Ekonomis', price: 14000000, spec: 'Rangka kayu campuran, busa standar, fabric polos' },
+      2: { label: 'Standard', price: 19500000, spec: 'Rangka kayu jati, busa density sedang, fabric premium' },
+      3: { label: 'Premium',  price: 26000000, spec: 'Rangka kayu jati tua, busa high-density, kulit sintetis' },
+      4: { label: 'Deluxe',   price: 34000000, spec: 'Rangka kayu jati tua, busa high-density, kulit asli' },
+      5: { label: 'Bespoke',  price: null,     spec: 'Ukuran &amp; material custom — sesuai request klien' }
+    }}
+  };
+
+  var CONTACTS_BY_ORG = {
+    wujud: ['PT Graha Interior Nusantara', 'CV Sumber Makmur', 'Bpk. Halim (Personal)'],
+    mebel: ['Toko Furnitur Sentosa', 'PT Graha Interior Nusantara', 'Ibu Rani (Personal)'],
+    interior: ['PT Menara Abadi Group', 'CV Kantor Modern']
+  };
+
+  var ORGANIZATIONS = {
+    wujud:    { name: 'PT Wujud Karya Konstruksi', short: 'Wujud Karya Konstruksi', role: 'Owner', mark: 'W', gradient: 'linear-gradient(135deg,var(--sales),var(--proc))', members: 12, opened: 'Dibuka hari ini' },
+    mebel:    { name: 'CV Mebel Berkah Jaya', short: 'Mebel Berkah Jaya', role: 'Admin Utama', mark: 'M', gradient: 'linear-gradient(135deg,var(--proc),var(--ok))', members: 5, opened: 'Dibuka 3 hari lalu' },
+    interior: { name: 'PT Interior Prima Nusantara', short: 'Interior Prima Nusantara', role: 'Staff Purchasing', mark: 'I', gradient: 'linear-gradient(135deg,var(--warn),var(--sales))', members: 28, opened: 'Dibuka 2 minggu lalu' }
+  };
+
+  // ---------------------------------------------------------------
+  // State global — satu sumber kebenaran, di-render ulang tiap berubah
+  // ---------------------------------------------------------------
+  var state = {
+    page: 'penawaran-list',
+    currentOrgId: 'wujud',
+    quotationsByOrg: {
+      wujud: [
+        { id: 'PEN-2026-0198', customer: 'PT Graha Interior Nusantara', date: '2026-07-02', status: 'disetujui',
+          items: [
+            { id: 1, productId: 'kitchen-set', tierId: 3, qty: 1 },
+            { id: 2, productId: 'kabinet-dinding', tierId: 2, qty: 1 }
+          ] }
+      ],
+      mebel: [
+        { id: 'PEN-2026-0044', customer: 'Toko Furnitur Sentosa', date: '2026-07-10', status: 'terkirim',
+          items: [
+            { id: 101, productId: 'sofa-adhum', tierId: 3, qty: 4 }
+          ] }
+      ],
+      interior: []
+    },
+    draft: null,   // penawaran yang lagi diedit/dibuat
+    nextItemId: 200
+  };
+
+  function currentQuotations() { return state.quotationsByOrg[state.currentOrgId]; }
+
+  function newDraft() {
+    return { id: null, customer: '', date: '', status: 'draft', items: [] };
+  }
+
+  function fmtRp(n) {
+    if (n == null) return 'Sesuai RAB';
+    return 'Rp ' + n.toLocaleString('id-ID');
+  }
+
+  function lineTotal(item) {
+    var tier = PRODUCTS[item.productId].tiers[item.tierId];
+    if (!tier || tier.price == null) return 0;
+    return tier.price * item.qty;
+  }
+
+  function draftTotal() {
+    return state.draft.items.reduce(function (sum, it) { return sum + lineTotal(it); }, 0);
+  }
+
+  // ---------------------------------------------------------------
+  // Render — full re-render, dengan fokus & posisi kursor dijaga
+  // ---------------------------------------------------------------
+  function render() {
+    var active = document.activeElement;
+    var activeId = active && active.id;
+    var selStart = null, selEnd = null;
+    if (active && (active.tagName === 'INPUT') && typeof active.selectionStart === 'number') {
+      selStart = active.selectionStart; selEnd = active.selectionEnd;
+    }
+
+    document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+    var navMap = { 'dashboard': 'dashboard', 'penawaran-list': 'penawaran-list', 'penawaran-form': 'penawaran-list' };
+    var navKey = navMap[state.page];
+    if (navKey) {
+      var navEl = document.querySelector('.nav-item[data-nav="' + navKey + '"]');
+      if (navEl) navEl.classList.add('active');
+    }
+
+    var app = document.getElementById('app');
+    if (state.page === 'dashboard') app.innerHTML = renderDashboard();
+    else if (state.page === 'penawaran-list') app.innerHTML = renderList();
+    else if (state.page === 'penawaran-form') app.innerHTML = renderForm();
+
+    if (activeId) {
+      var el = document.getElementById(activeId);
+      if (el) {
+        el.focus();
+        if (selStart != null && el.setSelectionRange) {
+          try { el.setSelectionRange(selStart, selEnd); } catch (e) {}
+        }
+      }
+    }
+  }
+
+  function renderDashboard() {
+    return '<div class="form-shell"><div class="page-head"><div><h1>Dashboard</h1>' +
+      '<div class="sub">Prototipe ini fokus di modul Penawaran — klik "Penawaran" di sidebar buat lihat state &amp; tier-lock beneran jalan.</div></div></div></div>';
+  }
+
+  function renderList() {
+    var quotations = currentQuotations();
+    var rows = quotations.map(function (q) {
+      var total = q.items.reduce(function (s, it) { return s + lineTotal(it); }, 0);
+      return '<tr>' +
+        '<td class="num">' + q.id + '</td>' +
+        '<td>' + q.customer + '</td>' +
+        '<td class="num">' + q.date + '</td>' +
+        '<td class="num">' + fmtRp(total) + '</td>' +
+        '<td><span class="status-pill ' + q.status + '">' + (q.status === 'disetujui' ? 'Disetujui' : q.status === 'terkirim' ? 'Terkirim' : 'Draft') + '</span></td>' +
+        '</tr>';
+    }).join('');
+
+    return '<div class="page-head">' +
+      '<div><h1>Penawaran</h1><div class="sub">' + ORGANIZATIONS[state.currentOrgId].name + ' · ' + quotations.length + ' penawaran tersimpan di state organisasi ini</div></div>' +
+      '<button class="btn btn-primary" onclick="__erp.newQuotation()">+ Buat Penawaran Baru</button>' +
+      '</div>' +
+      (quotations.length === 0
+        ? '<div class="empty-state">Belum ada penawaran di organisasi ini. Klik "+ Buat Penawaran Baru" untuk mulai.</div>'
+        : '<table class="list-table"><thead><tr><th>No</th><th>Customer</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>');
+  }
+
+  function renderForm() {
+    var d = state.draft;
+    var itemsHtml = d.items.map(function (item, idx) {
+      var product = PRODUCTS[item.productId];
+      var tier = product.tiers[item.tierId];
+      var pillsHtml = Object.keys(product.tiers).map(function (tKey) {
+        var t = product.tiers[tKey];
+        var isActive = String(item.tierId) === tKey;
+        return '<div class="tier-pill' + (isActive ? ' active' : '') + '" onclick="__erp.setTier(' + item.id + ',' + tKey + ')">' +
+          '<span class="lvl">Tier ' + tKey + '</span>' + t.label + '</div>';
+      }).join('');
+
+      return '<div class="item-card">' +
+        '<div class="item-top">' +
+          '<div class="field"><label>Produk</label>' +
+            '<select id="product-' + item.id + '" onchange="__erp.setProduct(' + item.id + ', this.value)">' +
+              Object.keys(PRODUCTS).map(function (pid) {
+                return '<option value="' + pid + '"' + (pid === item.productId ? ' selected' : '') + '>' + PRODUCTS[pid].name + '</option>';
+              }).join('') +
+            '</select>' +
+          '</div>' +
+          '<div class="field qty"><label>Qty</label>' +
+            '<input id="qty-' + item.id + '" type="number" min="1" value="' + item.qty + '" onchange="__erp.setQty(' + item.id + ', this.value)">' +
+          '</div>' +
+          '<button class="remove-btn" onclick="__erp.removeItem(' + item.id + ')" title="Hapus item">✕</button>' +
+        '</div>' +
+        '<div class="tier-pills">' + pillsHtml + '</div>' +
+        '<div class="line-summary"><span class="spec">' + tier.spec + '</span><span class="lt num">' + fmtRp(lineTotal(item)) + '</span></div>' +
+      '</div>';
+    }).join('');
+
+    var canSave = d.customer.trim() && d.date && d.items.length > 0;
+
+    return '<div class="form-shell">' +
+      '<div class="page-head"><div><h1>' + (d.id ? d.id : 'Penawaran Baru') + '</h1>' +
+        '<div class="sub">Pilih tier per item — BOM &amp; harga ikut otomatis, tidak bisa dirakit bebas</div></div>' +
+        '<button class="btn btn-ghost" onclick="__erp.cancelForm()">← Kembali ke daftar</button></div>' +
+
+      '<div class="field-row">' +
+        '<div class="field"><label>Customer</label>' +
+          '<select id="customer-input" onchange="__erp.setCustomer(this.value)">' +
+            '<option value="">— pilih customer —</option>' +
+            CONTACTS_BY_ORG[state.currentOrgId].map(function (c) { return '<option value="' + c + '"' + (c === d.customer ? ' selected' : '') + '>' + c + '</option>'; }).join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="field"><label>Tanggal Penawaran</label>' +
+          '<input id="date-input" type="date" value="' + d.date + '" onchange="__erp.setDate(this.value)">' +
+        '</div>' +
+      '</div>' +
+
+      '<p class="section-label" style="margin:0 0 8px;">Item &amp; Tier</p>' +
+      itemsHtml +
+      '<div class="add-item-btn" onclick="__erp.addItem()">+ Tambah Item</div>' +
+
+      '<div class="total-bar"><span class="lbl">Total Penawaran</span><span class="val num">' + fmtRp(draftTotal()) + '</span></div>' +
+      (canSave ? '' : '<div class="validation-note">Isi customer, tanggal, dan minimal 1 item sebelum menyimpan.</div>') +
+      '<div class="form-actions">' +
+        '<button class="btn btn-secondary" onclick="__erp.cancelForm()">Batal</button>' +
+        '<button class="btn btn-primary" ' + (canSave ? '' : 'disabled') + ' onclick="__erp.saveQuotation()">Simpan Penawaran</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+
+  // ---------------------------------------------------------------
+  // Actions — semua ubah state lalu render()
+  // ---------------------------------------------------------------
+  window.__erp = {
+    newQuotation: function () {
+      state.draft = newDraft();
+      state.page = 'penawaran-form';
+      render();
+    },
+    cancelForm: function () {
+      state.draft = null;
+      state.page = 'penawaran-list';
+      render();
+    },
+    setCustomer: function (val) { state.draft.customer = val; render(); },
+    setDate: function (val) { state.draft.date = val; render(); },
+    addItem: function () {
+      state.draft.items.push({ id: state.nextItemId++, productId: 'kitchen-set', tierId: 3, qty: 1 });
+      render();
+    },
+    removeItem: function (itemId) {
+      state.draft.items = state.draft.items.filter(function (it) { return it.id !== itemId; });
+      render();
+    },
+    setProduct: function (itemId, productId) {
+      var item = state.draft.items.find(function (it) { return it.id === itemId; });
+      item.productId = productId;
+      item.tierId = 3; // reset ke tier tengah tiap ganti produk — kombinasi lama tidak ikut kebawa
+      render();
+    },
+    setTier: function (itemId, tierId) {
+      var item = state.draft.items.find(function (it) { return it.id === itemId; });
+      item.tierId = Number(tierId);
+      render();
+    },
+    setQty: function (itemId, val) {
+      var item = state.draft.items.find(function (it) { return it.id === itemId; });
+      item.qty = Math.max(1, parseInt(val, 10) || 1);
+      render();
+    },
+    saveQuotation: function () {
+      var d = state.draft;
+      if (!d.customer.trim() || !d.date || d.items.length === 0) return;
+      var quotations = currentQuotations();
+      d.id = 'PEN-2026-' + String(200 + quotations.length).padStart(4, '0');
+      d.status = 'terkirim';
+      quotations.unshift(d);
+      state.draft = null;
+      state.page = 'penawaran-list';
+      render();
+      showToast('Penawaran ' + d.id + ' tersimpan di ' + ORGANIZATIONS[state.currentOrgId].short);
+    },
+    switchOrg: function (orgId) {
+      state.currentOrgId = orgId;
+      state.draft = null;
+      state.page = 'penawaran-list';
+      document.getElementById('org-chip-label').textContent = ORGANIZATIONS[orgId].name;
+      document.getElementById('org-overlay').classList.remove('open');
+      renderOrgGrid();
+      render();
+    },
+    openOrgPicker: function () {
+      document.getElementById('org-overlay').classList.add('open');
+    }
+  };
+
+  function renderOrgGrid() {
+    var grid = document.getElementById('org-grid');
+    grid.innerHTML = Object.keys(ORGANIZATIONS).map(function (orgId) {
+      var o = ORGANIZATIONS[orgId];
+      var isCurrent = orgId === state.currentOrgId;
+      return '<div class="org-card' + (isCurrent ? ' current' : '') + '" onclick="__erp.switchOrg(\'' + orgId + '\')">' +
+        '<div class="oc-top"><div class="oc-mark" style="background:' + o.gradient + ';">' + o.mark + '</div>' +
+        '<div><div class="oc-name">' + o.short + '</div><div class="oc-legal">' + o.name + '</div></div></div>' +
+        '<span class="oc-role" style="background:var(--sales-soft); color:var(--sales);">' + o.role + (isCurrent ? ' · aktif sekarang' : '') + '</span>' +
+        '<div class="oc-meta"><span>' + o.members + ' anggota</span><span>' + o.opened + '</span></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('org-switch-btn').addEventListener('click', function () { __erp.openOrgPicker(); });
+  document.getElementById('org-overlay-close').addEventListener('click', function () { document.getElementById('org-overlay').classList.remove('open'); });
+
+  document.querySelectorAll('.nav-item').forEach(function (nav) {
+    nav.addEventListener('click', function () {
+      var key = nav.getAttribute('data-nav');
+      if (key === 'soon') { showToast('Modul ini belum diimplementasikan di prototipe ini'); return; }
+      state.page = key;
+      render();
+    });
+  });
+
+  renderOrgGrid();
+  render();
+})();
+</script>

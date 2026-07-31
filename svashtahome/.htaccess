@@ -1,0 +1,24 @@
+# Svashta Home — root .htaccess
+# Kalau di server udah ada .htaccess lain di sini (dari hosting/cPanel default),
+# GABUNGIN isi file ini ke situ — jangan ditimpa total.
+
+RewriteEngine On
+
+# /sitemap.xml -> sitemap.php (biar URL-nya rapi, sesuai konvensi search engine)
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+# /robots.txt -> robots.php (dinamis, nyesuain staging vs domain asli)
+RewriteRule ^robots\.txt$ robots.php [L]
+
+# --- URL rapi (SEO-friendly), gak nunjukin /pages/ atau .php ---
+RewriteRule ^product/?$ pages/category.php [L]
+RewriteRule ^product/kategori/([^/]+)/?$ pages/category.php?cat=$1 [L,QSA]
+RewriteRule ^product/([^/]+)/?$ pages/product.php?slug=$1 [L,QSA]
+
+RewriteRule ^projects/?$ pages/projects-list.php [L]
+RewriteRule ^projects/([^/]+)/?$ pages/project-single.php?slug=$1 [L,QSA]
+
+RewriteRule ^blog/?$ pages/blog.php [L]
+RewriteRule ^blog/([^/]+)/?$ pages/blog-single.php?slug=$1 [L,QSA]
+
+RewriteRule ^custom-order/?$ pages/custom_order.php [L]

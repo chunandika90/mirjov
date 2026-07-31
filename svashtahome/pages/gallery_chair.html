@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <!-- ===============================================-->
+    <!--    Document Title-->
+    <!-- ===============================================-->
+    <title>SVASHTAHOME</title>
+
+
+    <!-- ===============================================-->
+    <!--    Favicons-->
+    <!-- ===============================================-->
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="manifest" href="../assets/img/favicons/manifest.json">
+    <meta name="msapplication-TileImage" content="../assets/img/favicons/mstile-150x150.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../vendors/overlayscrollbars/OverlayScrollbars.min.js"></script>
+
+
+    <!-- ===============================================-->
+    <!--    Stylesheets-->
+    <!-- ===============================================-->
+    <link href="../assets/css/theme.css" rel="stylesheet" />
+    <link href="../assets/css/user.css" rel="stylesheet" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;900&amp;family=Roboto:wght@100;300;400;500;700;900&amp;display=swap" rel="stylesheet">
+  </head>
+
+
+<style>
+.navbar-brand.brand-tight {
+  display: flex;
+  align-items: center;
+  white-space: nowrap; /* prevents wrapping */
+  gap: 0; /* no space between image and text */
+}
+
+.navbar-brand.brand-tight img {
+  margin-right: -2px; /* minimal spacing or overlap if needed */
+}
+.navbar-nav .nav-link {
+  white-space: nowrap;
+}
+
+</style>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-theme fixed-top p-0" data-navbar-on-scroll="data-navbar-on-scroll">
+		<div class="container-fluid">
+			  <a class="navbar-brand brand-tight" href="../index.html">
+				<img src="../assets/img/favicons/svashta_symbol_white.png" alt="Svashta Icon" width="80" height="50">
+				<span>SVASHTA HOME</span>
+			  </a>
+			
+			<button class="navbar-toggler p-0" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNavbarCollapse" aria-controls="primaryNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+			<div class="collapse navbar-collapse" id="primaryNavbarCollapse">
+			  <ul class="navbar-nav ms-auto">
+				<li class="nav-item"><a class="nav-link fw-medium " href="../index.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Home</span></a>
+				<!--  
+				  <div class="dropdown-menu dropdown-menu-end py-0 overflow-hidden" aria-labelledby="navbarDropdownMenuLink1"><a class="dropdown-item" href="homes/one-page.html">One page</a><a class="dropdown-item" href="homes/header-static.html">Static header</a><a class="dropdown-item" href="homes/static-classic.html">Static classic</a><a class="dropdown-item" href="homes/slider-header.html">Slider header</a><a class="dropdown-item" href="homes/slider-classic.html">Slider classic</a><a class="dropdown-item" href="homes/text-left-header.html">Text left header</a><a class="dropdown-item" href="homes/text-left-classic.html">Text left classic</a><a class="dropdown-item" href="homes/typed-text-header.html">Typed text header</a><a class="dropdown-item" href="homes/typed-text-classic.html">Typed text classic</a><a class="dropdown-item" href="homes/text-left-slider.html">Text left slider</a><a class="dropdown-item" href="homes/text-left-classic-slider.html">Text left classic slider</a><a class="dropdown-item" href="homes/video-background.html">Video background</a><a class="dropdown-item" href="homes/video-classic.html">Video classic</a><a class="dropdown-item" href="homes/gradient-background.html">Gradient background</a><a class="dropdown-item" href="homes/gradient-classic.html">Gradient classic</a></div>
+				--!>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/blog.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Blog</span></a>
+				<!--  
+				  <div class="dropdown-menu dropdown-menu-end py-0 overflow-hidden" aria-labelledby="navbarDropdownMenuLink1"><a class="dropdown-item" href="homes/one-page.html">One page</a><a class="dropdown-item" href="homes/header-static.html">Static header</a><a class="dropdown-item" href="homes/static-classic.html">Static classic</a><a class="dropdown-item" href="homes/slider-header.html">Slider header</a><a class="dropdown-item" href="homes/slider-classic.html">Slider classic</a><a class="dropdown-item" href="homes/text-left-header.html">Text left header</a><a class="dropdown-item" href="homes/text-left-classic.html">Text left classic</a><a class="dropdown-item" href="homes/typed-text-header.html">Typed text header</a><a class="dropdown-item" href="homes/typed-text-classic.html">Typed text classic</a><a class="dropdown-item" href="homes/text-left-slider.html">Text left slider</a><a class="dropdown-item" href="homes/text-left-classic-slider.html">Text left classic slider</a><a class="dropdown-item" href="homes/video-background.html">Video background</a><a class="dropdown-item" href="homes/video-classic.html">Video classic</a><a class="dropdown-item" href="homes/gradient-background.html">Gradient background</a><a class="dropdown-item" href="homes/gradient-classic.html">Gradient classic</a></div>
+				--!>
+				</li>
+				<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink2" href="#" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Product</span></a>
+				  <div class="dropdown-menu dropdown-menu-end dropdown-pages py-3" aria-labelledby="navbarDropdownMenuLink2">
+					<div class="row">
+					  <div class="col-6 col-md-6 px-1">
+						<ul class="nav flex-column">
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_sofa.html">Sofa</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_table.html">Table</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_chair.html">Chair</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_bed.html">Bed</a></li>
+						</ul>
+					  </div>
+					  <div class="col-6 col-md-6 px-1">
+						<ul class="nav flex-column">
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_cabinet.html">Cabinet</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_outdoor.html">Outdoor</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_collections.html">Collections</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_collaborations.html">Collaborations</a></li>
+						</ul>
+					  </div>
+					
+					</div>
+				  </div>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/work-wide.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Projects</span></a>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/custom_order.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Custom Order</span></a>
+				</li>
+			  </ul>
+			</div>
+		</div>
+      </div>
+    </nav>
+    <!-- ===============================================-->
+    <!--    Main Content-->
+    <!-- ===============================================-->
+    <main class="main" id="top">
+      <div class="preloader" id="preloader" data-preloader>
+        <div class="preloader-wrapper big active" data-preloader>
+          <div class="spinner-layer spinner-white-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+              <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="text-center overflow-hidden py-0" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+
+        <div class="bg-holder overlay  parallax" style="background-image:url(../assets/img/headers/header-9.jpg);">
+        </div>
+        <!--/.bg-holder-->
+
+        <div class="container-fluid">
+          <div class="header-overlay"></div>
+          <div class="position-relative pt-10 pb-8">
+            <div class="header-text">
+              <div class="overflow-hidden">
+                <h1 class="display-3 fs-7 text-white fw-lighter ls-2" data-zanim-xs='{"duration":2,"delay":0}'>Chair</h1>
+              </div>
+              <div class="overflow-hidden">
+                <div class="d-flex justify-content-center" data-zanim-xs='{"duration":2,"delay":0.1}'>
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb text-uppercase ls-2">
+                      <li class="breadcrumb-item"><a class="text-400 hover-color-white" href="../index.html">Home</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">Gallery</li>
+                      <li class="breadcrumb-item active" aria-current="page">Chair</li>
+                    </ol>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+    <style>.thumbnail-grid-item > .position-absolute {
+  pointer-events: none;
+}
+
+.thumbnail-grid-item > .position-absolute > .collapse.show {
+  pointer-events: auto;
+}</style>
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section>
+
+        <div class="container">
+          <div class="row g-2 position-relative thumbnail-grid-container" id="selector">
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_adihulung.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-1" aria-expanded="false" aria-controls="collapse-11" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-1">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#!" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-2" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_adihulung.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">ADILUHUNG ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							Derived from the Javanese word meaning “noble” or “sublime,” Adiluhung is more than a piece of
+							furniture; it is a reverence to heritage. Each curve and joint reflects the wisdom of generations
+							of artisans, hand-carved and assembled using age-old woodworking traditions passed down
+							through centuries
+							
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                            Adiluhung available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. 
+							We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                             60 (width) x 55 (length) x 81 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY OPTIONS</strong><br>
+                             we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options<br><br>
+                        
+                            <strong>Material and finishes</strong><br>
+                             Adiluhung armchair and chairs available in natural to darker finishes but we suggested to 
+							 have the closed pore finish to show the smoothness of the body and the beautiful grain of 
+							 Precious Solid Indonesian Teakwood (only available in Solid Teakwood option)
+                        </p>
+                        <a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_adihulung.html">View Details</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_asana.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-2" aria-expanded="false" aria-controls="collapse-2" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-2">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-1" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-3" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_asana.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">ASANA ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							 Asana is designed with quiet clarity. Its lines are pure, measured, and meditative — a study in
+							 proportion and poise. The seat rests low, the back rises in gentle support, and the arms extend
+							 with elegant intention, creating a silhouette that feels both anchored and uplifting.
+							 This is not just a chair — it is a space to inhabit. A moment made material
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                             Asana available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. 
+							 We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                             55 (width) x 60 (length) x 80 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY OPTIONS</strong><br>
+                             we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>Material and finishes</strong><br>
+                             Asana armchair and chairs structure is made of a very strong metal frame. 
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_asana.html">View Details</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_antaboga.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-3" aria-expanded="false" aria-controls="collapse-3" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-3">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-2" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-4" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_antaboga.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">ANTABOGA</h5>
+						<p>
+							 In Javanese lore, Antaboga is the primordial dragon, coiled in meditation at the center of the
+							 world — a symbol of creation, grounding, and timeless presence. Inspired by this ancient figure,
+							 the Antaboga chair evokes a sense of quiet strength and rooted grace
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                             Antaboga available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. 
+							 We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                            56 (width) x 59 (length) x 97 (height) cm.<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                            we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>SEAT COMFORT</strong><br>
+                             Antaboga armchair and chairs available in natural to darker finishes but we suggested to
+							 have the closed pore finish to show the smoothness of the body and the beautiful grain of
+							 Precious Solid Indonesian Teakwood (available in Solid Teakwood, Solid Mahogany and Solid
+							 Sungkai option)
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_antaboga.html">View Details</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_prabakara2.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-4" aria-expanded="false" aria-controls="collapse-4" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-4">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-3" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-5" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_prabakara2.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">PRABAKARA ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							 Prabakara is designed not merely to furnish a room, but to elevate it. Its silhouette is poised — a
+							 fusion of bold geometry and flowing lines. The armrests extend with subtle authority, while the
+							 seat and backrest gently cradle the body, offering comfort wrapped in elegance.
+							 Every angle is a play of light and shadow, reflecting its namesake — as if the chair itself radiates
+							 presence, quietly commanding attention in any space it inhabits.
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                             Prabakara available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>Measurements</strong><br>
+                             58 (width) x 61 (length) x 81 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                            we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>Material and finishes</strong><br>
+                             Prabakara armchair and chairs available in natural to darker finishes but we suggested to
+ have the closed pore finish to show the smoothness of the body and the beautiful grain of
+ Precious Solid Indonesian Teakwood (only available in Solid Teakwood option).
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_prabakara.html">View Detail</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_kiageng.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-5" aria-expanded="false" aria-controls="collapse-5" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-5">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-4" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-6" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_kiageng.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">KI AGENG ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							 Named after the revered honorific "Ki Ageng" — bestowed upon noble elders and wisdom-keepers
+							 in Javanese society — this collection is crafted to evoke gravitas, grounding, and grace. The
+							 design is deliberate and meditative: generous proportions offer comfort and repose, while
+							 strong, vertical lines express dignity and balance.
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                            Ki Ageng available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>Measurements</strong><br>
+                             120 (width) x 120 (length) x 102 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                             we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>Material and finishes</strong><br>
+                             Ki Ageng armchair and chairs available in natural to darker finishes but we suggested to
+							 have the closed pore finish to show the smoothness of the body and the beautiful grain of
+							 Precious Solid Indonesian Teakwood (only available in Solid Teakwood option)
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_kiageng.html">View Detail</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_mamari.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-6" aria-expanded="false" aria-controls="collapse-6" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-6">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-5" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-7" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_mamari.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">MAMARI ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							Mamari is designed as a gentle embrace — its curved back and flowing armrests extend with
+							 tender openness, offering a seat that welcomes rather than commands. The silhouette is
+							 rounded, fluid, and grounded, evoking a sense of refuge and repose.
+							 It is a chair not only for sitting, but for settling into — a moment of pause amid movement, a
+							 space of quiet connection.
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                            Mamari available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or even lounge chair options. We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                            80 (width) x 75 (length) x 110 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                             we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options<br><br>
+                        
+                            <strong>SEAT COMFORT</strong><br>
+                            Mamari armchair and chairs available in natural to darker finishes but we suggested to have
+ the closed pore finish to show the smoothness of the body and the beautiful grain of
+ Precious Solid Indonesian Teakwood (available in Solid Teakwood. Solid Mahogany and solid
+ Sungkai option).
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_mamari.html">View Detail</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_sujana.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-7" aria-expanded="false" aria-controls="collapse-7" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-7">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-6" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#collapse-8" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_sujana.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">SUJANA ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							Sujana’s design speaks in calm tones — its silhouette is firm, deliberate, and thoughtfully
+							 proportioned. A broad, slightly reclining backrest invites rest, while the arms extend with quiet
+							 dignity. The form is balanced and composed, offering both visual strength and genuine comfort.
+							 This is a chair that does not follow trends, but sets its own rhythm — confident, measured, and
+							 timeless
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                            Sujana available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or
+ even lounge chair options. We can customize the measurements to suit your needs.<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                             54 (width) x 65 (length) x 84 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                            we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>SEAT COMFORT</strong><br>
+                             Sujana armchair and chairs available in natural to darker finishes but we suggested to have
+ the closed pore finish to show the smoothness of the body and the beautiful grain of
+ Precious Solid Indonesian Teakwood (available in Solid Teakwood option)
+ 
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_sujana.html">View Detail</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item"><img class="thumbnail-gridder" src="../assets/img/gallery/chair_anda.jpg" alt="" data-bs-toggle="collapse" data-bs-target="#collapse-8" aria-expanded="false" aria-controls="collapse-8" />
+              <div class="position-absolute start-0">
+                <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-8">
+                  <div class="card card-body border-0 bg-100 m-0 px-3 py-2">
+                    <div class="row align-items-center">
+                      <div class="thumbnail-grid-navigation"><a class="thumbnail-close" href="#!"><i class="fas fa-times"></i></a><a class="thumbnail-grid-nav prev" href="#!" data-grid-target="#collapse-7" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-left"></i></a><a class="thumbnail-grid-nav next" href="#!" data-grid-target="#" data-thumbnail-grid-nav="data-thumbnail-grid-nav"><i class="fas fa-angle-right"></i></a></div>
+                      <div class="col-7">
+                        <div class="d-none d-lg-block p-0"><img class="w-100 img-fluid rounded" src="../assets/img/gallery/chair_anda.jpg" alt="" /></div>
+                      </div>
+                      <div class="col-lg-5">
+                        <h5 class="ls-1">ANDA ARMCHAIRS AND CHAIRS</h5>
+						<p>
+							With soft geometry and quiet confidence, Anda welcomes the sitter with open arms and gentle
+							 contours. The backrest curves inward just enough to embrace. The proportions feel tailored,
+							 human, close — like a conversation that doesn’t need to raise its voice.
+							 Anda is both understated and undeniably present — a piece that makes you feel seen without
+							 asking to be seen
+						</p>
+                        <p>
+                            <strong>FUNCTION</strong><br>
+                             Anda available in Chairs and armchairs style. It can easily be a dining chairs, desk chair or
+ even lounge chair options. We can customize the measurements to suit your needs<br><br>
+                        
+                            <strong>MEASUREMENTS</strong><br>
+                             70 (width) x 57 (length) x 75 (height) cm<br><br>
+                        
+                            <strong>UPHOLSTERY options</strong><br>
+                             we have a wide fabric variety option, from water and stain repellant fabric option to genuine I talian leather options.<br><br>
+                        
+                            <strong>SEAT COMFORT</strong><br>
+                              Anda armchair and chairs available in natural to darker finishes but we suggested to have
+ the closed pore finish to show the smoothness of the body and the beautiful grain of
+ Precious Solid Indonesian Teakwood (available in Solid Teakwood. Solid Mahogany and solid
+ Sungkai option)
+ 
+                        </p>
+                        <p></p><a class="btn btn-outline-dark btn-sm hvr-sweep-top hover-color-white mt-2" href="../pages/gallery_chair_anda.html">View Detail</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+    </main>
+    <!-- ===============================================-->
+    <!--    End of Main Content-->
+    <!-- ===============================================-->
+
+
+    <!--===============================================-->
+    <!--    Footer-->
+    <!--===============================================-->
+    
+    <section class="bg-1100 py-6 pb-9 px-3 px-lg-0" id="reach-us">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="row">
+              <div class="col-6 col-md-3 ps-lg-4 mb-4 mb-lg-0">
+                <h5 class="text-white mb-3">Company</h5>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html#about-us">About</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html#services">Our Services</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html">Certifications</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html">Careers</a></li>
+                </ul>
+              </div>
+    
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+              <div class="col-6 col-md-3 ps-4 mb-4 mb-lg-0">
+                <h5 class="text-white mb-3">Contact US</h5>
+                <ul class="list-unstyled text-white">
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/whatsapp.png" alt="WhatsApp" class="me-2">
+                    <a href="https://wa.me/6281320300880" class="text-white text-decoration-none" target="_blank">0813-2030-0880</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/instagram-new--v1.png" alt="Instagram" class="me-2">
+                    <a href="https://instagram.com/svashta_home" class="text-white text-decoration-none" target="_blank">@svashta_home</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/youtube-play.png" alt="YouTube" class="me-2">
+                    <a href="https://youtube.com/@SvashtaHome" class="text-white text-decoration-none" target="_blank">Svashta Home</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/domain.png" alt="Website" class="me-2">
+                    <a href="https://www.svashtahome.com" class="text-white text-decoration-none" target="_blank">svashtahome.com</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/new-post.png" alt="Email" class="me-2">
+                    <a href="mailto:project@svashtahome.com" class="text-white text-decoration-none">project@svashtahome.com</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/link.png" alt="Linktree" class="me-2">
+                    <a href="https://linktr.ee/svashtahome" class="text-white text-decoration-none" target="_blank">svashtahome</a>
+                  </li>
+                  <li class="mb-2 d-flex align-items-center">
+                    <img src="https://img.icons8.com/ios-filled/24/ffffff/marker.png" alt="Location" class="me-2">
+                    <a href="https://www.google.com/maps/place/Svashta+Home+-+Bespoke+Fine+Furnishings/@-6.3170114,106.6476314,17z/data=!3m1!4b1!4m6!3m5!1s0x2e69e56a7880e9bb:0x100b633685e43986!8m2!3d-6.3170168!4d106.6525023!16s%2Fg%2F11sv6dj5ls?entry=ttu&g_ep=EgoyMDI1MDUwNy4wIKXMDSoASAFQAw%3D%3D"
+                      class="text-white text-decoration-none"
+                      target="_blank" rel="noopener noreferrer">
+                      Ruko 92 Avenix A/11 - BSD City, Kab. Tangerang, Banten, Indonesia
+                    </a>
+                  </li>
+                </ul>
+              </div>
+    
+              <div class="col-md-6 ps-md-4">
+                <h5 class="text-white mb-3">FROM THE BLOG</h5>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog1_post.html">Why Javanese Teak Stands Out: A Comparative Guide to Premium Furniture Woods</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog2_post.html">Choosing High-Quality Furniture: A Sustainable Way of Living</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog3_post.html">Designing for Comfort: Why Ergonomic Furniture is Essential for Health and Beauty</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                </ul>
+              </div>
+    
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <footer class="footer text-center bg-black py-3 w-100 position-relative">
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col-12 col-md-auto mb-1 mb-md-0">
+            <p class="mb-0">COPYRIGHT © SVASHTAHOME 2025<span class="mx-2"></span></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+    <a class="btn-back-to-top" href="#top">
+      <img src="../assets/img/line-icons/upload-arrow.svg" width="8" alt="">
+    </a>
+
+
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script src="../vendors/popper/popper.min.js"></script>
+    <script src="../vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="../vendors/anchorjs/anchor.min.js"></script>
+    <script src="../vendors/is/is.min.js"></script>
+    <script src="../vendors/fontawesome/all.min.js"></script>
+    <script src="../vendors/lodash/lodash.min.js"></script>
+    <script src="../vendors/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="../vendors/gsap/gsap.js"></script>
+    <script src="../vendors/gsap/customEase.js"></script>
+    <script src="../assets/js/theme.js"></script>
+
+	<style>
+    /* Prevent horizontal scroll caused by fixed buttons */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* WhatsApp Floating Button */
+    .whatsapp-float {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25d366;
+      color: white;
+      border-radius: 50px;
+      text-align: center;
+      box-shadow: 2px 2px 3px #999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+    }
+
+    .whatsapp-float img {
+      width: 35px;
+      height: 35px;
+    }
+
+    /* Speaker Toggle */
+    .speaker-toggle {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      bottom: 90px;
+      right: 20px;
+      background-color: #808080;
+      border-radius: 40px;
+      text-align: center;
+      box-shadow: 2px 2px 3px #999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+
+    .speaker-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .speaker-toggle img {
+      width: 35px;
+      height: 35px;
+    }
+
+    /* Optional: adjust spacing for small screens */
+    @media (max-width: 375px) {
+      .whatsapp-float,
+      .speaker-toggle {
+        right: 10px;
+      }
+    }
+  </style>
+<!-- Background Music -->
+  <audio id="background-music" loop >
+    <source src="es_creamer.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+<!-- Background Music -->
+  <audio id="background-music" loop >
+    <source src="es_creamer.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Speaker Button -->
+  <div class="speaker-toggle" onclick="toggleAudio()" aria-label="Toggle Music">
+    <img id="speaker-icon" src="https://img.icons8.com/ios-filled/50/ffffff/speaker.png" alt="Speaker" />
+  </div>
+  <!-- WhatsApp Floating Button -->
+  <a
+    href="https://wa.me/6281320300880?text=Hello%20Svashta%20Home%20I'm%20Interested%20in%20the%20Product"
+    class="whatsapp-float"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Chat on WhatsApp"
+  >
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/whatsapp.png" alt="WhatsApp Icon" />
+  </a>
+<script>
+  const music = document.getElementById("background-music");
+  const speakerIcon = document.getElementById("speaker-icon");
+  const playMusicButton = document.querySelector(".play-music-button");
+  let isPlaying = false;
+
+  // This function will be called when the speaker button is clicked
+  function toggleAudio() {
+    if (isPlaying) {
+      music.pause();
+      speakerIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/mute.jpg";
+    } else {
+      music.play().then(() => {
+        speakerIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/speaker.jpg";
+      }).catch(error => {
+        console.error("Error playing audio:", error);
+      });
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // Function to start the music when the user clicks "Play Music"
+  function startMusic() {
+    music.play().then(() => {
+      console.log("Music started after user interaction.");
+      playMusicButton.style.display = "none"; // Hide the button after music starts
+    }).catch(error => {
+      console.error("Error starting music:", error);
+    });
+  }
+
+  </body>
+
+</html>
