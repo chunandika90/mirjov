@@ -152,7 +152,10 @@ if ($isNewForm) {
     $createForPo = null;
     if (!empty($_GET['create_for_po'])) {
         $stmt = $pdo->prepare(
-            "SELECT po.*, c.name AS vendor_name, (SELECT COALESCE(SUM(qty*unit_cost),0) FROM po_lines WHERE po_id=po.id) AS po_total
+            "SELECT po.*, c.name AS vendor_name,
+               (SELECT COALESCE(SUM(qty*unit_cost),0) FROM po_lines WHERE po_id=po.id) AS po_total,
+               (SELECT COALESCE(SUM(qty),0) FROM po_lines WHERE po_id=po.id) AS po_qty,
+               (SELECT product_id FROM po_lines WHERE po_id=po.id AND product_id IS NOT NULL LIMIT 1) AS po_product_id
              FROM purchase_orders po JOIN contacts c ON c.id=po.vendor_id
              WHERE po.id=? AND po.organization_id=? AND po.po_type='jasa_produksi'"
         );
@@ -261,15 +264,19 @@ if ($isNewForm) {
           <label>Produk Target (hasil rakitan)</label>
           <select name="product_id" id="spk-product-select" required>
             <option value="">— Pilih Produk —</option>
-            <?php foreach ($products as $p): ?><option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option><?php endforeach; ?>
+            <?php foreach ($products as $p): ?><option value="<?= $p['id'] ?>" <?= ($createForPo['po_product_id'] ?? null) == $p['id'] ? 'selected' : '' ?>><?= htmlspecialchars($p['name']) ?></option><?php endforeach; ?>
           </select>
         </div>
-        <div class="field"><label>Qty Hasil</label><input type="number" step="0.01" name="output_qty" id="spk-output-qty" required></div>
+        <div class="field">
+          <label>Qty Hasil<?= $createForPo ? ' (dari PO, ' . rtrim(rtrim(number_format((float) $createForPo['po_qty'], 2, ',', '.'), '0'), ',') . ')' : '' ?></label>
+          <input type="number" step="0.01" name="output_qty" id="spk-output-qty" value="<?= $createForPo ? (float) $createForPo['po_qty'] : '' ?>" required>
+          <?php if ($createForPo): ?><div style="font-size:11.5px; color:var(--ink-muted); margin-top:4px;">Boleh diubah kalau hasil produksi beneran beda dari qty PO (mis. ada yang cacat).</div><?php endif; ?>
+        </div>
       </div>
       <div class="field-row">
         <div class="field">
           <label>Biaya Jasa Rakit<?= $createForPo ? ' (dari PO, Rp ' . number_format((float) $createForPo['po_total'], 0, ',', '.') . ')' : '' ?></label>
-          <input type="number" step="0.01" name="assembly_fee" value="<?= $createForPo['po_total'] ?? 0 ?>" <?= $createForPo ? 'readonly' : '' ?>>
+          <input type="text" inputmode="numeric" class="rupiah-input" name="assembly_fee" value="<?= $createForPo['po_total'] ?? 0 ?>" <?= $createForPo ? 'readonly' : '' ?>>
         </div>
         <div class="field">
           <label>Gudang Sumber Material</label>
@@ -376,7 +383,11 @@ if ($isNewForm) {
   document.getElementById('spk-product-select').addEventListener('change', fillFromBom);
   document.getElementById('spk-output-qty').addEventListener('input', fillFromBom);
   document.getElementById('spk-warehouse-select').addEventListener('change', checkMaterialSufficiency);
-  addMaterialLine(null, null);
+  <?php if ($createForPo && $createForPo['po_product_id']): ?>
+    fillFromBom();
+  <?php else: ?>
+    addMaterialLine(null, null);
+  <?php endif; ?>
   </script>
 
 <?php else: ?>

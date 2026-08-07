@@ -53,9 +53,9 @@ if (($_GET['export'] ?? '') === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="custom-orders-' . date('Y-m-d') . '.csv"');
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['ID', 'Nama', 'Kontak', 'Request', 'Balasan Admin', 'Tanggal', 'Status']);
+    fputcsv($out, ['ID', 'Nama', 'Lokasi', 'Kontak', 'What I Need', 'Need For', 'Request', 'Balasan Admin', 'Tanggal', 'Status']);
     foreach ($rows as $r) {
-        fputcsv($out, [$r['id'], $r['customer_name'], $r['contact'], $r['request'], $r['admin_reply'], $r['created_at'], $r['status']]);
+        fputcsv($out, [$r['id'], $r['customer_name'], $r['location'], $r['contact'], $r['need_category'], $r['need_for'], $r['request'], $r['admin_reply'], $r['created_at'], $r['status']]);
     }
     fclose($out);
     exit;
@@ -80,7 +80,8 @@ $counts = [
 
 $orderSelect = 'SELECT o.*, uu.username AS updated_by_name FROM custom_orders o LEFT JOIN admin_users uu ON uu.id = o.updated_by';
 
-$ordersStmt = $pdo->prepare($orderSelect . ' WHERE 1=1' . str_replace(' WHERE ', ' AND ', $dateWhere) . ' ORDER BY o.created_at DESC');
+$dateWhereAliased = str_replace('created_at', 'o.created_at', $dateWhere);
+$ordersStmt = $pdo->prepare($orderSelect . ' WHERE 1=1' . str_replace(' WHERE ', ' AND ', $dateWhereAliased) . ' ORDER BY o.created_at DESC');
 $ordersStmt->execute($dateParams);
 $orders = $ordersStmt->fetchAll();
 
@@ -91,8 +92,8 @@ if (!empty($_GET['ticket'])) {
     $ticket = $stmt->fetch() ?: null;
 }
 
-$pageTitle = 'Custom Orders';
-$pageSubtitle = 'Tiket permintaan custom order dari customer';
+$pageTitle = 'Report Custom Order';
+$pageSubtitle = 'Tiket permintaan konsultasi dari customer';
 $activeNav = 'orders';
 require __DIR__ . '/includes/header.php';
 ?>
@@ -128,12 +129,14 @@ require __DIR__ . '/includes/header.php';
 <?php else: ?>
 <div style="overflow-x:auto;">
   <table class="data-table">
-    <thead><tr><th>Customer</th><th>Contact</th><th>Request</th><th>Date</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Customer</th><th>Contact</th><th>What I Need</th><th>Need For</th><th>Request</th><th>Date</th><th>Status</th><th></th></tr></thead>
     <tbody>
       <?php foreach ($orders as $o): ?>
         <tr>
-          <td><?= htmlspecialchars($o['customer_name']) ?></td>
+          <td><?= htmlspecialchars($o['customer_name']) ?><?= $o['location'] ? '<br><small style="color:var(--ink-muted);">' . htmlspecialchars($o['location']) . '</small>' : '' ?></td>
           <td><?= htmlspecialchars($o['contact']) ?></td>
+          <td><?= htmlspecialchars($o['need_category'] ?? '—') ?></td>
+          <td><?= htmlspecialchars($o['need_for'] ?? '—') ?></td>
           <td style="max-width:280px;"><?= htmlspecialchars(mb_strimwidth($o['request'], 0, 120, '...')) ?></td>
           <td class="num"><?= htmlspecialchars(date('d M Y', strtotime($o['created_at']))) ?></td>
           <td><span class="status-pill <?= $o['status'] ?>"><?= strtoupper($o['status']) ?></span></td>
@@ -164,7 +167,11 @@ require __DIR__ . '/includes/header.php';
 
         <div class="field">
           <label>Customer</label>
-          <div><?= htmlspecialchars($ticket['customer_name']) ?> — <?= htmlspecialchars($ticket['contact']) ?></div>
+          <div><?= htmlspecialchars($ticket['customer_name']) ?> — <?= htmlspecialchars($ticket['contact']) ?><?= $ticket['location'] ? ' — ' . htmlspecialchars($ticket['location']) : '' ?></div>
+        </div>
+        <div class="field">
+          <label>What I Need / Need For</label>
+          <div><?= htmlspecialchars($ticket['need_category'] ?? '—') ?> / <?= htmlspecialchars($ticket['need_for'] ?? '—') ?></div>
         </div>
         <div class="field">
           <label>Request</label>

@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email = trim($_POST['email'] ?? '');
                 $name = trim($_POST['name'] ?? '');
                 $roleId = (int) ($_POST['role_id'] ?? 0);
+                $entityType = ($_POST['entity_type'] ?? '') === 'badan' ? 'badan' : 'perorangan';
+                $subjectToPph = !empty($_POST['subject_to_pph']) ? 1 : 0;
                 if ($email === '' || $roleId === 0) {
                     throw new RuntimeException('Email dan Role wajib diisi.');
                 }
@@ -31,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     if ($name === '') throw new RuntimeException('Nama wajib diisi untuk user baru.');
                     $tempPassword = bin2hex(random_bytes(5));
-                    $pdo->prepare('INSERT INTO users (name, email, password_hash) VALUES (?,?,?)')
-                        ->execute([$name, $email, password_hash($tempPassword, PASSWORD_DEFAULT)]);
+                    $pdo->prepare('INSERT INTO users (name, email, password_hash, entity_type, subject_to_pph) VALUES (?,?,?,?,?)')
+                        ->execute([$name, $email, password_hash($tempPassword, PASSWORD_DEFAULT), $entityType, $subjectToPph]);
                     $userId = (int) $pdo->lastInsertId();
                     $flash = ['ok', "User baru dibuat. Password sementara: $tempPassword (kirim manual ke user, minta ganti setelah login pertama)."];
                 }
@@ -58,6 +60,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare('UPDATE user_organization_roles SET status=? WHERE id=? AND organization_id=?')
                     ->execute([$status, $membershipId, $org['organization_id']]);
                 $flash = ['ok', 'Status anggota diperbarui.'];
+            } elseif ($action === 'update_tax_info') {
+                // entity_type/subject_to_pph nempel di users (global), tapi cuma boleh
+                // diubah lewat halaman ini kalau user-nya emang anggota organisasi aktif.
+                $userId = (int) ($_POST['user_id'] ?? 0);
+                $membershipCheck = $pdo->prepare('SELECT id FROM user_organization_roles WHERE user_id=? AND organization_id=?');
+                $membershipCheck->execute([$userId, $org['organization_id']]);
+                if (!$membershipCheck->fetch()) throw new RuntimeException('User bukan anggota organisasi ini.');
+                $entityType = ($_POST['entity_type'] ?? '') === 'badan' ? 'badan' : 'perorangan';
+                $subjectToPph = !empty($_POST['subject_to_pph']) ? 1 : 0;
+                $pdo->prepare('UPDATE users SET entity_type=?, subject_to_pph=? WHERE id=?')
+                    ->execute([$entityType, $subjectToPph, $userId]);
+                $flash = ['ok', 'Data pajak associate diperbarui.'];
             }
         } catch (Throwable $e) {
             $flash = ['error', $e->getMessage()];
@@ -66,7 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $members = $pdo->prepare(
-    'SELECT uor.id AS membership_id, uor.status, uor.role_id, u.name, u.email, r.name AS role_name
+    'SELECT uor.id AS membership_id, uor.status, uor.role_id, u.id AS user_id, u.name, u.email, r.name AS role_name,
+       u.entity_type, u.subject_to_pph
      FROM user_organization_roles uor
      JOIN users u ON u.id = uor.user_id
      JOIN roles r ON r.id = uor.role_id
@@ -105,6 +120,16 @@ $roles = $roles->fetchAll();
         <?php endforeach; ?>
       </select>
     </div>
+    <div class="field" style="min-width:140px;">
+      <label>Tipe (buat komisi)</label>
+      <select name="entity_type">
+        <option value="perorangan">Perorangan</option>
+        <option value="badan">Badan</option>
+      </select>
+    </div>
+    <label style="font-size:12.5px; display:flex; align-items:center; gap:6px; margin-bottom:9px;">
+      <input type="checkbox" name="subject_to_pph" value="1" checked> Kena PPh 23
+    </label>
     <button type="submit" class="btn">+ Tambah</button>
   </form>
 </div>
@@ -112,7 +137,7 @@ $roles = $roles->fetchAll();
 
 <div class="card">
   <table class="data-table">
-    <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><?php if ($isOwner): ?><th></th><?php endif; ?></tr></thead>
+    <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Tipe (Komisi)</th><th>Status</th><?php if ($isOwner): ?><th></th><?php endif; ?></tr></thead>
     <tbody>
       <?php foreach ($members as $m): ?>
         <tr>
@@ -132,6 +157,25 @@ $roles = $roles->fetchAll();
               </form>
             <?php else: ?>
               <span class="pill <?= $m['role_name'] === 'Owner' ? 'owner' : '' ?>"><?= htmlspecialchars($m['role_name']) ?></span>
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if ($isOwner): ?>
+              <form method="post" onchange="this.submit();" style="display:flex; gap:8px; align-items:center;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="update_tax_info">
+                <input type="hidden" name="user_id" value="<?= $m['user_id'] ?>">
+                <select name="entity_type" style="padding:4px 6px; border:1px solid var(--border); border-radius:4px; font-size:12px;">
+                  <option value="perorangan" <?= $m['entity_type'] === 'perorangan' ? 'selected' : '' ?>>Perorangan</option>
+                  <option value="badan" <?= $m['entity_type'] === 'badan' ? 'selected' : '' ?>>Badan</option>
+                </select>
+                <label style="font-size:11px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
+                  <input type="checkbox" name="subject_to_pph" value="1" <?= $m['subject_to_pph'] ? 'checked' : '' ?>> PPh 23
+                </label>
+              </form>
+            <?php else: ?>
+              <span class="pill"><?= $m['entity_type'] === 'badan' ? 'BADAN' : 'PERORANGAN' ?></span>
+              <?php if ($m['subject_to_pph']): ?><span class="pill">PPh 23</span><?php endif; ?>
             <?php endif; ?>
           </td>
           <td><span class="pill"><?= strtoupper($m['status']) ?></span></td>

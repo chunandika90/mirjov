@@ -3,10 +3,16 @@ $pageTitle = 'Produk & Tier';
 $activeMenu = 'products';
 require __DIR__ . '/includes/header.php';
 require_module_access('kontak'); // master data produk digabung ke izin modul Kontak
+require_once __DIR__ . '/../backoffice-shared/image_upload.php';
 
 $pdo = db();
 $flash = null;
 const TIER_LEVELS = ['ekonomis' => 'Ekonomis', 'standard' => 'Standard', 'premium' => 'Premium', 'deluxe' => 'Deluxe', 'bespoke' => 'Bespoke'];
+const DIMENSION_FIELDS = [
+    'panjang' => 'Panjang', 'lebar' => 'Lebar', 'tinggi' => 'Tinggi',
+    'tinggi_dudukan' => 'Tinggi Dudukan', 'tinggi_lengan' => 'Tinggi Lengan',
+    'tinggi_sandaran' => 'Tinggi Sandaran', 'tinggi_kaki' => 'Tinggi Kaki',
+];
 
 function find_or_create_material(PDO $pdo, int $orgId, string $name, float $defaultCost = 0): int
 {
@@ -45,6 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $collection = trim($_POST['collection'] ?? '') ?: null;
             $finishing = trim($_POST['finishing'] ?? '') ?: null;
             $size = trim($_POST['size'] ?? '') ?: null;
+            $dimensionFields = ['panjang', 'lebar', 'tinggi', 'tinggi_dudukan', 'tinggi_lengan', 'tinggi_sandaran', 'tinggi_kaki'];
+            $dimensions = [];
+            foreach ($dimensionFields as $df) {
+                $v = trim($_POST[$df] ?? '');
+                $dimensions[$df] = $v === '' ? null : (float) $v;
+            }
             $extraLabels = $_POST['extra_label'] ?? [];
             $extraValues = $_POST['extra_value'] ?? [];
             $extraSpecs = [];
@@ -61,22 +73,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($material !== null) find_or_create_material($pdo, $org['organization_id'], $material);
 
             if ($id > 0) {
-                $pdo->prepare('UPDATE products SET name=?, unit=?, material=?, item_type=?, collection=?, finishing=?, size=?, extra_specs=? WHERE id=? AND organization_id=?')
-                    ->execute([$name, $unit, $material, $itemType, $collection, $finishing, $size, json_encode($extraSpecs), $id, $org['organization_id']]);
+                $pdo->prepare('UPDATE products SET name=?, unit=?, material=?, item_type=?, collection=?, finishing=?, size=?, panjang=?, lebar=?, tinggi=?, tinggi_dudukan=?, tinggi_lengan=?, tinggi_sandaran=?, tinggi_kaki=?, extra_specs=? WHERE id=? AND organization_id=?')
+                    ->execute([$name, $unit, $material, $itemType, $collection, $finishing, $size,
+                        $dimensions['panjang'], $dimensions['lebar'], $dimensions['tinggi'], $dimensions['tinggi_dudukan'], $dimensions['tinggi_lengan'], $dimensions['tinggi_sandaran'], $dimensions['tinggi_kaki'],
+                        json_encode($extraSpecs), $id, $org['organization_id']]);
                 $flash = ['ok', 'Produk diperbarui.'];
             } else {
-                $pdo->prepare('INSERT INTO products (organization_id, name, unit, material, item_type, collection, finishing, size, extra_specs) VALUES (?,?,?,?,?,?,?,?,?)')
-                    ->execute([$org['organization_id'], $name, $unit, $material, $itemType, $collection, $finishing, $size, json_encode($extraSpecs)]);
+                $pdo->prepare('INSERT INTO products (organization_id, name, unit, material, item_type, collection, finishing, size, panjang, lebar, tinggi, tinggi_dudukan, tinggi_lengan, tinggi_sandaran, tinggi_kaki, extra_specs) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+                    ->execute([$org['organization_id'], $name, $unit, $material, $itemType, $collection, $finishing, $size,
+                        $dimensions['panjang'], $dimensions['lebar'], $dimensions['tinggi'], $dimensions['tinggi_dudukan'], $dimensions['tinggi_lengan'], $dimensions['tinggi_sandaran'], $dimensions['tinggi_kaki'],
+                        json_encode($extraSpecs)]);
                 $id = (int) $pdo->lastInsertId();
                 $flash = ['ok', 'Produk ditambahkan.'];
             }
+
+            if (!empty($_FILES['photo']['name'])) {
+                $newPath = save_resized_product_photo($_FILES['photo']);
+                $oldPhoto = $pdo->prepare('SELECT photo_path FROM products WHERE id=?');
+                $oldPhoto->execute([$id]);
+                $oldPath = $oldPhoto->fetchColumn();
+                $pdo->prepare('UPDATE products SET photo_path=? WHERE id=? AND organization_id=?')->execute([$newPath, $id, $org['organization_id']]);
+                delete_product_photo($oldPath ?: null);
+            }
+
             header('Location: products.php?product_id=' . $id);
             exit;
         } elseif ($action === 'delete_product') {
             require_module_access('kontak', 'can_delete');
             $id = (int) ($_POST['product_id'] ?? 0);
+            $photoStmt = $pdo->prepare('SELECT photo_path FROM products WHERE id=? AND organization_id=?');
+            $photoStmt->execute([$id, $org['organization_id']]);
+            $photoToDelete = $photoStmt->fetchColumn();
             $pdo->prepare('DELETE FROM products WHERE id=? AND organization_id=?')->execute([$id, $org['organization_id']]);
+            delete_product_photo($photoToDelete ?: null);
             $flash = ['ok', 'Produk dihapus.'];
+        } elseif ($action === 'remove_product_photo') {
+            require_module_access('kontak', 'can_edit');
+            $id = (int) ($_POST['product_id'] ?? 0);
+            $photoStmt = $pdo->prepare('SELECT photo_path FROM products WHERE id=? AND organization_id=?');
+            $photoStmt->execute([$id, $org['organization_id']]);
+            $photoToDelete = $photoStmt->fetchColumn();
+            $pdo->prepare('UPDATE products SET photo_path=NULL WHERE id=? AND organization_id=?')->execute([$id, $org['organization_id']]);
+            delete_product_photo($photoToDelete ?: null);
+            $flash = ['ok', 'Foto produk dihapus.'];
+            header('Location: products.php?product_id=' . $id);
+            exit;
         } elseif ($action === 'save_tier') {
             require_module_access('kontak', 'can_edit');
             $productId = (int) ($_POST['product_id'] ?? 0);
@@ -179,9 +220,16 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
     </div>
     <div class="txn-rail-list">
       <?php $lastName = null; foreach ($products as $p): ?>
-        <a class="txn-rail-item <?= $editingProductId === (int) $p['id'] ? 'active' : '' ?>" href="products.php?product_id=<?= $p['id'] ?>">
-          <div class="doc"><?= htmlspecialchars($p['name']) ?></div>
-          <div class="sub"><?= htmlspecialchars(trim($p['material'] ?? '') ?: 'Belum ada spec') ?></div>
+        <a class="txn-rail-item <?= $editingProductId === (int) $p['id'] ? 'active' : '' ?>" href="products.php?product_id=<?= $p['id'] ?>" style="display:flex; gap:10px; align-items:center;">
+          <?php if ($p['photo_path']): ?>
+            <img src="<?= htmlspecialchars($p['photo_path']) ?>" alt="" style="width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0;">
+          <?php else: ?>
+            <div style="width:36px; height:36px; border-radius:6px; background:oklch(0.94 0.003 90); flex-shrink:0;"></div>
+          <?php endif; ?>
+          <div style="min-width:0;">
+            <div class="doc"><?= htmlspecialchars($p['name']) ?></div>
+            <div class="sub"><?= htmlspecialchars(trim($p['material'] ?? '') ?: 'Belum ada spec') ?></div>
+          </div>
         </a>
       <?php endforeach; ?>
       <?php if (!$products): ?><div style="padding:14px; font-size:12px; color:var(--ink-muted);">Belum ada produk.</div><?php endif; ?>
@@ -213,8 +261,14 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
             <div class="field"><label>Finishing</label><input type="text" name="finishing" class="combo-finishing" autocomplete="off"></div>
           </div>
           <div class="field-row">
-            <div class="field"><label>Ukuran</label><input type="text" name="size"></div>
+            <div class="field"><label>Ukuran (bebas, cth. "60x60x45cm")</label><input type="text" name="size"></div>
             <div class="field"><label>Satuan</label><input type="text" name="unit" value="pcs"></div>
+          </div>
+          <label style="display:block; font-size:12px; font-weight:600; margin:10px 0 6px;">Dimensi (mm)</label>
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px 12px; margin-bottom:14px;">
+            <?php foreach (DIMENSION_FIELDS as $df => $dl): ?>
+              <div class="field" style="margin-bottom:0;"><label style="font-size:12px; font-weight:500;"><?= htmlspecialchars($dl) ?></label><input type="number" step="0.01" name="<?= $df ?>"></div>
+            <?php endforeach; ?>
           </div>
           <button type="submit" class="btn">Simpan Produk</button>
         </form>
@@ -229,10 +283,28 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
           <?php endif; ?>
         </div>
         <?php if (has_access('kontak', 'can_edit')): ?>
-        <form method="post" id="spec-form">
+        <form method="post" id="spec-form" enctype="multipart/form-data">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="save_product">
           <input type="hidden" name="product_id" value="<?= $editingProduct['id'] ?>">
+
+          <div class="field">
+            <label>Foto Produk</label>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <?php if ($editingProduct['photo_path']): ?>
+                <img src="<?= htmlspecialchars($editingProduct['photo_path']) ?>" alt="" style="width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--border);">
+              <?php else: ?>
+                <div style="width:90px; height:90px; border-radius:8px; border:1px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--ink-muted); text-align:center;">Belum ada foto</div>
+              <?php endif; ?>
+              <div>
+                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp">
+                <?php if ($editingProduct['photo_path']): ?>
+                  <div style="margin-top:6px;"><button type="button" class="btn btn-sm btn-ghost" onclick="if(confirm('Hapus foto produk ini?')) __submitDeleteForm('remove_product_photo', {product_id: <?= $editingProduct['id'] ?>})">Hapus Foto</button></div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
           <div class="field"><label>Nama Produk</label><input type="text" name="name" value="<?= htmlspecialchars($editingProduct['name']) ?>" required></div>
           <div class="field-row">
             <div class="field"><label>Material</label><input type="text" name="material" value="<?= htmlspecialchars($editingProduct['material'] ?? '') ?>" class="combo-material-spec" autocomplete="off"></div>
@@ -243,8 +315,15 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
             <div class="field"><label>Finishing</label><input type="text" name="finishing" value="<?= htmlspecialchars($editingProduct['finishing'] ?? '') ?>" class="combo-finishing" autocomplete="off"></div>
           </div>
           <div class="field-row">
-            <div class="field"><label>Ukuran</label><input type="text" name="size" value="<?= htmlspecialchars($editingProduct['size'] ?? '') ?>"></div>
+            <div class="field"><label>Ukuran (bebas, cth. "60x60x45cm")</label><input type="text" name="size" value="<?= htmlspecialchars($editingProduct['size'] ?? '') ?>"></div>
             <div class="field" style="max-width:160px;"><label>Satuan</label><input type="text" name="unit" value="<?= htmlspecialchars($editingProduct['unit']) ?>"></div>
+          </div>
+
+          <label style="display:block; font-size:12px; font-weight:600; margin:10px 0 6px;">Dimensi (mm)</label>
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px 12px; margin-bottom:14px;">
+            <?php foreach (DIMENSION_FIELDS as $df => $dl): ?>
+              <div class="field" style="margin-bottom:0;"><label style="font-size:12px; font-weight:500;"><?= htmlspecialchars($dl) ?></label><input type="number" step="0.01" name="<?= $df ?>" value="<?= htmlspecialchars($editingProduct[$df] ?? '') ?>"></div>
+            <?php endforeach; ?>
           </div>
 
           <label style="display:block; font-size:12px; font-weight:600; margin:10px 0 6px;">Spec Tambahan</label>
@@ -268,6 +347,9 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
             <div><span class="lbl">Collection</span><?= htmlspecialchars($editingProduct['collection'] ?: '—') ?></div>
             <div><span class="lbl">Finishing</span><?= htmlspecialchars($editingProduct['finishing'] ?: '—') ?></div>
             <div><span class="lbl">Ukuran</span><?= htmlspecialchars($editingProduct['size'] ?: '—') ?></div>
+            <?php foreach (DIMENSION_FIELDS as $df => $dl): if ($editingProduct[$df] === null) continue; ?>
+              <div><span class="lbl"><?= htmlspecialchars($dl) ?></span><?= rtrim(rtrim(number_format((float) $editingProduct[$df], 2, ',', '.'), '0'), ',') ?> mm</div>
+            <?php endforeach; ?>
           </div>
         <?php endif; ?>
       </div>
@@ -293,7 +375,7 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
               <input type="hidden" name="action" value="save_tier">
               <input type="hidden" name="product_id" value="<?= $editingProduct['id'] ?>">
               <input type="hidden" name="tier_level" value="<?= $level ?>">
-              <div class="field"><label>Harga Jual</label><input type="number" step="0.01" name="price" value="<?= $tier['price'] ?? 0 ?>"></div>
+              <div class="field"><label>Harga Jual</label><input type="text" inputmode="numeric" class="rupiah-input" name="price" value="<?= $tier['price'] ?? 0 ?>"></div>
               <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px;">BOM Komponen</label>
               <div id="bom-list-<?= $level ?>" style="flex:1;">
                 <?php foreach ($bom as $b): ?>
@@ -301,7 +383,7 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
                     <input type="text" name="bom_material[]" placeholder="Material" value="<?= htmlspecialchars($b['material_name'] ?? '') ?>" class="combo-bom-material" autocomplete="off" style="width:100%; padding:5px; border:1px solid var(--border); border-radius:3px; margin-bottom:4px; font-size:12px;">
                     <div style="display:flex; gap:4px;">
                       <input type="number" step="0.01" name="bom_qty[]" placeholder="Qty" value="<?= $b['qty'] ?? '' ?>" style="width:50%; padding:5px; border:1px solid var(--border); border-radius:3px; font-size:12px;">
-                      <input type="number" step="0.01" name="bom_cost[]" placeholder="Cost" value="<?= $b['cost'] ?? '' ?>" style="width:50%; padding:5px; border:1px solid var(--border); border-radius:3px; font-size:12px;">
+                      <input type="text" inputmode="numeric" class="rupiah-input" name="bom_cost[]" placeholder="Cost" value="<?= $b['cost'] ?? '' ?>" style="width:50%; padding:5px; border:1px solid var(--border); border-radius:3px; font-size:12px;">
                     </div>
                   </div>
                 <?php endforeach; ?>
@@ -337,7 +419,10 @@ function initBomCombobox(el) {
     onSelect: function (item) {
       var row = el.closest('.bom-row');
       var costInput = row.querySelector('[name="bom_cost[]"]');
-      if (costInput && !costInput.value) costInput.value = item.cost || 0;
+      if (costInput && !costInput.value) {
+        costInput.value = item.cost || 0;
+        costInput.dispatchEvent(new Event('input'));
+      }
     }
   });
 }
@@ -348,9 +433,10 @@ function addBomRow(level) {
   d.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;';
   d.innerHTML = '<input type="text" name="bom_material[]" placeholder="Material" autocomplete="off" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:3px;margin-bottom:4px;font-size:12px;">'
     + '<div style="display:flex;gap:4px;"><input type="number" step="0.01" name="bom_qty[]" placeholder="Qty" style="width:50%;padding:5px;border:1px solid var(--border);border-radius:3px;font-size:12px;">'
-    + '<input type="number" step="0.01" name="bom_cost[]" placeholder="Cost" style="width:50%;padding:5px;border:1px solid var(--border);border-radius:3px;font-size:12px;"></div>';
+    + '<input type="text" inputmode="numeric" class="rupiah-input" name="bom_cost[]" placeholder="Cost" style="width:50%;padding:5px;border:1px solid var(--border);border-radius:3px;font-size:12px;"></div>';
   document.getElementById('bom-list-' + level).appendChild(d);
   initBomCombobox(d.querySelector('input[name="bom_material[]"]'));
+  initRupiahInput(d.querySelector('input[name="bom_cost[]"]'));
 }
 
 document.addEventListener('DOMContentLoaded', function () {

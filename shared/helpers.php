@@ -39,6 +39,31 @@ function render_audit_trail(?string $createdByName, ?string $createdAt, ?string 
     return '<div class="audit-trail">' . implode(' &nbsp;&middot;&nbsp; ', $parts) . '</div>';
 }
 
+/**
+ * Terima link YouTube format apa aja (watch?v=, youtu.be/, embed/, shorts/) ATAU
+ * ID mentahnya langsung — selalu balikin cuma ID-nya doang buat disimpan ke DB.
+ * Kalau formatnya gak dikenali, dibalikin apa adanya (di-trim) — biar admin CMS
+ * gak perlu mikirin format, tinggal paste link lengkap dari address bar.
+ */
+function extract_youtube_id(string $input): string
+{
+    $input = trim($input);
+    if ($input === '') return '';
+
+    $patterns = [
+        '#youtu\.be/([A-Za-z0-9_-]{6,})#',
+        '#youtube\.com/watch\?v=([A-Za-z0-9_-]{6,})#',
+        '#youtube\.com/embed/([A-Za-z0-9_-]{6,})#',
+        '#youtube\.com/shorts/([A-Za-z0-9_-]{6,})#',
+        '#youtube\.com/live/([A-Za-z0-9_-]{6,})#',
+    ];
+    foreach ($patterns as $p) {
+        if (preg_match($p, $input, $m)) return $m[1];
+    }
+
+    return $input;
+}
+
 function unique_slug(PDO $pdo, string $table, string $base, int $excludeId = 0): string
 {
     $slug = slugify($base);

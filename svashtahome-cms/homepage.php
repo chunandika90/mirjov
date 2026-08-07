@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'save_video': {
                 $headline = trim($_POST['headline'] ?? '');
                 $slogan = trim($_POST['slogan'] ?? '');
-                $youtubeId = trim($_POST['youtube_id'] ?? '');
+                $youtubeId = extract_youtube_id($_POST['youtube_id'] ?? '');
                 $videoPath = $_POST['existing_video'] ?? null;
                 if (!empty($_FILES['video_file']['name']) && $_FILES['video_file']['error'] === UPLOAD_ERR_OK) {
                     if ($_FILES['video_file']['size'] > 40 * 1024 * 1024) {
@@ -307,8 +307,9 @@ require __DIR__ . '/includes/header.php';
       <input type="text" name="slogan" value="<?= htmlspecialchars($video['slogan'] ?? '') ?>">
     </div>
     <div class="field">
-      <label>YouTube Video ID (opsional, mis. jlWMTNZNOc0)</label>
-      <input type="text" name="youtube_id" value="<?= htmlspecialchars($video['youtube_id'] ?? '') ?>">
+      <label>Link YouTube (opsional)</label>
+      <input type="text" name="youtube_id" placeholder="Paste link lengkap juga bisa, mis. https://youtube.com/watch?v=jlWMTNZNOc0" value="<?= htmlspecialchars($video['youtube_id'] ?? '') ?>">
+      <div class="seo-hint">Paste link apa aja dari YouTube (link biasa, youtu.be, shorts, dll) — otomatis diambil ID-nya aja pas disimpan.</div>
     </div>
     <div class="field">
       <label>Atau upload file video (.mp4, maks 40MB)</label>

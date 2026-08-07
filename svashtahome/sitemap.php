@@ -9,7 +9,7 @@ $urls = [
     ['loc' => SITE_URL . '/product', 'priority' => '0.9'],
     ['loc' => SITE_URL . '/blog', 'priority' => '0.7'],
     ['loc' => SITE_URL . '/projects', 'priority' => '0.7'],
-    ['loc' => SITE_URL . '/custom-order', 'priority' => '0.6'],
+    ['loc' => SITE_URL . '/consultation', 'priority' => '0.6'],
 ];
 
 try {

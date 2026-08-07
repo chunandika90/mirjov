@@ -262,7 +262,7 @@ if ($isNewForm) {
             <label style="display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
               <input type="checkbox" name="invoice_line_id[]" value="<?= $il['id'] ?>">
               <span style="flex:1;"><?= htmlspecialchars($il['product_name_snapshot']) ?> (<?= htmlspecialchars($il['tier_level_snapshot']) ?>) — <?= $il['qty'] ?> unit — <?= htmlspecialchars($il['customer_name']) ?> <small style="color:var(--ink-muted);">[<?= htmlspecialchars($il['doc_number']) ?>]</small></span>
-              <input type="number" name="unit_cost[<?= $il['id'] ?>]" placeholder="Cost/unit" step="0.01" style="width:110px; padding:6px; border:1px solid var(--border); border-radius:4px;">
+              <input type="text" inputmode="numeric" class="rupiah-input" name="unit_cost[<?= $il['id'] ?>]" placeholder="Cost/unit" style="width:110px; padding:6px; border:1px solid var(--border); border-radius:4px;">
             </label>
           <?php endforeach; ?>
           <?php if (!$invoiceLines): ?><p style="color:var(--ink-muted); font-size:13px;">Tidak ada item Invoice yang belum di-PO-kan.</p><?php endif; ?>
@@ -296,12 +296,13 @@ if ($isNewForm) {
       '<input type="text" name="item_name[]" placeholder="Nama item" style="flex:2;padding:8px;border:1px solid var(--border);border-radius:4px;">' +
       '<input type="hidden" name="material_id[]" class="raw-material-id">' +
       '<input type="number" name="qty[]" placeholder="Qty" step="0.01" style="width:80px;padding:8px;border:1px solid var(--border);border-radius:4px;">' +
-      '<input type="number" name="unit_cost[]" placeholder="Cost/unit" step="0.01" style="width:110px;padding:8px;border:1px solid var(--border);border-radius:4px;">' +
+      '<input type="text" inputmode="numeric" class="rupiah-input" name="unit_cost[]" placeholder="Cost/unit" style="width:110px;padding:8px;border:1px solid var(--border);border-radius:4px;">' +
       '<button type="button" class="btn btn-sm btn-ghost" onclick="this.closest(\'div\').remove()">✕</button>';
     row.querySelector('.raw-material-select').addEventListener('change', function () {
       row.querySelector('.raw-material-id').value = this.value;
       if (this.value) row.querySelector('input[name="item_name[]"]').value = this.options[this.selectedIndex].textContent;
     });
+    initRupiahInput(row.querySelector('input[name="unit_cost[]"]'));
     document.getElementById('raw-lines').appendChild(row);
   });
   document.getElementById('add-raw-line').click();

@@ -46,18 +46,18 @@
     })();
     </script>
 
-    <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/favicons/logo_svashtahome.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicons/logo_svashtahome.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicons/logo_svashtahome.png">
-    <link rel="shortcut icon" type="image/x-icon" href="../assets/img/favicons/logo_svashtahome.png">
-    <link rel="manifest" href="../assets/img/favicons/manifest.json">
-    <meta name="msapplication-TileImage" content="../assets/img/favicons/mstile-150x150.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/logo_svashtahome.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicons/logo_svashtahome.png">
+    <link rel="manifest" href="/assets/img/favicons/manifest.json">
+    <meta name="msapplication-TileImage" content="/assets/img/favicons/mstile-150x150.png">
     <meta name="theme-color" content="#ffffff">
-    <script src="../vendors/overlayscrollbars/OverlayScrollbars.min.js"></script>
+    <script src="/vendors/overlayscrollbars/OverlayScrollbars.min.js"></script>
 
-    <link href="../vendors/swiper/swiper-bundle.min.css" rel="stylesheet">
-    <link href="../assets/css/theme.css" rel="stylesheet" />
-    <link href="../assets/css/user.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/user.css') ?: time() ?>" rel="stylesheet" />
+    <link href="/vendors/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="/assets/css/theme.css" rel="stylesheet" />
+    <link href="/assets/css/user.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/user.css') ?: time() ?>" rel="stylesheet" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">

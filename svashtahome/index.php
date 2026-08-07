@@ -38,7 +38,7 @@ function svashta_homepage_data(): array
         }
 
         $video = $pdo->query('SELECT * FROM homepage_video WHERE id = 1')->fetch();
-        if ($video && ($video['headline'] || $video['slogan'])) {
+        if ($video && ($video['headline'] || $video['slogan'] || $video['youtube_id'] || $video['video_path'])) {
             $data['video'] = $video;
         }
 
@@ -184,7 +184,7 @@ $hp = svashta_homepage_data();
 				  <div class="dropdown-menu dropdown-menu-end py-0 overflow-hidden" aria-labelledby="navbarDropdownMenuLink1"><a class="dropdown-item" href="homes/one-page.html">One page</a><a class="dropdown-item" href="homes/header-static.html">Static header</a><a class="dropdown-item" href="homes/static-classic.html">Static classic</a><a class="dropdown-item" href="homes/slider-header.html">Slider header</a><a class="dropdown-item" href="homes/slider-classic.html">Slider classic</a><a class="dropdown-item" href="homes/text-left-header.html">Text left header</a><a class="dropdown-item" href="homes/text-left-classic.html">Text left classic</a><a class="dropdown-item" href="homes/typed-text-header.html">Typed text header</a><a class="dropdown-item" href="homes/typed-text-classic.html">Typed text classic</a><a class="dropdown-item" href="homes/text-left-slider.html">Text left slider</a><a class="dropdown-item" href="homes/text-left-classic-slider.html">Text left classic slider</a><a class="dropdown-item" href="homes/video-background.html">Video background</a><a class="dropdown-item" href="homes/video-classic.html">Video classic</a><a class="dropdown-item" href="homes/gradient-background.html">Gradient background</a><a class="dropdown-item" href="homes/gradient-classic.html">Gradient classic</a></div>
 				--!>
 				</li>
-				<li class="nav-item"><a class="nav-link fw-medium "  href="/custom-order" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Custom Order</span></a>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="/consultation" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Consultation</span></a>
 				</li>
 			  </ul>
 			</div>
@@ -330,39 +330,56 @@ contemporary villa or a classic residence, Svashta pieces bring quiet elegance a
       <section class="py-8 py-md-10 text-center">
 
         <?php
-        // Prioritas: kalau ada file video yang diupload, itu yang dipakai.
-        // Kalau kosong, fallback ke YouTube ID.
-        if (!empty($hp['video']['video_path'])) {
+        // Video yang KEPUTER pas diklik: prioritas link YouTube kalau diisi (paling
+        // gampang di-update dari CMS), file upload cuma dipakai kalau youtube_id-nya
+        // kosong. Sebelumnya kebalik (upload selalu menang) — bikin update YouTube
+        // link di CMS keliatan gak ke-apply kalau ada file upload lama yang nyangkut.
+        if (!empty($hp['video']['youtube_id'])) {
+            $bigPictureData = json_encode(['ytSrc' => $hp['video']['youtube_id']]);
+        } elseif (!empty($hp['video']['video_path'])) {
             $bigPictureData = json_encode(['vidSrc' => image_url($hp['video']['video_path'])]);
-            $videoBgImage = 'assets/img/backgrounds/our-video-bg.jpg';
         } else {
-            $ytId = $hp['video']['youtube_id'] ?? '';
-            $bigPictureData = json_encode(['ytSrc' => $ytId]);
-            $videoBgImage = $ytId ? 'https://img.youtube.com/vi/' . rawurlencode($ytId) . '/maxresdefault.jpg' : 'assets/img/backgrounds/our-video-bg.jpg';
+            $bigPictureData = json_encode(['ytSrc' => '']);
         }
+        // Background/poster section ini SELALU coba ambil thumbnail YouTube kalau
+        // youtube_id ada — gak peduli video yang keputer itu file upload atau YouTube,
+        // biar posternya gak generic/statis terus. Fallback ke gambar statis cuma
+        // kalau youtube_id-nya kosong beneran.
+        // Coba maxresdefault (1280x720, HD) dulu — JS di bawah bakal otomatis turun
+        // ke hqdefault (480x360) kalau ternyata videonya gak punya versi HD.
+        $ytIdForThumb = $hp['video']['youtube_id'] ?? '';
+        $videoBgImageHD = $ytIdForThumb ? 'https://img.youtube.com/vi/' . rawurlencode($ytIdForThumb) . '/maxresdefault.jpg' : '';
+        $videoBgImageFallback = $ytIdForThumb ? 'https://img.youtube.com/vi/' . rawurlencode($ytIdForThumb) . '/hqdefault.jpg' : 'assets/img/backgrounds/our-video-bg.jpg';
         ?>
-        <div class="bg-holder" style="background-image:url(<?= htmlspecialchars($videoBgImage) ?>);background-position: 63% 50%;">
-        </div>
-        <!--/.bg-holder-->
+        <div class="container position-relative" style="aspect-ratio: 16 / 9; max-height: 640px;">
+          <div class="bg-holder rounded-3 js-video-bg" data-hd-src="<?= htmlspecialchars($videoBgImageHD) ?>" style="background-image:url(<?= htmlspecialchars($videoBgImageFallback) ?>);background-position: 63% 50%;">
+          </div>
+          <!--/.bg-holder-->
 
-        <div class="container">
-          <div class="row justify-content-center" data-zanim-timeline="{}" data-zanim-trigger="scroll">
-            <div class="col-lg-8">
-              <div class="row align-items-center">
-                <div class="col-md-5 text-md-end">
-                  <h2 class="font-base text-white mb-0 fs-3 lh-1"><span class="d-block" data-zanim-xs='{"from":{"opacity":0,"x":-30},"to":{"opacity":1,"x":0},"duration":1.5,"delay":0}'><?= htmlspecialchars($hp['video']['headline']) ?></span><span class="d-block" data-zanim-xs='{"from":{"opacity":0,"x":-30},"to":{"opacity":1,"x":0},"duration":1.5,"delay":0.1}'><?= htmlspecialchars($hp['video']['slogan']) ?></span></h2>
-                </div>
-                <div class="col-md-2 my-3 my-md-0"><a class="video-modal btn btn-outline-white hvr-sweep-top rounded-circle p-0 btn-play mx-auto" href="#!" data-bigpicture='<?= htmlspecialchars($bigPictureData) ?>'><span class="fas fa-play" data-fa-transform="grow-1 right-2"></span></a></div>
-                <div class="col-md-5 text-md-start">
-                  <div class="overflow-hidden">
-                    <p class="text-white mb-0" data-zanim-xs='{"from":{"opacity":0,"x":30},"to":{"opacity":1,"x":0},"duration":1.5,"delay":0.1}'>Promote your company<br />Creating your own <br />slogan here</p>
-                  </div>
-                </div>
-              </div>
+          <div class="row justify-content-center align-items-center h-100 position-relative" style="z-index: 1;" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+            <div class="col-auto">
+              <a class="video-modal btn btn-outline-white hvr-sweep-top rounded-circle p-0 btn-play mx-auto" href="#!" data-bigpicture='<?= htmlspecialchars($bigPictureData) ?>'><span class="fas fa-play" data-fa-transform="grow-1 right-2"></span></a>
             </div>
           </div>
         </div>
         <!-- end of .container-->
+        <?php if ($videoBgImageHD): ?>
+        <script>
+        (function () {
+          var el = document.querySelector('.js-video-bg');
+          if (!el) return;
+          var hdSrc = el.getAttribute('data-hd-src');
+          var img = new Image();
+          img.onload = function () {
+            // YouTube balikin placeholder abu-abu 120x90 persis kalau video-nya
+            // gak punya versi HD — cuma pakai maxresdefault kalau ini BUKAN itu.
+            if (img.naturalWidth === 120 && img.naturalHeight === 90) return;
+            el.style.backgroundImage = 'url(' + hdSrc + ')';
+          };
+          img.src = hdSrc;
+        })();
+        </script>
+        <?php endif; ?>
 
       </section>
       <!-- <section> close ============================-->

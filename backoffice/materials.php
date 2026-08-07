@@ -17,12 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
             $unit = trim($_POST['unit'] ?? '') ?: 'pcs';
             $defaultCost = (float) ($_POST['default_cost'] ?? 0);
+            $notes = trim($_POST['notes'] ?? '') ?: null;
             if ($name === '') throw new RuntimeException('Nama material wajib diisi.');
             if ($id > 0) {
-                $pdo->prepare('UPDATE materials SET name=?, unit=?, default_cost=? WHERE id=? AND organization_id=?')->execute([$name, $unit, $defaultCost, $id, $org['organization_id']]);
+                $pdo->prepare('UPDATE materials SET name=?, unit=?, default_cost=?, notes=? WHERE id=? AND organization_id=?')->execute([$name, $unit, $defaultCost, $notes, $id, $org['organization_id']]);
                 $flash = ['ok', 'Material diperbarui.'];
             } else {
-                $pdo->prepare('INSERT INTO materials (organization_id, name, unit, default_cost) VALUES (?,?,?,?)')->execute([$org['organization_id'], $name, $unit, $defaultCost]);
+                $pdo->prepare('INSERT INTO materials (organization_id, name, unit, default_cost, notes) VALUES (?,?,?,?,?)')->execute([$org['organization_id'], $name, $unit, $defaultCost, $notes]);
                 $flash = ['ok', 'Material ditambahkan.'];
             }
         } elseif ($action === 'delete_material') {
@@ -78,13 +79,16 @@ $warehouses = $warehouses->fetchAll();
     <tbody>
       <?php foreach ($materials as $m): ?>
         <tr>
-          <td><?= htmlspecialchars($m['name']) ?></td>
+          <td>
+            <?= htmlspecialchars($m['name']) ?>
+            <?php if ($m['notes']): ?><div style="font-size:11.5px; color:var(--ink-muted); margin-top:2px;"><?= htmlspecialchars($m['notes']) ?></div><?php endif; ?>
+          </td>
           <td><?= htmlspecialchars($m['unit']) ?></td>
           <td class="num">Rp <?= number_format((float) $m['default_cost'], 0, ',', '.') ?></td>
           <td><?= rtrim(rtrim(number_format((float) $m['stock_qty'], 2, ',', '.'), '0'), ',') ?></td>
           <td>
             <?php if (has_access('kontak', 'can_edit')): ?>
-              <button class="btn btn-sm btn-ghost" type="button" onclick="document.getElementById('material_id').value='<?= $m['id'] ?>'; document.getElementById('material-form').name.value='<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>'; document.getElementById('material-form').unit.value='<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>'; document.getElementById('material-form').default_cost.value='<?= (float) $m['default_cost'] ?>'; document.getElementById('material-modal').classList.add('open');">Edit</button>
+              <button class="btn btn-sm btn-ghost" type="button" onclick="document.getElementById('material_id').value='<?= $m['id'] ?>'; document.getElementById('material-form').name.value='<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>'; document.getElementById('material-form').unit.value='<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>'; document.getElementById('material-form').default_cost.value='<?= (float) $m['default_cost'] ?>'; document.getElementById('material-form').default_cost.dispatchEvent(new Event('input')); document.getElementById('material-form').notes.value=<?= json_encode($m['notes'] ?? '') ?>; document.getElementById('material-modal').classList.add('open');">Edit</button>
             <?php endif; ?>
             <?php if (has_access('kontak', 'can_delete')): ?>
               <button class="btn btn-sm btn-ghost" type="button" onclick="if(confirm('Hapus material ini?')) __submitDeleteForm('delete_material', {material_id: <?= $m['id'] ?>})">Hapus</button>
@@ -107,7 +111,8 @@ $warehouses = $warehouses->fetchAll();
         <input type="hidden" name="material_id" id="material_id">
         <div class="field"><label>Nama Material</label><input type="text" name="name" required></div>
         <div class="field"><label>Satuan</label><input type="text" name="unit" value="pcs"></div>
-        <div class="field"><label>Default Cost (buat prefill harga di PO)</label><input type="number" step="0.01" name="default_cost" value="0"></div>
+        <div class="field"><label>Default Cost (buat prefill harga di PO)</label><input type="text" inputmode="numeric" class="rupiah-input" name="default_cost" value="0"></div>
+        <div class="field"><label>Notes (cth. "dibikin pas project Butik Hotel Ubud")</label><textarea name="notes" rows="2"></textarea></div>
       </div>
       <div class="modal-foot">
         <button type="button" class="btn btn-ghost" data-close-modal="material-modal">Batal</button>
@@ -138,7 +143,7 @@ $warehouses = $warehouses->fetchAll();
           </select>
         </div>
         <div class="field"><label>Qty</label><input type="number" step="0.01" name="qty" required></div>
-        <div class="field"><label>Cost/unit (buat basis HPP)</label><input type="number" step="0.01" name="unit_cost" required></div>
+        <div class="field"><label>Cost/unit (buat basis HPP)</label><input type="text" inputmode="numeric" class="rupiah-input" name="unit_cost" required></div>
       </div>
       <div class="modal-foot">
         <button type="button" class="btn btn-ghost" data-close-modal="opening-modal">Batal</button>

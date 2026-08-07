@@ -240,7 +240,7 @@ if (!$isNewForm) {
         <div class="row" style="align-items:center;">
           <span>Diskon</span>
           <span style="display:flex; gap:4px; align-items:center;">
-            <input type="number" step="0.01" name="discount_value" id="discount-value" value="0" style="width:90px; padding:5px; border:1px solid var(--border); border-radius:4px;">
+            <input type="text" inputmode="numeric" class="rupiah-input" name="discount_value" id="discount-value" value="0" style="width:90px; padding:5px; border:1px solid var(--border); border-radius:4px;">
             <select name="discount_type" id="discount-type" style="padding:5px; border:1px solid var(--border); border-radius:4px;">
               <option value="percent">%</option>
               <option value="amount">Rp</option>
@@ -309,7 +309,7 @@ if (!$isNewForm) {
         row.querySelector('.q-line-total').textContent = 'Rp ' + lineTotal.toLocaleString('id-ID');
         subtotal += lineTotal;
       });
-      var discVal = parseFloat(document.getElementById('discount-value').value) || 0;
+      var discVal = parseFloat(document.getElementById('discount-value').value.replace(/[^\d]/g, '')) || 0;
       var discType = document.getElementById('discount-type').value;
       var discAmount = discType === 'percent' ? subtotal * (discVal / 100) : discVal;
       var afterDisc = Math.max(0, subtotal - discAmount);

@@ -68,22 +68,22 @@
           </div>
         </div>
       </div>
-    </footer><a class="btn-back-to-top" href="#top"><img src="../assets/img/line-icons/upload-arrow.svg" width="8" alt=""></a>
+    </footer><a class="btn-back-to-top" href="#top"><img src="/assets/img/line-icons/upload-arrow.svg" width="8" alt=""></a>
 
-    <script src="../vendors/popper/popper.min.js"></script>
-    <script src="../vendors/bootstrap/bootstrap.min.js"></script>
-    <script src="../vendors/anchorjs/anchor.min.js"></script>
-    <script src="../vendors/is/is.min.js"></script>
-    <script src="../vendors/hover-dir/hoverDir.min.js"></script>
-    <script src="../vendors/isotope-layout/isotope.pkgd.min.js"></script>
-    <script src="../vendors/isotope-packery/packery-mode.pkgd.min.js"></script>
-    <script src="../vendors/swiper/swiper-bundle.min.js"></script>
-    <script src="../vendors/fontawesome/all.min.js"></script>
-    <script src="../vendors/lodash/lodash.min.js"></script>
-    <script src="../vendors/imagesloaded/imagesloaded.pkgd.min.js"></script>
-    <script src="../vendors/gsap/gsap.js"></script>
-    <script src="../vendors/gsap/customEase.js"></script>
-    <script src="../assets/js/theme.js"></script>
+    <script src="/vendors/popper/popper.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="/vendors/anchorjs/anchor.min.js"></script>
+    <script src="/vendors/is/is.min.js"></script>
+    <script src="/vendors/hover-dir/hoverDir.min.js"></script>
+    <script src="/vendors/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="/vendors/isotope-packery/packery-mode.pkgd.min.js"></script>
+    <script src="/vendors/swiper/swiper-bundle.min.js"></script>
+    <script src="/vendors/fontawesome/all.min.js"></script>
+    <script src="/vendors/lodash/lodash.min.js"></script>
+    <script src="/vendors/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="/vendors/gsap/gsap.js"></script>
+    <script src="/vendors/gsap/customEase.js"></script>
+    <script src="/assets/js/theme.js"></script>
 
     <a href="https://wa.me/6281320300880?text=Hello%20Svashta%20Home%20I'm%20Interested%20in%20the%20Product"
       class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp"

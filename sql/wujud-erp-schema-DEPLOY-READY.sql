@@ -272,11 +272,12 @@ CREATE TABLE `materials` (
   `name` varchar(200) NOT NULL,
   `unit` varchar(20) NOT NULL DEFAULT 'pcs',
   `default_cost` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `notes` text,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `organization_id` (`organization_id`),
   CONSTRAINT `materials_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `organizations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -331,7 +332,7 @@ CREATE TABLE `product_collections` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_org_collection` (`organization_id`,`name`),
   CONSTRAINT `fk_collection_org` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `product_finishings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -357,7 +358,7 @@ CREATE TABLE `product_item_types` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_org_item_type` (`organization_id`,`name`),
   CONSTRAINT `fk_item_type_org` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `product_tiers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -374,7 +375,7 @@ CREATE TABLE `product_tiers` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_tier_version` (`product_id`,`tier_level`,`version`),
   CONSTRAINT `product_tiers_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `products`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -388,14 +389,22 @@ CREATE TABLE `products` (
   `item_type` varchar(150) DEFAULT NULL,
   `collection` varchar(150) DEFAULT NULL,
   `size` varchar(150) DEFAULT NULL,
+  `panjang` decimal(8,2) DEFAULT NULL,
+  `lebar` decimal(8,2) DEFAULT NULL,
+  `tinggi` decimal(8,2) DEFAULT NULL,
+  `tinggi_dudukan` decimal(8,2) DEFAULT NULL,
+  `tinggi_lengan` decimal(8,2) DEFAULT NULL,
+  `tinggi_sandaran` decimal(8,2) DEFAULT NULL,
+  `tinggi_kaki` decimal(8,2) DEFAULT NULL,
   `finishing` varchar(150) DEFAULT NULL,
+  `photo_path` varchar(255) DEFAULT NULL,
   `extra_specs` json DEFAULT NULL,
   `unit` varchar(20) NOT NULL DEFAULT 'pcs',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `organization_id` (`organization_id`),
   CONSTRAINT `products_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `projects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

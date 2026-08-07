@@ -19,6 +19,10 @@ try {
         $h->execute([$product['id']]);
         $product['highlights'] = $h->fetchAll();
 
+        $ig = db()->prepare('SELECT * FROM product_instagram_posts WHERE product_id = ? ORDER BY sort_order');
+        $ig->execute([$product['id']]);
+        $product['instagram_posts'] = $ig->fetchAll();
+
         $related = db()->prepare('SELECT * FROM products WHERE category = ? AND id != ? ORDER BY RAND() LIMIT 4');
         $related->execute([$product['category'], $product['id']]);
         $relatedProducts = $related->fetchAll();
@@ -105,9 +109,17 @@ require __DIR__ . '/inc/nav.php';
       width: 44px; height: 44px; background: rgba(28,26,23,0.35); border-radius: 50%;
     }
     .pdf-gallery .swiper-button-prev:after, .pdf-gallery .swiper-button-next:after { font-size: 16px; color: #f6f3ee; }
+    .pdf-grid.has-ig { grid-template-columns: 1.3fr 1fr 1fr; gap: 60px; }
+    .pdf-ig-col { border-left: 1px solid #e2dccd; padding-left: 30px; }
+    .pdf-ig-label {
+      display: block; font-family: 'Jost', sans-serif; font-weight: 500;
+      font-size: 12px; letter-spacing: 3px; color: #8b8578; margin-bottom: 24px;
+    }
+    .pdf-ig-grid { display: flex; flex-direction: column; gap: 24px; }
+    .pdf-ig-grid > * { min-width: 0; max-width: 100%; }
     @media (max-width: 991.98px) {
-      .pdf-grid { grid-template-columns: 1fr; gap: 40px; }
-      .pdf-specs { border-left: none; padding-left: 0; border-top: 1px solid #e2dccd; padding-top: 32px; }
+      .pdf-grid, .pdf-grid.has-ig { grid-template-columns: 1fr; gap: 40px; }
+      .pdf-specs, .pdf-ig-col { border-left: none; padding-left: 0; border-top: 1px solid #e2dccd; padding-top: 32px; }
       .pdf-section { padding: 48px 20px 80px; }
     }
   </style>
@@ -149,7 +161,7 @@ require __DIR__ . '/inc/nav.php';
         </div>
 
         <div class="pdf-section w-100">
-        <div class="pdf-grid">
+        <div class="pdf-grid<?= !empty($product['instagram_posts']) ? ' has-ig' : '' ?>">
           <div>
             <?php if ($product['price']): ?>
               <p class="fw-semibold mb-3">Rp <?= number_format((float) $product['price'], 0, ',', '.') ?></p>
@@ -158,7 +170,7 @@ require __DIR__ . '/inc/nav.php';
               <p class="text-body-secondary mb-2"><strong>Materials:</strong> <?= htmlspecialchars($product['materials']) ?></p>
             <?php endif; ?>
             <p class="pdf-desc"><?= nl2br(htmlspecialchars($product['description'])) ?></p>
-            <a class="pdf-btn" href="/custom-order">Enquire About This Piece</a>
+            <a class="pdf-btn" href="/consultation">Enquire About This Piece</a>
           </div>
 
           <?php if ($product['highlights']): ?>
@@ -171,6 +183,18 @@ require __DIR__ . '/inc/nav.php';
               </div>
             <?php endforeach; ?>
           </div>
+          <?php endif; ?>
+
+          <?php if (!empty($product['instagram_posts'])): ?>
+          <div class="pdf-ig-col">
+            <span class="pdf-ig-label">AS SEEN ON INSTAGRAM</span>
+            <div class="pdf-ig-grid">
+              <?php foreach ($product['instagram_posts'] as $ig): ?>
+                <blockquote class="instagram-media" data-instgrm-permalink="<?= htmlspecialchars($ig['instagram_url']) ?>" data-instgrm-version="14" style="margin:0 auto;"></blockquote>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <script async src="//www.instagram.com/embed.js"></script>
           <?php endif; ?>
         </div>
         </div>

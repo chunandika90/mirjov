@@ -269,7 +269,7 @@ if ($isNewForm) {
               <option value="amount">Rp</option>
             </select>
           </div>
-          <div class="field"><label>Nilai</label><input type="number" step="0.01" name="dp_value" id="dp-value" value="0"></div>
+          <div class="field"><label>Nilai</label><input type="text" inputmode="numeric" class="rupiah-input" name="dp_value" id="dp-value" value="0"></div>
         </div>
 
         <div class="txn-totals">
@@ -337,7 +337,7 @@ if ($isNewForm) {
     var dpRow = document.getElementById('calc-dp-row');
     if (scheme === 'dp') {
       var type = document.getElementById('dp-type').value;
-      var val = parseFloat(document.getElementById('dp-value').value) || 0;
+      var val = parseFloat(document.getElementById('dp-value').value.replace(/[^\d]/g, '')) || 0;
       billed = type === 'percent' ? pickedTotal * (val / 100) : val;
       billed = Math.min(billed, pickedTotal);
       document.getElementById('calc-dp').textContent = 'Rp ' + billed.toLocaleString('id-ID');

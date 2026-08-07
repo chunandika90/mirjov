@@ -89,4 +89,39 @@
     input.addEventListener('input', render);
     input.addEventListener('blur', function () { setTimeout(function () { dd.style.display = 'none'; }, 150); });
   };
+
+  // Input Rupiah — auto-format delimiter ribuan pas ngetik ("150000" -> "150.000"),
+  // gak ada desimal/",00". Value asli (digit polos, tanpa titik) yang dikirim pas submit,
+  // biar backend yang masih pakai (float) $_POST[...] tetap kebaca bener.
+  window.initRupiahInput = function (input) {
+    if (!input || input.dataset.rupiahInit) return;
+    input.dataset.rupiahInit = '1';
+    input.type = 'text';
+    input.setAttribute('inputmode', 'numeric');
+    input.removeAttribute('step');
+
+    function format() {
+      var cursorFromEnd = input.value.length - input.selectionStart;
+      var digits = input.value.replace(/[^\d]/g, '');
+      input.value = digits === '' ? '' : Number(digits).toLocaleString('id-ID');
+      var pos = Math.max(0, input.value.length - cursorFromEnd);
+      if (document.activeElement === input) input.setSelectionRange(pos, pos);
+    }
+
+    var initial = Math.round(parseFloat(input.value) || 0);
+    input.value = initial ? initial.toLocaleString('id-ID') : (input.value === '0' ? '0' : '');
+    input.addEventListener('input', format);
+
+    var form = input.closest('form');
+    if (form && !form.dataset.rupiahSubmitHook) {
+      form.dataset.rupiahSubmitHook = '1';
+      form.addEventListener('submit', function () {
+        form.querySelectorAll('.rupiah-input').forEach(function (el) {
+          el.value = el.value.replace(/[^\d]/g, '');
+        });
+      });
+    }
+  };
+
+  document.querySelectorAll('.rupiah-input').forEach(window.initRupiahInput);
 })();

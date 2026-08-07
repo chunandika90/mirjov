@@ -17,12 +17,10 @@ if (!isset(CATEGORY_LABELS[$cat])) {
 
 $products = [];
 try {
-    if ($cat) {
-        $stmt = db()->prepare('SELECT * FROM products WHERE category = ? ORDER BY created_at DESC');
-        $stmt->execute([$cat]);
-    } else {
-        $stmt = db()->query('SELECT * FROM products ORDER BY created_at DESC');
-    }
+    // Selalu ambil SEMUA produk — filter kategori dikerjain di browser (JS),
+    // bukan reload halaman. $cat cuma dipakai buat SEO (title/desc/canonical)
+    // dan nentuin tombol mana yang aktif + item mana yang kelihatan pas load awal.
+    $stmt = db()->query('SELECT * FROM products ORDER BY created_at DESC');
     $products = $stmt->fetchAll();
     $hlStmt = db()->prepare('SELECT * FROM product_highlights WHERE product_id = ? ORDER BY sort_order');
     foreach ($products as &$p) {
@@ -105,22 +103,23 @@ require __DIR__ . '/inc/nav.php';
 
 <section class="py-3" style="background:#faf8f4;">
   <div class="container">
-    <div class="d-flex justify-content-center gap-2 flex-wrap mb-4">
-      <a class="btn btn-sm hvr-sweep-top <?= $cat === '' ? 'btn-dark' : 'btn-outline-dark' ?>" href="/product">All</a>
+    <div class="d-flex justify-content-center gap-2 flex-wrap mb-4" id="product-filter-nav">
+      <a class="btn btn-sm hvr-sweep-top js-cat-filter <?= $cat === '' ? 'btn-dark' : 'btn-outline-dark' ?>" href="/product" data-cat="">All</a>
       <?php foreach (CATEGORY_LABELS as $key => $label): ?>
-        <a class="btn btn-sm hvr-sweep-top <?= $cat === $key ? 'btn-dark' : 'btn-outline-dark' ?>" href="/product/kategori/<?= $key ?>"><?= strtoupper($label) ?></a>
+        <a class="btn btn-sm hvr-sweep-top js-cat-filter <?= $cat === $key ? 'btn-dark' : 'btn-outline-dark' ?>" href="/product/kategori/<?= $key ?>" data-cat="<?= htmlspecialchars($key) ?>"><?= strtoupper($label) ?></a>
       <?php endforeach; ?>
     </div>
 
     <?php if (!$products): ?>
-      <p class="text-center text-body-secondary">Belum ada produk di kategori ini.</p>
+      <p class="text-center text-body-secondary js-empty-msg">Belum ada produk di kategori ini.</p>
     <?php else: ?>
     <div class="row g-2 position-relative thumbnail-grid-container" id="selector">
       <?php foreach ($products as $i => $p):
         $prevTarget = $i > 0 ? '#collapse-' . ($i - 1) : '#!';
         $nextTarget = $i < count($products) - 1 ? '#collapse-' . ($i + 1) : '#!';
+        $itemHidden = $cat !== '' && $p['category'] !== $cat;
       ?>
-      <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item">
+      <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item js-product-item<?= $itemHidden ? ' d-none' : '' ?>" data-cat="<?= htmlspecialchars($p['category']) ?>">
         <img class="thumbnail-gridder" src="<?= htmlspecialchars(image_thumb_url($p['cover_image'])) ?>" alt="<?= htmlspecialchars($p['name']) ?>" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $i ?>" aria-expanded="false" aria-controls="collapse-<?= $i ?>" />
         <div class="position-absolute start-0">
           <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-<?= $i ?>">
@@ -155,8 +154,44 @@ require __DIR__ . '/inc/nav.php';
       </div>
       <?php endforeach; ?>
     </div>
+    <p class="text-center text-body-secondary js-empty-msg d-none">Belum ada produk di kategori ini.</p>
     <?php endif; ?>
   </div>
 </section>
+
+<script>
+(function () {
+  var nav = document.getElementById('product-filter-nav');
+  if (!nav) return;
+  var items = document.querySelectorAll('.js-product-item');
+  var emptyMsg = document.querySelector('.js-empty-msg');
+
+  function applyFilter(cat) {
+    var visibleCount = 0;
+    items.forEach(function (item) {
+      var match = cat === '' || item.getAttribute('data-cat') === cat;
+      item.classList.toggle('d-none', !match);
+      if (match) visibleCount++;
+    });
+    if (emptyMsg) emptyMsg.classList.toggle('d-none', visibleCount > 0);
+  }
+
+  nav.querySelectorAll('.js-cat-filter').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var cat = btn.getAttribute('data-cat') || '';
+      applyFilter(cat);
+      nav.querySelectorAll('.js-cat-filter').forEach(function (b) {
+        b.classList.remove('btn-dark');
+        b.classList.add('btn-outline-dark');
+      });
+      btn.classList.remove('btn-outline-dark');
+      btn.classList.add('btn-dark');
+      var url = btn.getAttribute('href');
+      if (window.history && window.history.pushState) window.history.pushState({}, '', url);
+    });
+  });
+})();
+</script>
 
 <?php require __DIR__ . '/inc/footer.php'; ?>

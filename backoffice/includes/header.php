@@ -14,6 +14,10 @@ $org = require_org();
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= htmlspecialchars($pageTitle ?? 'Backoffice') ?> — Wujud ERP</title>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicons/favicon-16x16.png">
+<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicons/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -64,8 +68,10 @@ $org = require_org();
     <div class="app-topbar">
       <h1><?= htmlspecialchars($pageTitle ?? '') ?></h1>
       <div class="user">
-        <?= htmlspecialchars($user['name']) ?> — <span class="pill <?= $org['role_name'] === 'Owner' ? 'owner' : '' ?>"><?= htmlspecialchars($org['role_name']) ?></span>
-        · <a href="select-org.php">Ganti Organisasi</a>
-        · <a href="logout.php">Logout</a>
+        <div class="user-name"><?= htmlspecialchars($user['name']) ?> — <span class="pill <?= $org['role_name'] === 'Owner' ? 'owner' : '' ?>"><?= htmlspecialchars($org['role_name']) ?></span></div>
+        <div class="user-actions">
+          <a href="select-org.php">Ganti Organisasi</a>
+          <a href="logout.php" class="btn btn-sm btn-ghost">Logout</a>
+        </div>
       </div>
     </div>

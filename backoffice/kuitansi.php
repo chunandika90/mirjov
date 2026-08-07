@@ -130,7 +130,7 @@ if ($isNewForm) {
         </select>
       </div>
       <div class="field-row">
-        <div class="field"><label>Nominal</label><input type="number" step="0.01" name="amount" required></div>
+        <div class="field"><label>Nominal</label><input type="text" inputmode="numeric" class="rupiah-input" name="amount" required></div>
         <div class="field">
           <label>Tipe Pembayaran</label>
           <select name="payment_type">

@@ -80,6 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([$productId, $label, $text, $order++]);
                 }
 
+                // Post Instagram (bisa lebih dari satu) — replace semua tiap save
+                $pdo->prepare('DELETE FROM product_instagram_posts WHERE product_id=?')->execute([$productId]);
+                $igUrls = $_POST['instagram_url'] ?? [];
+                $order = 0;
+                foreach ($igUrls as $rawUrl) {
+                    $url = trim($rawUrl);
+                    if ($url === '') continue;
+                    if (!preg_match('#^https://(www\.)?instagram\.com/(p|reel|tv)/#i', $url)) {
+                        throw new RuntimeException('Link Instagram gak valid: ' . $url . ' (harus link post/reel Instagram).');
+                    }
+                    $pdo->prepare('INSERT INTO product_instagram_posts (product_id, instagram_url, sort_order) VALUES (?,?,?)')
+                        ->execute([$productId, $url, $order++]);
+                }
+
                 $flash = ['ok', 'Produk tersimpan.'];
                 break;
             }
@@ -149,9 +163,13 @@ if (!empty($_GET['edit_product'])) {
         $h = $pdo->prepare('SELECT * FROM product_highlights WHERE product_id=? ORDER BY sort_order');
         $h->execute([$editingProduct['id']]);
         $editingProduct['highlights'] = $h->fetchAll();
+        $ig = $pdo->prepare('SELECT * FROM product_instagram_posts WHERE product_id=? ORDER BY sort_order');
+        $ig->execute([$editingProduct['id']]);
+        $editingProduct['instagram_posts'] = $ig->fetchAll();
     }
 }
 $hl = $editingProduct['highlights'] ?? [];
+$igPosts = $editingProduct['instagram_posts'] ?? [];
 
 $pageTitle = 'Products';
 $pageSubtitle = 'Kelola katalog produk per kategori';
@@ -163,7 +181,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="section-head" style="margin-bottom:18px;">
   <div></div>
-  <button class="btn" data-open-modal="product-modal" onclick="document.getElementById('product-form').reset(); document.getElementById('product_id').value=''; document.getElementById('product-modal-title').textContent='Add Product'; document.getElementById('product-gallery-existing').innerHTML=''; document.getElementById('highlights-list').innerHTML='';">+ Add Product</button>
+  <button class="btn" data-open-modal="product-modal" onclick="document.getElementById('product-form').reset(); document.getElementById('product_id').value=''; document.getElementById('product-modal-title').textContent='Add Product'; document.getElementById('product-gallery-existing').innerHTML=''; document.getElementById('highlights-list').innerHTML=''; document.getElementById('instagram-list').innerHTML='';">+ Add Product</button>
 </div>
 
 <div class="chip-row">
@@ -301,6 +319,20 @@ require __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
           </div>
           <div class="add-item-btn" style="margin-bottom:0;" onclick="__addHighlightRow()">+ Tambah Highlight</div>
+        </div>
+
+        <div class="field">
+          <label>Instagram Posts (tampil di bawah carousel foto)</label>
+          <div class="seo-hint" style="margin-top:-2px; margin-bottom:8px;">Tempel link post/reel Instagram (bukan link profil) — contoh: https://www.instagram.com/p/XXXXXXXXX/</div>
+          <div id="instagram-list">
+            <?php foreach ($igPosts as $ig): ?>
+              <div class="instagram-block" style="position:relative; margin-bottom:8px;">
+                <button type="button" onclick="this.closest('.instagram-block').remove()" style="position:absolute; top:9px; right:8px; background:none; border:none; color:var(--danger); font-size:11px; font-weight:700; cursor:pointer;">✕ Hapus</button>
+                <input type="url" name="instagram_url[]" placeholder="https://www.instagram.com/p/..." value="<?= htmlspecialchars($ig['instagram_url']) ?>" style="padding-right:70px;">
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <div class="add-item-btn" style="margin-bottom:0;" onclick="__addInstagramRow()">+ Tambah Post Instagram</div>
         </div>
       </div>
       <div class="modal-foot">

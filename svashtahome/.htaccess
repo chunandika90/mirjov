@@ -4,6 +4,12 @@
 
 RewriteEngine On
 
+# Paksa selalu ke "svashtahome.com" (tanpa www) — biar gak ada 2 versi domain yang
+# bisa beda kelakuan (misal user buka dari www.svashtahome.com lewat in-app browser
+# IG/FB terus asset/CSS-nya kacau). Ini jalan paling pertama, sebelum rule lain.
+RewriteCond %{HTTP_HOST} ^www\.svashtahome\.com$ [NC]
+RewriteRule ^(.*)$ https://svashtahome.com/$1 [L,R=301]
+
 # /sitemap.xml -> sitemap.php (biar URL-nya rapi, sesuai konvensi search engine)
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
@@ -21,4 +27,7 @@ RewriteRule ^projects/([^/]+)/?$ pages/project-single.php?slug=$1 [L,QSA]
 RewriteRule ^blog/?$ pages/blog.php [L]
 RewriteRule ^blog/([^/]+)/?$ pages/blog-single.php?slug=$1 [L,QSA]
 
-RewriteRule ^custom-order/?$ pages/custom_order.php [L]
+# /custom-order -> nama baru /consultation. Redirect 301 permanen biar link lama
+# (yang udah ke-share/ke-index Google) gak putus, cuma pindah ke URL baru.
+RewriteRule ^custom-order/?$ /consultation [R=301,L]
+RewriteRule ^consultation/?$ pages/custom_order.php [L]

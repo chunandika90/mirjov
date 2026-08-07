@@ -80,6 +80,20 @@
     list.appendChild(row);
   };
 
+  // Tambah baris link Instagram baru (dipanggil dari onclick inline)
+  window.__addInstagramRow = function () {
+    var list = document.getElementById('instagram-list');
+    if (!list) return;
+    var row = document.createElement('div');
+    row.className = 'instagram-block';
+    row.style.position = 'relative';
+    row.style.marginBottom = '8px';
+    row.innerHTML =
+      '<button type="button" onclick="this.closest(\'.instagram-block\').remove()" style="position:absolute; top:9px; right:8px; background:none; border:none; color:var(--danger); font-size:11px; font-weight:700; cursor:pointer;">✕ Hapus</button>' +
+      '<input type="url" name="instagram_url[]" placeholder="https://www.instagram.com/p/..." style="padding-right:70px;">';
+    list.appendChild(row);
+  };
+
   // Rating input (klik bintang isi input number tersembunyi)
   document.querySelectorAll('.rating-input').forEach(function (group) {
     var hidden = group.querySelector('input[type=hidden]');
