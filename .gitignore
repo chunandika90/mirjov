@@ -1,0 +1,18 @@
+# Kredensial asli — JANGAN pernah di-commit. Pakai config.example.php sebagai template.
+backoffice-shared/config.php
+backoffice-shared/config.local.php
+
+# File OS/editor
+.DS_Store
+Thumbs.db
+
+# Upload user (foto produk, lampiran, dll) — bukan bagian dari kode, isinya beda-beda per environment
+backoffice.svashtahome.com/uploads/
+
+# Artifact server (bukan kode)
+backoffice.svashtahome.com/.ftpquota
+backoffice.svashtahome.com/error_log
+*.log
+
+# File referensi/contoh dari user (PDF/xlsx dokumen asli, foto) — data, bukan kode
+doc/
