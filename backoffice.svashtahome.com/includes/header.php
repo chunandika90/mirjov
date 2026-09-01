@@ -35,11 +35,13 @@ $org = require_org();
     <nav class="app-nav">
       <a href="dashboard.php" class="<?= ($activeMenu ?? '') === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
 
-      <?php if (has_access('kontak') || has_access('penawaran')): ?>
+      <?php if (has_access('kontak') || has_access('penawaran') || has_access('master_barang')): ?>
         <div style="margin:12px 12px 4px; padding-top:16px; border-top:1px solid #3a362f; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:oklch(0.55 0.01 260);">Master Data</div>
       <?php endif; ?>
       <?php if (has_access('kontak')): ?>
         <a href="warehouses.php" class="<?= ($activeMenu ?? '') === 'warehouses' ? 'active' : '' ?>">Master Lokasi</a>
+      <?php endif; ?>
+      <?php if (has_access('master_barang')): ?>
         <a href="master-barang-kanban.php" class="<?= ($activeMenu ?? '') === 'products' ? 'active' : '' ?>">Master Barang</a>
       <?php endif; ?>
       <?php if (has_access('penawaran')): ?>
@@ -80,16 +82,16 @@ $org = require_org();
           'kuitansi' => 'kuitansi.php', 'kontak' => 'contacts.php', 'laporan' => 'laporan.php',
       ];
       $manufakturKeys = ['manufaktur_penawaran', 'manufaktur_po', 'manufaktur_surat_jalan', 'manufaktur_label'];
-      $moduleLinksVisible = array_filter(array_keys(MODULES), fn($k) => $k !== 'dashboard' && !in_array($k, $manufakturKeys, true) && has_access($k));
+      $moduleLinksVisible = array_filter(array_keys(MODULES), fn($k) => $k !== 'dashboard' && $k !== 'master_barang' && !in_array($k, $manufakturKeys, true) && has_access($k));
       ?>
-      <?php if ($moduleLinksVisible || has_access('kontak')): ?>
+      <?php if ($moduleLinksVisible || has_access('kontak') || has_access('master_barang')): ?>
         <div style="margin:12px 12px 4px; padding-top:16px; border-top:1px solid #3a362f; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:oklch(0.55 0.01 260);">Modul Lain</div>
       <?php endif; ?>
-      <?php if (has_access('kontak')): ?>
+      <?php if (has_access('master_barang')): ?>
         <a href="products.php" class="<?= ($activeMenu ?? '') === 'products_legacy' ? 'active' : '' ?>">Master Barang (Form Lengkap)</a>
       <?php endif; ?>
       <?php foreach (MODULES as $key => $label):
-          if ($key === 'dashboard' || in_array($key, $manufakturKeys, true) || !has_access($key)) continue;
+          if ($key === 'dashboard' || $key === 'master_barang' || in_array($key, $manufakturKeys, true) || !has_access($key)) continue;
           $href = $moduleLinks[$key] ?? '#';
       ?>
         <a href="<?= htmlspecialchars($href) ?>" class="<?= ($activeMenu ?? '') === $key ? 'active' : '' ?>"><?= htmlspecialchars($label) ?></a>

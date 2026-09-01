@@ -2,7 +2,7 @@
 $pageTitle = 'Master Barang';
 $activeMenu = 'products';
 require __DIR__ . '/includes/header.php';
-require_module_access('kontak'); // master data produk digabung ke izin modul Kontak
+require_module_access('master_barang');
 require_once __DIR__ . '/../backoffice-shared/image_upload.php';
 
 $pdo = db();
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orgId = $org['organization_id'];
     try {
         if ($action === 'add_category') {
-            require_module_access('kontak', 'can_create');
+            require_module_access('master_barang', 'can_create');
             $name = trim($_POST['name'] ?? '');
             if ($name === '') throw new RuntimeException('Nama kategori wajib diisi.');
             $code = next_category_code($pdo, $orgId);
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $pdo->lastInsertId());
             exit;
         } elseif ($action === 'rename_category') {
-            require_module_access('kontak', 'can_edit');
+            require_module_access('master_barang', 'can_edit');
             $id = (int) ($_POST['category_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
             if ($name === '') throw new RuntimeException('Nama kategori wajib diisi.');
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $id);
             exit;
         } elseif ($action === 'delete_category') {
-            require_module_access('kontak', 'can_delete');
+            require_module_access('master_barang', 'can_delete');
             $id = (int) ($_POST['category_id'] ?? 0);
             $subCount = $pdo->prepare('SELECT COUNT(*) c FROM product_subcategories WHERE category_id=? AND organization_id=?');
             $subCount->execute([$id, $orgId]);
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM product_categories WHERE id=? AND organization_id=?')->execute([$id, $orgId]);
             $flash = ['ok', 'Kategori dihapus.'];
         } elseif ($action === 'add_subcategory') {
-            require_module_access('kontak', 'can_create');
+            require_module_access('master_barang', 'can_create');
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
             if ($name === '') throw new RuntimeException('Nama sub kategori wajib diisi.');
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $categoryId . '&subcategory_id=' . $pdo->lastInsertId());
             exit;
         } elseif ($action === 'rename_subcategory') {
-            require_module_access('kontak', 'can_edit');
+            require_module_access('master_barang', 'can_edit');
             $id = (int) ($_POST['subcategory_id'] ?? 0);
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $categoryId . '&subcategory_id=' . $id);
             exit;
         } elseif ($action === 'delete_subcategory') {
-            require_module_access('kontak', 'can_delete');
+            require_module_access('master_barang', 'can_delete');
             $id = (int) ($_POST['subcategory_id'] ?? 0);
             $prodCount = $pdo->prepare('SELECT COUNT(*) c FROM products WHERE subcategory_id=? AND organization_id=?');
             $prodCount->execute([$id, $orgId]);
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM product_subcategories WHERE id=? AND organization_id=?')->execute([$id, $orgId]);
             $flash = ['ok', 'Sub kategori dihapus.'];
         } elseif ($action === 'add_product') {
-            require_module_access('kontak', 'can_create');
+            require_module_access('master_barang', 'can_create');
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $subcategoryId = (int) ($_POST['subcategory_id'] ?? 0) ?: null;
             $name = trim($_POST['name'] ?? '');
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $categoryId . '&subcategory_id=' . ($subcategoryId ?: 0));
             exit;
         } elseif ($action === 'rename_product') {
-            require_module_access('kontak', 'can_edit');
+            require_module_access('master_barang', 'can_edit');
             $id = (int) ($_POST['product_id'] ?? 0);
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $subcategoryId = (int) ($_POST['subcategory_id'] ?? 0);
@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: master-barang-kanban.php?category_id=' . $categoryId . '&subcategory_id=' . $subcategoryId);
             exit;
         } elseif ($action === 'delete_product') {
-            require_module_access('kontak', 'can_delete');
+            require_module_access('master_barang', 'can_delete');
             $id = (int) ($_POST['product_id'] ?? 0);
             $photoStmt = $pdo->prepare('SELECT photo_path FROM products WHERE id=? AND organization_id=?');
             $photoStmt->execute([$id, $orgId]);
@@ -260,10 +260,10 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
               <span class="name"><?= htmlspecialchars($c['name']) ?></span>
             </a>
           </div>
-          <?php if (has_access('kontak', 'can_edit')): ?>
+          <?php if (has_access('master_barang', 'can_edit')): ?>
             <div class="actions">
               <button type="button" onclick="mbkToggleRename('cat-<?= $c['id'] ?>')">✎</button>
-              <?php if (has_access('kontak', 'can_delete')): ?>
+              <?php if (has_access('master_barang', 'can_delete')): ?>
                 <button type="button" onclick="if(confirm('Hapus kategori ini?')) __submitDeleteForm('delete_category', {category_id: <?= $c['id'] ?>})">🗑</button>
               <?php endif; ?>
             </div>
@@ -281,7 +281,7 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
       <?php endforeach; ?>
       <?php if (!$categories): ?><div class="mbk-empty">Belum ada kategori.</div><?php endif; ?>
     </div>
-    <?php if (has_access('kontak', 'can_create')): ?>
+    <?php if (has_access('master_barang', 'can_create')): ?>
       <form method="post" class="mbk-add-form">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="add_category">
@@ -313,10 +313,10 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
                 <span class="name"><?= htmlspecialchars($s['name']) ?></span>
               </a>
             </div>
-            <?php if (has_access('kontak', 'can_edit')): ?>
+            <?php if (has_access('master_barang', 'can_edit')): ?>
               <div class="actions">
                 <button type="button" onclick="mbkToggleRename('sub-<?= $s['id'] ?>')">✎</button>
-                <?php if (has_access('kontak', 'can_delete')): ?>
+                <?php if (has_access('master_barang', 'can_delete')): ?>
                   <button type="button" onclick="if(confirm('Hapus sub kategori ini?')) __submitDeleteForm('delete_subcategory', {subcategory_id: <?= $s['id'] ?>, category_id: <?= $activeCategoryId ?>})">🗑</button>
                 <?php endif; ?>
               </div>
@@ -335,7 +335,7 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
         <?php endforeach; ?>
         <?php if (!$subcategories && !$directProductCount): ?><div class="mbk-empty">Belum ada sub kategori.</div><?php endif; ?>
       </div>
-      <?php if (has_access('kontak', 'can_create')): ?>
+      <?php if (has_access('master_barang', 'can_create')): ?>
         <form method="post" class="mbk-add-form">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="add_subcategory">
@@ -361,9 +361,9 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
             </div>
             <div class="actions">
               <button type="button" title="Detail Lengkap" onclick="mbkOpenProductInfo(event, <?= $p['id'] ?>)">🔍</button>
-              <?php if (has_access('kontak', 'can_edit')): ?>
+              <?php if (has_access('master_barang', 'can_edit')): ?>
                 <button type="button" title="Ganti Nama" onclick="mbkToggleRename('prod-<?= $p['id'] ?>')">✎</button>
-                <?php if (has_access('kontak', 'can_delete')): ?>
+                <?php if (has_access('master_barang', 'can_delete')): ?>
                   <button type="button" title="Hapus" onclick="if(confirm('Hapus barang ini? Gak bisa dibalikin.')) __submitDeleteForm('delete_product', {product_id: <?= $p['id'] ?>, category_id: <?= $activeCategoryId ?>, subcategory_id: <?= $activeSubcategoryId ?>})">🗑</button>
                 <?php endif; ?>
               <?php endif; ?>
@@ -383,7 +383,7 @@ if ($activeCategoryId && $activeSubcategoryId !== null) {
         <?php endforeach; ?>
         <?php if (!$products): ?><div class="mbk-empty">Belum ada barang.</div><?php endif; ?>
       </div>
-      <?php if (has_access('kontak', 'can_create')): ?>
+      <?php if (has_access('master_barang', 'can_create')): ?>
         <form method="post" class="mbk-add-form">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="add_product">

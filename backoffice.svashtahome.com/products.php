@@ -2,7 +2,7 @@
 $pageTitle = 'Produk & Tier';
 $activeMenu = 'products_legacy';
 require __DIR__ . '/includes/header.php';
-require_module_access('kontak'); // master data produk digabung ke izin modul Kontak
+require_module_access('master_barang');
 require_once __DIR__ . '/../backoffice-shared/image_upload.php';
 
 $pdo = db();
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     try {
         if ($action === 'save_product') {
-            require_module_access('kontak', $_POST['product_id'] ? 'can_edit' : 'can_create');
+            require_module_access('master_barang', $_POST['product_id'] ? 'can_edit' : 'can_create');
             $id = (int) ($_POST['product_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
             $unit = trim($_POST['unit'] ?? '') ?: 'pcs';
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: products.php?product_id=' . $id);
             exit;
         } elseif ($action === 'delete_product') {
-            require_module_access('kontak', 'can_delete');
+            require_module_access('master_barang', 'can_delete');
             $id = (int) ($_POST['product_id'] ?? 0);
             $photoStmt = $pdo->prepare('SELECT photo_path FROM products WHERE id=? AND organization_id=?');
             $photoStmt->execute([$id, $org['organization_id']]);
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             delete_product_photo($photoToDelete ?: null);
             $flash = ['ok', 'Produk dihapus.'];
         } elseif ($action === 'remove_product_photo') {
-            require_module_access('kontak', 'can_edit');
+            require_module_access('master_barang', 'can_edit');
             $id = (int) ($_POST['product_id'] ?? 0);
             $photoStmt = $pdo->prepare('SELECT photo_path FROM products WHERE id=? AND organization_id=?');
             $photoStmt->execute([$id, $org['organization_id']]);
@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: products.php?product_id=' . $id);
             exit;
         } elseif ($action === 'save_tier') {
-            require_module_access('kontak', 'can_edit');
+            require_module_access('master_barang', 'can_edit');
             $productId = (int) ($_POST['product_id'] ?? 0);
             $tierLevel = $_POST['tier_level'] ?? '';
             $price = (float) ($_POST['price'] ?? 0);
@@ -282,7 +282,7 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
   <div class="txn-detail">
     <div class="txn-detail-header">
       <div></div>
-      <?php if (has_access('kontak', 'can_create')): ?>
+      <?php if (has_access('master_barang', 'can_create')): ?>
         <a class="btn btn-sm btn-ghost" href="products.php">+ Produk Baru</a>
       <?php endif; ?>
     </div>
@@ -334,11 +334,11 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
       <div class="card" style="margin-bottom:16px;">
         <div class="txn-detail-header">
           <h2><?= htmlspecialchars($editingProduct['name']) ?></h2>
-          <?php if (has_access('kontak', 'can_delete')): ?>
+          <?php if (has_access('master_barang', 'can_delete')): ?>
             <button class="btn btn-sm btn-ghost" type="button" onclick="if(confirm('Hapus produk ini beserta semua tier-nya?')) __submitDeleteForm('delete_product', {product_id: <?= $editingProduct['id'] ?>})">Hapus Produk</button>
           <?php endif; ?>
         </div>
-        <?php if (has_access('kontak', 'can_edit')): ?>
+        <?php if (has_access('master_barang', 'can_edit')): ?>
         <form method="post" id="spec-form" enctype="multipart/form-data">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="save_product">
@@ -439,7 +439,7 @@ $extraSpecs = $editingProduct ? (json_decode($editingProduct['extra_specs'] ?? '
                 <?php if ($usedNow): ?><span class="pill pill-pending">🔒 Terpakai</span><?php endif; ?>
               <?php endif; ?>
             </div>
-            <?php if (has_access('kontak', 'can_edit')): ?>
+            <?php if (has_access('master_barang', 'can_edit')): ?>
             <form method="post" style="display:flex; flex-direction:column; flex:1;">
               <?= csrf_field() ?>
               <input type="hidden" name="action" value="save_tier">

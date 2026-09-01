@@ -14,6 +14,7 @@ const MODULES = [
     'kuitansi' => 'Kuitansi',
     'kontak' => 'Kontak',
     'laporan' => 'Laporan',
+    'master_barang' => 'Master Barang',
     'manufaktur_penawaran' => 'Manufaktur - Form Penawaran Harga',
     'manufaktur_po' => 'Manufaktur - Form Purchase Order',
     'manufaktur_surat_jalan' => 'Manufaktur - Form Surat Jalan',
