@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email = trim($_POST['email'] ?? '');
                 $name = trim($_POST['name'] ?? '');
                 $roleId = (int) ($_POST['role_id'] ?? 0);
+                $warehouseId = (int) ($_POST['warehouse_id'] ?? 0) ?: null;
                 $entityType = ($_POST['entity_type'] ?? '') === 'badan' ? 'badan' : 'perorangan';
                 $subjectToPph = !empty($_POST['subject_to_pph']) ? 1 : 0;
                 if ($email === '' || $roleId === 0) {
@@ -45,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('User ini sudah jadi anggota organisasi.');
                 }
 
-                $pdo->prepare('INSERT INTO user_organization_roles (user_id, organization_id, role_id) VALUES (?,?,?)')
-                    ->execute([$userId, $org['organization_id'], $roleId]);
+                $pdo->prepare('INSERT INTO user_organization_roles (user_id, organization_id, role_id, warehouse_id) VALUES (?,?,?,?)')
+                    ->execute([$userId, $org['organization_id'], $roleId, $warehouseId]);
                 if (!$flash) $flash = ['ok', 'Anggota ditambahkan.'];
             } elseif ($action === 'update_role') {
                 $membershipId = (int) ($_POST['membership_id'] ?? 0);
@@ -130,6 +131,15 @@ $uWarehouses = $uWarehouses->fetchAll();
       <select name="role_id" required>
         <?php foreach ($roles as $r): ?>
           <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+    <div class="field" style="min-width:160px;">
+      <label>Lokasi (kalau bukan Owner)</label>
+      <select name="warehouse_id">
+        <option value="">Semua Lokasi</option>
+        <?php foreach ($uWarehouses as $w): ?>
+          <option value="<?= $w['id'] ?>"><?= htmlspecialchars($w['name']) ?></option>
         <?php endforeach; ?>
       </select>
     </div>
