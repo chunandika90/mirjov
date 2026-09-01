@@ -1,0 +1,38 @@
+# Svashta Home — ini buat DITARUH DI ROOT public_html/ (BUKAN di dalam folder
+# new_svashtahome/). Situs asli isinya ada di folder new_svashtahome/, tapi
+# Document Root cPanel-nya tetap public_html/ langsung — jadi .htaccess ini yang
+# nyambungin semua request ke folder itu.
+
+RewriteEngine On
+
+# Paksa selalu ke "svashtahome.com" (tanpa www)
+RewriteCond %{HTTP_HOST} ^www\.svashtahome\.com$ [NC]
+RewriteRule ^(.*)$ https://svashtahome.com/$1 [L,R=301]
+
+# Homepage
+RewriteRule ^$ new_svashtahome/index.php [L]
+
+RewriteRule ^sitemap\.xml$ new_svashtahome/sitemap.php [L]
+RewriteRule ^robots\.txt$ new_svashtahome/robots.php [L]
+
+# --- URL rapi (SEO-friendly) ---
+RewriteRule ^product/?$ new_svashtahome/pages/category.php [L]
+RewriteRule ^product/kategori/([^/]+)/?$ new_svashtahome/pages/category.php?cat=$1 [L,QSA]
+RewriteRule ^product/([^/]+)/?$ new_svashtahome/pages/product.php?slug=$1 [L,QSA]
+
+RewriteRule ^projects/?$ new_svashtahome/pages/projects-list.php [L]
+RewriteRule ^projects/([^/]+)/?$ new_svashtahome/pages/project-single.php?slug=$1 [L,QSA]
+
+RewriteRule ^blog/?$ new_svashtahome/pages/blog.php [L]
+RewriteRule ^blog/([^/]+)/?$ new_svashtahome/pages/blog-single.php?slug=$1 [L,QSA]
+
+# /custom-order -> /consultation (redirect 301 biar link lama gak putus)
+RewriteRule ^custom-order/?$ /consultation [R=301,L]
+RewriteRule ^consultation/?$ new_svashtahome/pages/custom_order.php [L]
+
+# Semua request lain yang emang file/folder beneran (CSS, JS, gambar, uploads,
+# favicon, dll) — ambil langsung dari dalem new_svashtahome/, transparan buat
+# browser (URL di address bar tetap keliatan bersih tanpa "new_svashtahome/").
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ new_svashtahome/$1 [L]

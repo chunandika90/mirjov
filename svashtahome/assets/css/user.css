@@ -1,0 +1,27 @@
+/* prettier-ignore */
+
+/* Compress large section spacing on mobile so pages don't look full of empty space */
+@media (max-width: 767.98px) {
+  .py-6, .py-7, .py-8, .py-9, .py-10, .py-11 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+  .pt-6, .pt-7, .pt-8, .pt-9, .pt-10, .pt-11 {
+    padding-top: 3rem !important;
+  }
+  .pb-6, .pb-7, .pb-8, .pb-9, .pb-10, .pb-11 {
+    padding-bottom: 3rem !important;
+  }
+  .my-6, .my-7, .my-8, .my-9, .my-10, .my-11 {
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+  }
+  .mt-6, .mt-7, .mt-8, .mt-9, .mt-10, .mt-11 {
+    margin-top: 2rem !important;
+  }
+  .mb-6, .mb-7, .mb-8, .mb-9, .mb-10, .mb-11 {
+    margin-bottom: 2rem !important;
+  }
+}
+
+/*# sourceMappingURL=user.css.map */

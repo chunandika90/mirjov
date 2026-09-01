@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face { font-family: 'Inter'; src: local('Inter'); }
+  body { margin: 0; }
+  ::selection { background: oklch(0.7 0.12 250 / 0.3); }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: oklch(0.85 0 0); border-radius: 8px; }
+  select { font-family: inherit; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</helmet>
+
+<div style="font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; background: oklch(0.975 0.003 90); color: oklch(0.22 0.01 260); display: flex;">
+
+  <!-- Mobile topbar -->
+  <div style="display: {{ isMobile }}; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: oklch(0.16 0.01 260); align-items: center; justify-content: space-between; padding: 0 16px; z-index: 40;">
+    <button onClick="{{ toggleDrawer }}" style="background: none; border: none; color: oklch(0.95 0 0); font-size: 22px; padding: 4px 8px; cursor: pointer; line-height: 1;">☰</button>
+    <div style="color: oklch(0.95 0 0); font-weight: 700; font-size: 14px; letter-spacing: 0.04em;">WUJUD ERP</div>
+    <div style="width: 30px;"></div>
+  </div>
+
+  <!-- Drawer overlay (mobile) -->
+  <div style="display: {{ drawerOverlayDisplay }}; position: fixed; inset: 0; background: oklch(0 0 0 / 0.45); z-index: 45;" onClick="{{ closeDrawer }}"></div>
+
+  <!-- Sidebar -->
+  <aside style="{{ sidebarStyle }}">
+    <div style="padding: 24px 20px 18px; border-bottom: 1px solid oklch(1 0 0 / 0.08); display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-weight: 800; font-size: 15px; letter-spacing: 0.06em; color: oklch(0.97 0 0);">WUJUD ERP</div>
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: oklch(0.72 0.09 75); margin-top: 6px; text-transform: uppercase;">Mirjovkarunia Abadi</div>
+      </div>
+      <button onClick="{{ closeDrawer }}" style="display: {{ isMobile }}; background: none; border: none; color: oklch(0.7 0 0); font-size: 20px; cursor: pointer;">✕</button>
+    </div>
+
+    <nav style="flex: 1; overflow-y: auto; padding: 16px 12px 24px;">
+      <div style="padding: 0 10px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: oklch(0.55 0.01 260); text-transform: uppercase; margin-top: 4px;">Transaksi</div>
+      <sc-for list="{{ transaksiItems }}" as="item" hint-placeholder-count="9">
+        <a href="#" onClick="{{ item.onClick }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin-bottom: 2px; border-radius: 7px; font-size: 13.5px; font-weight: 500; text-decoration: none; color: {{ item.color }}; background: {{ item.bg }};">{{ item.label }}</a>
+      </sc-for>
+
+      <div style="padding: 0 10px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: oklch(0.55 0.01 260); text-transform: uppercase; margin-top: 18px;">Master Data</div>
+      <sc-for list="{{ masterItems }}" as="item" hint-placeholder-count="4">
+        <a href="#" onClick="{{ item.onClick }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin-bottom: 2px; border-radius: 7px; font-size: 13.5px; font-weight: 500; text-decoration: none; color: {{ item.color }}; background: {{ item.bg }};">{{ item.label }}</a>
+      </sc-for>
+
+      <div style="padding: 0 10px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: oklch(0.55 0.01 260); text-transform: uppercase; margin-top: 18px;">Project</div>
+      <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin-bottom: 2px; border-radius: 7px; font-size: 13.5px; font-weight: 500; text-decoration: none; color: oklch(0.78 0.01 260);">Project</a>
+
+      <div style="padding: 0 10px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: oklch(0.55 0.01 260); text-transform: uppercase; margin-top: 18px;">Admin</div>
+      <sc-for list="{{ adminItems }}" as="item" hint-placeholder-count="2">
+        <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin-bottom: 2px; border-radius: 7px; font-size: 13.5px; font-weight: 500; text-decoration: none; color: oklch(0.78 0.01 260);">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+
+    <div style="padding: 14px 20px; border-top: 1px solid oklch(1 0 0 / 0.08); font-size: 12px; color: oklch(0.6 0.01 260);">v0.1 — preview redesign</div>
+  </aside>
+
+  <!-- Main content -->
+  <div style="flex: 1; min-width: 0; {{ mainMarginStyle }}">
+
+    <!-- Desktop topbar -->
+    <div style="display: {{ isDesktopTopbar }}; align-items: center; justify-content: space-between; padding: 18px 32px; border-bottom: 1px solid oklch(0.9 0.003 90);">
+      <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em;">{{ pageTitle }}</div>
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: oklch(0.4 0.01 260);">
+        <span style="font-weight: 600;">ANDIKA</span>
+        <span style="background: oklch(0.16 0.01 260); color: oklch(0.95 0 0); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; padding: 3px 9px; border-radius: 20px;">OWNER</span>
+        <span style="color: oklch(0.8 0 0);">·</span>
+        <a href="#" style="color: oklch(0.4 0.01 260); text-decoration: none;">Ganti Organisasi</a>
+        <span style="color: oklch(0.8 0 0);">·</span>
+        <a href="#" style="color: oklch(0.4 0.01 260); text-decoration: none;">Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile page title bar -->
+    <div style="display: {{ isMobilePageTitle }}; padding: 16px 20px 4px;">
+      <div style="font-size: 19px; font-weight: 700;">{{ pageTitle }}</div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; height: {{ productMasterHeight }};">
+        <div style="width: 22%; min-width: 260px; flex-shrink: 0; border-right: 1px solid oklch(0.9 0.003 90); padding: 18px 14px; overflow-y: auto;">
+          <button onClick="{{ goToForm }}" style="width: 100%; background: oklch(0.55 0.14 255); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">+ Buat Penawaran</button>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <button onClick="{{ onPrevMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">‹</button>
+            <div style="font-size: 13px; font-weight: 700;">{{ currentMonthLabel }}</div>
+            <button onClick="{{ onNextMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">›</button>
+          </div>
+          <button onClick="{{ onThisMonth }}" style="width: 100%; background: none; border: 1px dashed oklch(0.8 0.01 260); color: oklch(0.45 0.01 260); padding: 6px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">Bulan Ini</button>
+
+          <sc-for list="{{ listDocItems }}" as="doc" hint-placeholder-count="3">
+            <div onClick="{{ doc.onSelect }}" style="padding: 11px 12px; border-radius: 9px; margin-bottom: 6px; cursor: pointer; background: {{ doc.bg }}; border: 1px solid {{ doc.border }};">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                <div style="font-size: 12.5px; font-weight: 700; color: {{ doc.textColor }};">{{ doc.docNo }}</div>
+                <span style="font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; color: {{ doc.statusColor }}; background: {{ doc.statusBg }}; white-space: nowrap;">{{ doc.statusLabel }}</span>
+              </div>
+              <div style="font-size: 12px; color: oklch(0.5 0.01 260);">{{ doc.customer }}</div>
+              <div style="font-size: 11px; color: oklch(0.6 0.01 260); margin-top: 2px;">{{ doc.total }} · {{ doc.date }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ isListEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 20px 8px; text-align: center; color: oklch(0.6 0.01 260); font-size: 12.5px;">Belum ada penawaran bulan ini.</div>
+          </sc-if>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 26px 32px 60px; overflow-y: auto;">
+          <sc-if value="{{ hasSelectedDoc }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 21px; font-weight: 700;">{{ selectedDocNo }}</div>
+                <span style="font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 20px; color: {{ selectedDocStatusColor }}; background: {{ selectedDocStatusBg }};">{{ selectedDocStatusLabel }}</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button onClick="{{ onPrintDoc }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">🖨 Print</button>
+                <button onClick="{{ goToForm }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Edit</button>
+                <button onClick="{{ onCancelDoc }}" disabled="{{ cancelDisabled }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.5 0.13 75); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button onClick="{{ onVoidDoc }}" disabled="{{ voidDisabled }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.55 0.15 25); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Void</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12.5px; color: oklch(0.4 0.01 260); margin: 14px 0 20px;">
+              <div><span style="color: oklch(0.55 0.01 260);">Customer:</span> <strong>{{ selectedDocCustomer }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Project:</span> <strong>{{ selectedDocProject }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Sales:</span> <strong>{{ selectedDocSales }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Tanggal:</span> <strong>{{ selectedDocDate }}</strong></div>
+            </div>
+
+            <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 12px; overflow-x: auto; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); margin-bottom: 20px;">
+              <table style="width: 100%; min-width: 480px; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid oklch(0.91 0.003 90); background: oklch(0.98 0.003 90);">
+                    <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Produk</th>
+                    <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Tier</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Qty</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Harga</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ selectedDocItems }}" as="di" hint-placeholder-count="2">
+                    <tr style="border-bottom: 1px solid oklch(0.94 0.003 90);">
+                      <td style="padding: 11px 14px; font-weight: 600; color: oklch(0.3 0.01 260);">{{ di.produk }}</td>
+                      <td style="padding: 11px 14px; color: oklch(0.45 0.01 260);">{{ di.tier }}</td>
+                      <td style="padding: 11px 14px; text-align: right;">{{ di.qty }}</td>
+                      <td style="padding: 11px 14px; text-align: right;">{{ di.hargaLabel }}</td>
+                      <td style="padding: 11px 14px; text-align: right; font-weight: 700;">{{ di.totalLabel }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="width: 280px;">
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>Subtotal</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedDocSubtotal }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>Diskon</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedDocDiscount }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>PPN (11%)</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedDocPpn }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 4px; border-top: 1px solid oklch(0.9 0.003 90); font-size: 15px;"><span style="font-weight: 700;">Total</span><span style="font-weight: 800; color: oklch(0.55 0.14 255);">{{ selectedDocTotal }}</span></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- FORM VIEW (full page) -->
+    <sc-if value="{{ showForm }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width: 1440px; margin: 0 auto; padding: 28px 32px 80px;">
+        <button onClick="{{ goToList }}" style="background: none; border: none; color: oklch(0.5 0.01 260); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px 0; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">← Kembali</button>
+
+        <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Buat Penawaran</div>
+        <div style="font-size: 13.5px; color: oklch(0.5 0.01 260); margin-bottom: 28px;">Isi detail penawaran untuk customer. Item bisa ditambah lebih dari satu.</div>
+
+        <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 14px; padding: 28px; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04);">
+
+          <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase; margin-bottom: 14px;">Informasi Umum</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 26px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Customer</label>
+              <select style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white; color: oklch(0.3 0.01 260);"><option>— Pilih Customer —</option></select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Project <span style="color: oklch(0.6 0.01 260); font-weight: 400;">(opsional)</span></label>
+              <select value="{{ selectedProjectId }}" onChange="{{ onProjectChange }}" style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white; color: oklch(0.3 0.01 260);">
+                <option value="">— Tidak terkait project —</option>
+                <sc-for list="{{ projectOptions }}" as="pj" hint-placeholder-count="3">
+                  <option value="{{ pj.id }}">{{ pj.name }}</option>
+                </sc-for>
+              </select>
+              <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                <sc-if value="{{ showNewProjectInput }}" hint-placeholder-val="{{ false }}">
+                  <input type="text" value="{{ newProjectName }}" onChange="{{ onNewProjectNameChange }}" placeholder="Nama project baru" style="flex: 1; padding: 6px 8px; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; font-size: 12.5px;"/>
+                  <button onClick="{{ onConfirmNewProject }}" style="background: oklch(0.55 0.14 255); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Tambah</button>
+                </sc-if>
+                <sc-if value="{{ showAddProjectButton }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ onToggleNewProject }}" style="background: none; border: none; color: oklch(0.5 0.14 255); font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 0;">+ Tambah Project Baru</button>
+                </sc-if>
+              </div>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Sales</label>
+              <select style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white; color: oklch(0.3 0.01 260);"><option>ANDIKA</option></select>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid oklch(0.93 0.003 90); padding-top: 22px; margin-bottom: 22px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Item Penawaran</div>
+              <div style="font-size: 13px; font-weight: 600; color: oklch(0.4 0.01 260);">Subtotal: {{ subtotal }}</div>
+            </div>
+
+            <sc-for list="{{ items }}" as="it" hint-placeholder-count="1">
+              <div style="padding: 14px; background: oklch(0.98 0.003 90); border: 1px solid oklch(0.92 0.003 90); border-radius: 10px; margin-bottom: 10px;">
+                <div style="overflow-x: auto;">
+                <div style="display: grid; grid-template-columns: minmax(160px,2.2fr) minmax(120px,1.2fr) 64px 120px 110px 30px; gap: 10px; align-items: start; margin-bottom: 10px; min-width: 640px;">
+                  <div>
+                    <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Produk</div>
+                    <div style="position: relative;">
+                      <input type="text" value="{{ it.productQuery }}" onChange="{{ it.onProductQueryChange }}" onFocus="{{ it.onProductFocus }}" onBlur="{{ it.onProductBlur }}" placeholder="Cari produk, atau ketik nama baru…" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px; background: white;"/>
+                      <sc-if value="{{ it.productOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border: 1px solid oklch(0.88 0.003 90); border-radius: 9px; box-shadow: 0 8px 20px oklch(0 0 0 / 0.1); z-index: 20; max-height: 220px; overflow-y: auto;">
+                          <sc-for list="{{ it.filteredProducts }}" as="p" hint-placeholder-count="2">
+                            <div onMouseDown="{{ p.onSelect }}" style="padding: 9px 12px; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid oklch(0.95 0.003 90);">
+                              <div style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ p.name }}</div>
+                              <div style="font-size: 11.5px; color: oklch(0.55 0.01 260); margin-top: 1px;">{{ p.specSummary }}</div>
+                            </div>
+                          </sc-for>
+                          <sc-if value="{{ it.showCreateOption }}" hint-placeholder-val="{{ false }}">
+                            <div onMouseDown="{{ it.onCreateProduct }}" style="padding: 9px 12px; font-size: 13.5px; cursor: pointer; color: oklch(0.5 0.14 255); font-weight: 600;">+ Buat produk baru "{{ it.productQuery }}"</div>
+                          </sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <sc-if value="{{ it.hasTierInfo }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top: 6px; padding: 7px 9px; background: oklch(0.96 0.006 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 6px; font-size: 11.5px; color: oklch(0.45 0.01 260); line-height: 1.6;">{{ it.tierInfoText }}</div>
+                    </sc-if>
+                  </div>
+                  <div>
+                    <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Tier</div>
+                    <select value="{{ it.tierId }}" onChange="{{ it.onTierChange }}" disabled="{{ it.tierDisabled }}" style="padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px; background: white; width: 100%;">
+                      <option value="">{{ it.tierPlaceholder }}</option>
+                      <sc-for list="{{ it.tierOptions }}" as="t" hint-placeholder-count="3">
+                        <option value="{{ t.id }}">{{ t.label }}</option>
+                      </sc-for>
+                    </select>
+                  </div>
+                  <div>
+                    <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Qty</div>
+                    <input type="number" value="{{ it.qty }}" onChange="{{ it.onQtyChange }}" style="padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px; width: 100%;"/>
+                  </div>
+                  <div>
+                    <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Harga / unit</div>
+                    <div style="padding: 9px 0; font-size: 13.5px; font-weight: 600; color: oklch(0.3 0.01 260);">{{ it.priceLabel }}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Total baris</div>
+                    <div style="padding: 9px 0; font-size: 14px; font-weight: 700; color: oklch(0.25 0.01 260);">{{ it.lineTotalLabel }}</div>
+                  </div>
+                  <button onClick="{{ it.onRemove }}" style="background: none; border: none; color: oklch(0.55 0.15 25); font-size: 18px; cursor: pointer; width: 30px; height: 38px; border-radius: 6px;">✕</button>
+                </div>
+                </div>
+                <div>
+                  <div style="font-size: 10.5px; color: oklch(0.55 0.01 260); margin-bottom: 3px;">Catatan (opsional)</div>
+                  <textarea value="{{ it.note }}" onChange="{{ it.onNoteChange }}" rows="2" placeholder="Catatan untuk item ini…" style="width: 100%; padding: 8px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+              </div>
+            </sc-for>
+
+            <button onClick="{{ addItem }}" style="background: white; border: 1px dashed oklch(0.75 0.01 260); color: oklch(0.4 0.01 260); padding: 9px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; margin-top: 4px;">+ Tambah Item</button>
+          </div>
+
+          <div style="border-top: 1px solid oklch(0.93 0.003 90); padding-top: 22px; margin-bottom: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Syarat & Ketentuan <span style="color: oklch(0.6 0.01 260); font-weight: 400;">(opsional)</span></label>
+              <select value="{{ termsId }}" onChange="{{ onTermsChange }}" style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white;">
+                <option value="">— Tidak pakai T&C —</option>
+                <sc-for list="{{ termsOptions }}" as="tc2" hint-placeholder-count="3">
+                  <option value="{{ tc2.id }}">{{ tc2.title }}</option>
+                </sc-for>
+              </select>
+              <sc-if value="{{ hasTermsPreview }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top: 6px; padding: 8px 10px; background: oklch(0.96 0.006 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 6px; font-size: 12px; color: oklch(0.45 0.01 260); line-height: 1.5;">{{ termsPreview }}</div>
+              </sc-if>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Catatan</label>
+              <input type="text" style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px;"/>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid oklch(0.93 0.003 90); padding-top: 22px; display: flex; justify-content: flex-end;">
+            <div style="width: 300px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 13.5px; color: oklch(0.45 0.01 260);">
+                <span>Subtotal</span>
+                <span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ subtotal }}</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 13.5px; color: oklch(0.45 0.01 260); gap: 10px;">
+                <span>Diskon</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <input type="number" value="{{ discountValue }}" onChange="{{ onDiscountValueChange }}" style="width: 70px; padding: 6px 8px; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; font-size: 13px; text-align: right;"/>
+                  <select value="{{ discountType }}" onChange="{{ onDiscountTypeChange }}" style="padding: 6px 8px; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; font-size: 13px; background: white;">
+                    <option value="percent">%</option>
+                    <option value="amount">Rp</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 13.5px; color: oklch(0.45 0.01 260);">
+                <span>PPN (11%)</span>
+                <span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ ppnAmount }}</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0 0; margin-top: 6px; border-top: 1px solid oklch(0.9 0.003 90); font-size: 16px;">
+                <span style="font-weight: 700;">Total</span>
+                <span style="font-weight: 800; color: oklch(0.55 0.14 255);">{{ grandTotal }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button onClick="{{ goToList }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">Batal</button>
+          <button onClick="{{ goToList }}" style="background: oklch(0.55 0.14 255); border: none; color: white; padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px oklch(0 0 0 / 0.1);">Simpan Penawaran</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- PRODUK & TIER MASTER VIEW -->
+    <sc-if value="{{ showProductMaster }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; height: {{ productMasterHeight }};">
+        <div style="width: 280px; flex-shrink: 0; border-right: 1px solid oklch(0.9 0.003 90); padding: 20px 16px; overflow-y: auto;">
+          <input type="text" value="{{ productSearch }}" onChange="{{ onProductSearchChange }}" placeholder="Cari produk…" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 13.5px; margin-bottom: 12px;"/>
+          <sc-for list="{{ productListItems }}" as="pl" hint-placeholder-count="3">
+            <div onClick="{{ pl.onSelect }}" style="padding: 10px 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; background: {{ pl.bg }}; border: 1px solid {{ pl.border }};">
+              <div style="font-size: 13.5px; font-weight: 600; color: {{ pl.textColor }};">{{ pl.name }}</div>
+              <div style="font-size: 11.5px; color: oklch(0.55 0.01 260); margin-top: 2px;">{{ pl.collection }}</div>
+            </div>
+          </sc-for>
+          <button style="width: 100%; margin-top: 8px; background: white; border: 1px dashed oklch(0.75 0.01 260); color: oklch(0.4 0.01 260); padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">+ Tambah Produk</button>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 28px 32px 60px; overflow-y: auto;">
+          <input type="text" value="{{ selectedProductName }}" onChange="{{ onSelectedProductNameChange }}" style="font-size: 22px; font-weight: 700; margin-bottom: 4px; width: 100%; border: 1px solid oklch(0.9 0.003 90); border-radius: 8px; padding: 6px 10px; margin-left: -10px; background: white;"/>
+          <div style="font-size: 13px; color: oklch(0.55 0.01 260); margin-bottom: 20px;">Info dasar & kombinasi tier/quality produk ini.</div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 600; color: oklch(0.5 0.01 260); margin-bottom: 5px;">Material</label>
+              <input type="text" value="{{ selectedProductMaterial }}" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+            </div>
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 600; color: oklch(0.5 0.01 260); margin-bottom: 5px;">Item</label>
+              <input type="text" value="{{ selectedProductItemType }}" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+            </div>
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 600; color: oklch(0.5 0.01 260); margin-bottom: 5px;">Collection</label>
+              <input type="text" value="{{ selectedProductCollection }}" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+            </div>
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 600; color: oklch(0.5 0.01 260); margin-bottom: 5px;">Ukuran</label>
+              <input type="text" value="{{ selectedProductSize }}" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+            </div>
+            <sc-for list="{{ extraSpecs }}" as="es" hint-placeholder-count="0">
+              <div>
+                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 5px;">
+                  <input type="text" value="{{ es.label }}" onChange="{{ es.onLabelChange }}" placeholder="Nama spec" style="font-size: 11.5px; font-weight: 600; color: oklch(0.5 0.01 260); border: none; border-bottom: 1px dashed oklch(0.8 0.01 260); width: 100%; padding: 0 0 2px;"/>
+                  <button onClick="{{ es.onRemove }}" style="background: none; border: none; color: oklch(0.6 0.1 25); font-size: 13px; cursor: pointer; line-height: 1; padding: 0 2px;">✕</button>
+                </div>
+                <input type="text" value="{{ es.value }}" onChange="{{ es.onValueChange }}" style="width: 100%; padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ addExtraSpec }}" style="background: none; border: 1px dashed oklch(0.75 0.01 260); color: oklch(0.4 0.01 260); padding: 7px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; margin-bottom: 28px;">+ Tambah Kolom Spec</button>
+
+          <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase; margin-bottom: 12px;">Tier / Quality</div>
+          <div style="display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px;">
+            <sc-for list="{{ tierCards }}" as="tc" hint-placeholder-count="5">
+              <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); display: flex; flex-direction: column; min-height: 300px; width: 260px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; min-height: 22px;">
+                  <div style="font-size: 14px; font-weight: 700;">{{ tc.name }}</div>
+                  <sc-if value="{{ tc.used }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: oklch(0.5 0.13 75); background: oklch(0.93 0.05 75); padding: 3px 8px; border-radius: 20px; white-space: nowrap;" title="Sudah dipakai di transaksi — edit akan buat versi baru">🔒 Terpakai</span>
+                  </sc-if>
+                </div>
+                <label style="display: block; font-size: 11px; color: oklch(0.55 0.01 260); margin-bottom: 4px;">Harga Jual</label>
+                <input type="text" value="{{ tc.priceLabel }}" style="width: 100%; padding: 8px 9px; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; font-size: 13.5px; font-weight: 600; margin-bottom: 12px;"/>
+
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                  <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: oklch(0.55 0.01 260); text-transform: uppercase; margin-bottom: 6px;">BOM Komponen (Material)</div>
+                  <sc-for list="{{ tc.bomRows }}" as="b" hint-placeholder-count="2">
+                    <div style="border: 1px solid oklch(0.9 0.003 90); border-radius: 7px; padding: 8px; margin-bottom: 8px; background: oklch(0.99 0.002 90);">
+                      <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+                        <div style="position: relative; flex: 1;">
+                          <input type="text" value="{{ b.materialQuery }}" onChange="{{ b.onMaterialQueryChange }}" onFocus="{{ b.onMaterialFocus }}" onBlur="{{ b.onMaterialBlur }}" placeholder="Cari material, atau ketik baru…" style="width: 100%; padding: 6px 7px; border: 1px solid oklch(0.88 0.003 90); border-radius: 6px; font-size: 12px;"/>
+                          <sc-if value="{{ b.materialOpen }}" hint-placeholder-val="{{ false }}">
+                            <div style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border: 1px solid oklch(0.88 0.003 90); border-radius: 8px; box-shadow: 0 8px 20px oklch(0 0 0 / 0.1); z-index: 20; max-height: 180px; overflow-y: auto;">
+                              <sc-for list="{{ b.filteredMaterials }}" as="m" hint-placeholder-count="2">
+                                <div onMouseDown="{{ m.onSelect }}" style="padding: 7px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid oklch(0.95 0.003 90);">
+                                  <span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ m.name }}</span>
+                                  <span style="color: oklch(0.55 0.01 260);"> · {{ m.unit }} · {{ m.id }}</span>
+                                </div>
+                              </sc-for>
+                              <sc-if value="{{ b.showCreateMaterial }}" hint-placeholder-val="{{ false }}">
+                                <div onMouseDown="{{ b.onCreateMaterial }}" style="padding: 7px 10px; font-size: 12px; cursor: pointer; color: oklch(0.5 0.14 255); font-weight: 600;">+ Buat material baru "{{ b.materialQuery }}"</div>
+                              </sc-if>
+                            </div>
+                          </sc-if>
+                        </div>
+                        <button onClick="{{ b.onRemove }}" style="background: none; border: none; color: oklch(0.55 0.15 25); font-size: 15px; cursor: pointer; padding: 0 2px;">✕</button>
+                      </div>
+                      <sc-if value="{{ b.materialId }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size: 10px; color: oklch(0.55 0.01 260); margin-bottom: 6px;">ID Material: {{ b.materialId }} · Satuan: {{ b.unit }}</div>
+                      </sc-if>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <div>
+                          <div style="font-size: 9.5px; color: oklch(0.6 0.01 260); margin-bottom: 3px;">Qty</div>
+                          <input type="text" value="{{ b.qty }}" onChange="{{ b.onQtyChange }}" placeholder="Qty" style="width: 100%; padding: 6px 7px; border: 1px solid oklch(0.88 0.003 90); border-radius: 6px; font-size: 12px;"/>
+                        </div>
+                        <div>
+                          <div style="font-size: 9.5px; color: oklch(0.6 0.01 260); margin-bottom: 3px;">Cost</div>
+                          <input type="text" value="{{ b.costLabel }}" onChange="{{ b.onCostChange }}" placeholder="Cost" style="width: 100%; padding: 6px 7px; border: 1px solid oklch(0.88 0.003 90); border-radius: 6px; font-size: 12px;"/>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <button onClick="{{ tc.onAddComponent }}" style="width: 100%; background: none; border: 1px dashed oklch(0.8 0.01 260); color: oklch(0.45 0.01 260); padding: 6px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-bottom: 10px;">+ Komponen</button>
+                </div>
+
+                <div style="margin-top: auto; border-top: 1px solid oklch(0.93 0.003 90); padding-top: 8px; display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: oklch(0.55 0.01 260);">Total Cost</span>
+                  <span style="font-weight: 700;">{{ tc.totalCostLabel }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- INVOICING LIST VIEW -->
+    <sc-if value="{{ showInvoicing }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; height: {{ productMasterHeight }};">
+        <div style="width: 22%; min-width: 260px; flex-shrink: 0; border-right: 1px solid oklch(0.9 0.003 90); padding: 18px 14px; overflow-y: auto;">
+          <button onClick="{{ goToInvoiceForm }}" style="width: 100%; background: oklch(0.55 0.14 255); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">+ Buat Invoice</button>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <button onClick="{{ onInvPrevMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">‹</button>
+            <div style="font-size: 13px; font-weight: 700;">{{ invMonthLabel }}</div>
+            <button onClick="{{ onInvNextMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">›</button>
+          </div>
+          <button onClick="{{ onInvThisMonth }}" style="width: 100%; background: none; border: 1px dashed oklch(0.8 0.01 260); color: oklch(0.45 0.01 260); padding: 6px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">Bulan Ini</button>
+
+          <sc-for list="{{ invListItems }}" as="doc3" hint-placeholder-count="3">
+            <div onClick="{{ doc3.onSelect }}" style="padding: 11px 12px; border-radius: 9px; margin-bottom: 6px; cursor: pointer; background: {{ doc3.bg }}; border: 1px solid {{ doc3.border }};">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                <div style="font-size: 12.5px; font-weight: 700; color: {{ doc3.textColor }};">{{ doc3.docNo }}</div>
+                <span style="font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; color: {{ doc3.statusColor }}; background: {{ doc3.statusBg }}; white-space: nowrap;">{{ doc3.statusLabel }}</span>
+              </div>
+              <div style="font-size: 12px; color: oklch(0.5 0.01 260);">{{ doc3.customer }}</div>
+              <div style="font-size: 11px; color: oklch(0.6 0.01 260); margin-top: 2px;">{{ doc3.total }} · {{ doc3.date }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ isInvListEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 20px 8px; text-align: center; color: oklch(0.6 0.01 260); font-size: 12.5px;">Belum ada invoice bulan ini.</div>
+          </sc-if>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 26px 32px 60px; overflow-y: auto;">
+          <sc-if value="{{ hasSelectedInv }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 21px; font-weight: 700;">{{ selectedInvNo }}</div>
+                <span style="font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 20px; color: {{ selectedInvStatusColor }}; background: {{ selectedInvStatusBg }};">{{ selectedInvStatusLabel }}</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">🖨 Print</button>
+                <button style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Edit</button>
+                <button onClick="{{ onCancelInv }}" disabled="{{ invCancelDisabled }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.5 0.13 75); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button onClick="{{ onVoidInv }}" disabled="{{ invVoidDisabled }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.55 0.15 25); padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Void</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12.5px; color: oklch(0.4 0.01 260); margin: 14px 0 20px;">
+              <div><span style="color: oklch(0.55 0.01 260);">Customer:</span> <strong>{{ selectedInvCustomer }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Sales:</span> <strong>{{ selectedInvSales }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Tanggal:</span> <strong>{{ selectedInvDate }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Total:</span> <strong>{{ selectedInvTotal }}</strong></div>
+              <div><span style="color: oklch(0.55 0.01 260);">Material:</span>
+                <span onClick="{{ selectedInvOnMaterialClick }}" style="cursor: pointer; font-weight: 700; padding: 2px 8px; border-radius: 20px; color: {{ selectedInvMaterialColor }}; background: {{ selectedInvMaterialBg }};" title="Klik untuk lihat detail request material">{{ selectedInvMaterialLabel }}</span>
+              </div>
+            </div>
+
+            <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 12px; overflow-x: auto; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); margin-bottom: 20px;">
+              <table style="width: 100%; min-width: 480px; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid oklch(0.91 0.003 90); background: oklch(0.98 0.003 90);">
+                    <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Produk</th>
+                    <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Tier</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Qty</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Harga</th>
+                    <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ selectedInvItems }}" as="ii" hint-placeholder-count="2">
+                    <tr style="border-bottom: 1px solid oklch(0.94 0.003 90);">
+                      <td style="padding: 11px 14px; font-weight: 600; color: oklch(0.3 0.01 260);">{{ ii.produk }}</td>
+                      <td style="padding: 11px 14px; color: oklch(0.45 0.01 260);">{{ ii.tier }}</td>
+                      <td style="padding: 11px 14px; text-align: right;">{{ ii.qty }}</td>
+                      <td style="padding: 11px 14px; text-align: right;">{{ ii.hargaLabel }}</td>
+                      <td style="padding: 11px 14px; text-align: right; font-weight: 700;">{{ ii.totalLabel }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="width: 300px;">
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>Subtotal</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedInvSubtotal }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>Diskon</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedInvDiscount }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>PPN (11%)</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ selectedInvPpn }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 4px; border-top: 1px solid oklch(0.9 0.003 90); font-size: 14px;"><span style="font-weight: 700;">Total Penawaran</span><span style="font-weight: 700;">{{ selectedInvQuotationTotal }}</span></div>
+                <sc-if value="{{ selectedInvIsDp }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.5 0.13 75);"><span>Skema</span><span style="font-weight: 700;">{{ selectedInvDpLabel }}</span></div>
+                </sc-if>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 4px; border-top: 1px solid oklch(0.9 0.003 90); font-size: 16px;"><span style="font-weight: 700;">Ditagihkan</span><span style="font-weight: 800; color: oklch(0.55 0.14 255);">{{ selectedInvTotal }}</span></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- MATERIAL REQUEST VIEW -->
+    <sc-if value="{{ showMaterialRequest }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; height: {{ productMasterHeight }};">
+        <div style="width: 300px; flex-shrink: 0; border-right: 1px solid oklch(0.9 0.003 90); padding: 20px 16px; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <button onClick="{{ onMatReqPrevMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">‹</button>
+            <div style="font-size: 13px; font-weight: 700;">{{ matReqMonthLabel }}</div>
+            <button onClick="{{ onMatReqNextMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">›</button>
+          </div>
+          <button onClick="{{ onMatReqThisMonth }}" style="width: 100%; background: none; border: 1px dashed oklch(0.8 0.01 260); color: oklch(0.45 0.01 260); padding: 6px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">Bulan Ini</button>
+          <sc-for list="{{ materialRequestListItems }}" as="mr" hint-placeholder-count="3">
+            <div onClick="{{ mr.onSelect }}" style="padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; background: {{ mr.bg }}; border: 1px solid {{ mr.border }};">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <div style="font-size: 13px; font-weight: 700; color: {{ mr.textColor }};">{{ mr.requestNo }}</div>
+                <span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; color: {{ mr.statusColor }}; background: {{ mr.statusBg }}; white-space: nowrap;">{{ mr.statusLabel }}</span>
+              </div>
+              <div style="font-size: 12px; color: oklch(0.5 0.01 260);">{{ mr.customer }}</div>
+              <div style="font-size: 11.5px; color: oklch(0.6 0.01 260); margin-top: 2px;">{{ mr.productLabel }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ isMatReqListEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 20px 8px; text-align: center; color: oklch(0.6 0.01 260); font-size: 12.5px;">Belum ada request bulan ini.</div>
+          </sc-if>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 28px 32px 60px; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <div style="font-size: 22px; font-weight: 700;">{{ selectedRequestNo }}</div>
+            <span style="font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; color: {{ selectedRequestStatusColor }}; background: {{ selectedRequestStatusBg }};">{{ selectedRequestStatusLabel }}</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12.5px; color: oklch(0.4 0.01 260); margin-bottom: 20px;">
+            <div><span style="color: oklch(0.55 0.01 260);">Customer:</span> <strong>{{ selectedRequestCustomer }}</strong></div>
+            <div><span style="color: oklch(0.55 0.01 260);">Project:</span> <strong>{{ selectedRequestProjectName }}</strong></div>
+            <div><span style="color: oklch(0.55 0.01 260);">Penawaran:</span> <strong>{{ selectedRequestQuotationRef }}</strong> ({{ selectedRequestQuotationDate }})</div>
+            <div><span style="color: oklch(0.55 0.01 260);">Invoice:</span> <strong>{{ selectedRequestInvoice }}</strong> ({{ selectedRequestInvoiceDate }})</div>
+            <div><span style="color: oklch(0.55 0.01 260);">Produk:</span> <strong>{{ selectedRequestProductCount }} item</strong></div>
+          </div>
+
+          <sc-for list="{{ selectedRequestProducts }}" as="prod" hint-placeholder-count="1">
+            <div style="margin-bottom: 26px;">
+              <div style="font-size: 14.5px; font-weight: 700; margin-bottom: 8px;">{{ prod.productLabel }}</div>
+              <div style="padding: 10px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12px; color: oklch(0.45 0.01 260); margin-bottom: 12px;">
+                <span style="font-weight: 700; color: oklch(0.35 0.01 260);">Spec Produk:</span> Material: {{ prod.specMaterial }} · Item: {{ prod.specItemType }} · Collection: {{ prod.specCollection }} · Ukuran: {{ prod.specSize }}
+              </div>
+
+              <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 12px; overflow-x: auto; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04);">
+                <table style="width: 100%; min-width: 620px; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid oklch(0.91 0.003 90); background: oklch(0.98 0.003 90);">
+                      <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Material</th>
+                      <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Butuh</th>
+                      <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Stok</th>
+                      <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.45 0.11 150); text-transform: uppercase;">Ambil dari Stok</th>
+                      <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.14 25); text-transform: uppercase;">Perlu PO</th>
+                      <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Status</th>
+                      <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ prod.lines }}" as="ln" hint-placeholder-count="2">
+                      <tr style="border-bottom: 1px solid oklch(0.94 0.003 90);">
+                        <td style="padding: 11px 14px; font-weight: 600; color: oklch(0.3 0.01 260);">{{ ln.materialName }} <span style="color: oklch(0.6 0.01 260); font-weight: 400;">({{ ln.unit }})</span></td>
+                        <td style="padding: 11px 14px; text-align: right;">{{ ln.needQty }}</td>
+                        <td style="padding: 11px 14px; text-align: right;">{{ ln.stockQty }}</td>
+                        <td style="padding: 11px 14px; text-align: right; font-weight: 700; color: oklch(0.4 0.12 150);">{{ ln.fromStockQty }}</td>
+                        <td style="padding: 11px 14px; text-align: right; font-weight: 700; color: oklch(0.5 0.15 25);">{{ ln.fromPoQty }}</td>
+                        <td style="padding: 11px 14px;">
+                          <span style="display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; color: {{ ln.statusColor }}; background: {{ ln.statusBg }};">{{ ln.statusLabel }}</span>
+                        </td>
+                        <td style="padding: 11px 14px; text-align: right;">
+                          <sc-if value="{{ ln.showPoButton }}" hint-placeholder-val="{{ false }}">
+                            <button onClick="{{ ln.onCreatePo }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 5px 11px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;">+ Buat PO</button>
+                          </sc-if>
+                        </td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </sc-for>
+
+          <div style="display: flex; justify-content: flex-end;">
+            <button disabled="{{ productionButtonDisabled }}" style="background: {{ productionButtonBg }}; color: white; border: none; padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: {{ productionButtonCursor }};">{{ productionButtonLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- INVOICE FORM (Buat Invoice full page) -->
+    <sc-if value="{{ showInvoiceForm }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width: 1000px; margin: 0 auto; padding: 28px 24px 80px;">
+        <button onClick="{{ backToInvoicing }}" style="background: none; border: none; color: oklch(0.5 0.01 260); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px 0; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">← Kembali</button>
+        <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Buat Invoice</div>
+        <div style="font-size: 13.5px; color: oklch(0.5 0.01 260); margin-bottom: 24px;">Pilih project, lalu pilih penawaran yang sudah Approved untuk ditagihkan.</div>
+
+        <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); margin-bottom: 20px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Project</label>
+          <select value="{{ invFormProjectId }}" onChange="{{ onInvFormProjectChange }}" style="width: 100%; max-width: 360px; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white;">
+            <option value="">— Pilih Project —</option>
+            <sc-for list="{{ projectOptions }}" as="pj2" hint-placeholder-count="2">
+              <option value="{{ pj2.id }}">{{ pj2.name }}</option>
+            </sc-for>
+          </select>
+        </div>
+
+        <sc-if value="{{ invFormHasProject }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase; margin-bottom: 10px;">Penawaran Approved</div>
+          <sc-for list="{{ invFormQuotations }}" as="q" hint-placeholder-count="1">
+            <div onClick="{{ q.onSelect }}" style="background: white; border: 1px solid {{ q.borderColor }}; border-radius: 12px; padding: 16px; margin-bottom: 10px; cursor: pointer;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid {{ q.radioColor }}; display: flex; align-items: center; justify-content: center;">
+                    <sc-if value="{{ q.selected }}" hint-placeholder-val="{{ false }}"><div style="width: 9px; height: 9px; border-radius: 50%; background: {{ q.radioColor }};"></div></sc-if>
+                  </div>
+                  <div style="font-size: 14.5px; font-weight: 700;">{{ q.doc }}</div>
+                </div>
+                <div style="font-size: 14px; font-weight: 700; color: oklch(0.3 0.01 260);">{{ q.total }}</div>
+              </div>
+              <div style="font-size: 12.5px; color: oklch(0.5 0.01 260); margin-top: 6px; margin-left: 26px;">{{ q.customer }} · {{ q.date }} · Termin: {{ q.termsTitle }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ invFormNoQuotations }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 24px; text-align: center; color: oklch(0.55 0.01 260); font-size: 13.5px; background: white; border: 1px dashed oklch(0.85 0.003 90); border-radius: 12px;">Belum ada penawaran Approved di project ini.</div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ invFormHasQuotation }}" hint-placeholder-val="{{ false }}">
+          <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); margin-top: 20px;">
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase; margin-bottom: 14px;">Skema Pembayaran</div>
+
+            <sc-if value="{{ invFormHasTerms }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 10px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12.5px; color: oklch(0.45 0.01 260); margin-bottom: 16px;">
+                <span style="font-weight: 700; color: oklch(0.35 0.01 260);">T&C Penawaran ({{ invFormTermsTitle }}):</span> {{ invFormTermsPreview }}
+              </div>
+            </sc-if>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+              <sc-for list="{{ invFormSchemeOptions }}" as="sch" hint-placeholder-count="2">
+                <button onClick="{{ sch.onSelect }}" style="flex: 1; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid {{ sch.borderColor }}; background: {{ sch.bg }}; color: {{ sch.textColor }};">{{ sch.label }}</button>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ invFormIsDp }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; margin-bottom: 16px;">
+                <select value="{{ invFormDpType }}" onChange="{{ onInvFormDpTypeChange }}" style="padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px; background: white;">
+                  <option value="percent">Persen (%)</option>
+                  <option value="amount">Nominal (Rp)</option>
+                </select>
+                <input type="number" value="{{ invFormDpValue }}" onChange="{{ onInvFormDpValueChange }}" style="padding: 9px 10px; border: 1px solid oklch(0.87 0.003 90); border-radius: 7px; font-size: 13.5px;"/>
+              </div>
+            </sc-if>
+
+            <div style="border-top: 1px solid oklch(0.93 0.003 90); padding-top: 16px; display: flex; justify-content: flex-end;">
+              <div style="width: 280px;">
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>Total Penawaran</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ invFormQuotationTotal }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: oklch(0.45 0.01 260);"><span>{{ invFormInvoiceLabel }}</span><span style="font-weight: 600; color: oklch(0.25 0.01 260);">{{ invFormPortionLabel }}</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 4px; border-top: 1px solid oklch(0.9 0.003 90); font-size: 16px;"><span style="font-weight: 700;">Ditagihkan</span><span style="font-weight: 800; color: oklch(0.55 0.14 255);">{{ invFormBilledAmount }}</span></div>
+                <sc-if value="{{ invFormShowRemaining }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 11.5px; color: oklch(0.6 0.01 260); text-align: right; margin-top: 4px;">Sisa termin berikutnya: {{ invFormRemainingLabel }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <button onClick="{{ backToInvoicing }}" style="background: white; border: 1px solid oklch(0.85 0.003 90); color: oklch(0.35 0.01 260); padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">Batal</button>
+            <button onClick="{{ backToInvoicing }}" style="background: oklch(0.55 0.14 255); border: none; color: white; padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">Simpan Invoice</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PURCHASE ORDER VIEW -->
+    <sc-if value="{{ showPo }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; height: {{ productMasterHeight }};">
+        <div style="width: 280px; flex-shrink: 0; border-right: 1px solid oklch(0.9 0.003 90); padding: 20px 16px; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <button onClick="{{ onPoPrevMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">‹</button>
+            <div style="font-size: 13px; font-weight: 700;">{{ poMonthLabel }}</div>
+            <button onClick="{{ onPoNextMonth }}" style="background: none; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: oklch(0.4 0.01 260);">›</button>
+          </div>
+          <button onClick="{{ onPoThisMonth }}" style="width: 100%; background: none; border: 1px dashed oklch(0.8 0.01 260); color: oklch(0.45 0.01 260); padding: 6px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-bottom: 14px;">Bulan Ini</button>
+          <sc-for list="{{ poListItems }}" as="po" hint-placeholder-count="1">
+            <div onClick="{{ po.onSelect }}" style="padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; background: {{ po.bg }}; border: 1px solid {{ po.border }};">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <div style="font-size: 13px; font-weight: 700; color: {{ po.textColor }};">{{ po.poNo }}</div>
+                <span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; color: {{ po.statusColor }}; background: {{ po.statusBg }}; white-space: nowrap;">{{ po.statusLabel }}</span>
+              </div>
+              <div style="font-size: 12px; color: oklch(0.5 0.01 260);">{{ po.vendor }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ isPoListEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 20px 8px; text-align: center; color: oklch(0.6 0.01 260); font-size: 12.5px;">Belum ada PO bulan ini.</div>
+          </sc-if>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 28px 32px 60px; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <div style="font-size: 22px; font-weight: 700;">{{ selectedPoNo }}</div>
+            <span style="font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; color: {{ selectedPoStatusColor }}; background: {{ selectedPoStatusBg }};">{{ selectedPoStatusLabel }}</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; background: oklch(0.97 0.005 260); border: 1px solid oklch(0.9 0.005 260); border-radius: 8px; font-size: 12.5px; color: oklch(0.4 0.01 260); margin-bottom: 20px;">
+            <div><span style="color: oklch(0.55 0.01 260);">Customer:</span> <strong>{{ selectedPoCustomer }}</strong></div>
+            <div><span style="color: oklch(0.55 0.01 260);">Project:</span> <strong>{{ selectedPoProjectName }}</strong></div>
+            <div><span style="color: oklch(0.55 0.01 260);">Penawaran:</span> <strong>{{ selectedPoQuotationRef }}</strong> ({{ selectedPoQuotationDate }})</div>
+            <div><span style="color: oklch(0.55 0.01 260);">Invoice:</span> <strong>{{ selectedPoInvoiceRef }}</strong> ({{ selectedPoInvoiceDate }})</div>
+            <div><span style="color: oklch(0.55 0.01 260);">Request Material:</span> <strong>{{ selectedPoRequestNo }}</strong></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Vendor</label>
+              <select value="{{ selectedPoVendor }}" onChange="{{ onPoVendorChange }}" style="width: 100%; padding: 10px 12px; border: 1px solid oklch(0.87 0.003 90); border-radius: 8px; font-size: 14px; background: white;">
+                <option value="">— Pilih Vendor —</option>
+                <sc-for list="{{ poVendorOptions }}" as="v" hint-placeholder-count="3">
+                  <option value="{{ v }}">{{ v }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Tipe</label>
+              <div style="padding: 10px 12px;"><span style="display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 700; color: oklch(0.4 0.13 250); background: oklch(0.92 0.05 250);">{{ selectedPoTipe }}</span></div>
+            </div>
+          </div>
+
+          <div style="background: white; border: 1px solid oklch(0.9 0.003 90); border-radius: 12px; overflow-x: auto; box-shadow: 0 1px 3px oklch(0 0 0 / 0.04); margin-bottom: 20px;">
+            <table style="width: 100%; min-width: 480px; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid oklch(0.91 0.003 90); background: oklch(0.98 0.003 90);">
+                  <th style="text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Material</th>
+                  <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Qty</th>
+                  <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Cost/unit</th>
+                  <th style="text-align: right; padding: 10px 14px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: oklch(0.5 0.01 260); text-transform: uppercase;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ poItems }}" as="it" hint-placeholder-count="1">
+                  <tr style="border-bottom: 1px solid oklch(0.94 0.003 90);">
+                    <td style="padding: 11px 14px; font-weight: 600; color: oklch(0.3 0.01 260);">{{ it.materialName }} <span style="color: oklch(0.6 0.01 260); font-weight: 400;">({{ it.unit }})</span></td>
+                    <td style="padding: 11px 14px; text-align: right;">{{ it.qty }}</td>
+                    <td style="padding: 8px 14px; text-align: right;"><input type="text" value="{{ it.costLabel }}" onChange="{{ it.onCostChange }}" style="width: 130px; text-align: right; padding: 6px 8px; border: 1px solid oklch(0.87 0.003 90); border-radius: 6px; font-size: 13px;"/></td>
+                    <td style="padding: 11px 14px; text-align: right; font-weight: 700;">{{ it.subtotalLabel }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="padding: 11px 14px; text-align: right; font-weight: 700;">Total</td>
+                  <td style="padding: 11px 14px; text-align: right; font-weight: 800; color: oklch(0.55 0.14 255);">{{ poTotalLabel }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end;">
+            <button onClick="{{ onMarkOrdered }}" style="background: oklch(0.55 0.14 255); color: white; border: none; padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">Kirim PO ke Vendor</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'list',
+    drawerOpen: false,
+    isMobile: window.innerWidth < 860,
+    discountType: 'percent',
+    discountValue: 10,
+    materialCatalog: [
+      { id: 'm1', name: 'Kayu Jati Board', unit: 'lbr', defaultCost: 450000 },
+      { id: 'm2', name: 'Engsel + Handle', unit: 'set', defaultCost: 400000 },
+      { id: 'm3', name: 'Finishing Duco', unit: 'unit', defaultCost: 1200000 },
+      { id: 'm4', name: 'Kayu Jati Board Pilihan', unit: 'lbr', defaultCost: 500000 },
+      { id: 'm5', name: 'Custom Hardware', unit: 'set', defaultCost: 2500000 },
+      { id: 'm6', name: 'Kayu Mahoni Board', unit: 'lbr', defaultCost: 480000 },
+      { id: 'm7', name: 'Multiplek HPL Board', unit: 'lbr', defaultCost: 320000 },
+      { id: 'm8', name: 'MDF Board', unit: 'lbr', defaultCost: 300000 },
+      { id: 'm9', name: 'MDF Board Premium', unit: 'lbr', defaultCost: 500000 },
+      { id: 'm10', name: 'Kayu Pinus', unit: 'lbr', defaultCost: 350000 },
+      { id: 'm11', name: 'Kayu Pinus Pilihan', unit: 'lbr', defaultCost: 430000 },
+      { id: 'm12', name: 'Rangka Rotan', unit: 'set', defaultCost: 2200000 },
+      { id: 'm13', name: 'Busa + Kain', unit: 'm', defaultCost: 230000 },
+      { id: 'm14', name: 'Rangka Rotan Tebal', unit: 'set', defaultCost: 3200000 },
+      { id: 'm15', name: 'Busa + Kain Premium', unit: 'm', defaultCost: 400000 },
+      { id: 'm16', name: 'Marmer Lokal', unit: 'm²', defaultCost: 1900000 },
+      { id: 'm17', name: 'Kaki Besi', unit: 'set', defaultCost: 900000 },
+      { id: 'm18', name: 'Marmer Import', unit: 'm²', defaultCost: 3250000 },
+      { id: 'm19', name: 'Kaki Kayu Solid', unit: 'set', defaultCost: 1500000 },
+      { id: 'm20', name: 'Marmer Import Grade A', unit: 'm²', defaultCost: 6125000 },
+      { id: 'm21', name: 'Kaki Custom Ukir', unit: 'set', defaultCost: 3200000 }
+    ],
+    catalog: [
+      { id: 'p1', name: 'Kitchen Set Custom', material: 'Kayu Jati', itemType: 'Kitchen Set', collection: 'Kitchen Collection', size: '100 x 150 x 200 cm', extraSpecs: [{ label: 'Finishing', value: 'Matte Duco' }], tiers: [
+        { id: 't1', name: 'Ekonomis', price: 15000000, used: true, bom: [{ materialId: 'm1', qty: '4 lbr', cost: 1800000 }, { materialId: 'm2', qty: '1 set', cost: 400000 }] },
+        { id: 't2', name: 'Standard', price: 22000000, used: true, bom: [{ materialId: 'm1', qty: '6 lbr', cost: 2700000 }, { materialId: 'm2', qty: '1 set', cost: 550000 }] },
+        { id: 't3', name: 'Premium', price: 34000000, used: false, bom: [{ materialId: 'm1', qty: '8 lbr', cost: 3600000 }, { materialId: 'm3', qty: '1 unit', cost: 1200000 }] },
+        { id: 't4', name: 'Deluxe', price: 48000000, used: false, bom: [{ materialId: 'm1', qty: '10 lbr', cost: 4500000 }, { materialId: 'm3', qty: '1 unit', cost: 1800000 }] },
+        { id: 't5', name: 'Bespoke', price: 65000000, used: false, bom: [{ materialId: 'm4', qty: '12 lbr', cost: 6000000 }, { materialId: 'm5', qty: '1 set', cost: 2500000 }] }
+      ]},
+      { id: 'p1b', name: 'Kitchen Set Custom', material: 'Kayu Mahoni', itemType: 'Kitchen Set', collection: 'Minimalist Collection', size: '120 x 160 x 210 cm', tiers: [
+        { id: 't1', name: 'Ekonomis', price: 16500000, used: false, bom: [{ materialId: 'm6', qty: '4 lbr', cost: 2000000 }] },
+        { id: 't2', name: 'Standard', price: 23500000, used: false, bom: [{ materialId: 'm6', qty: '6 lbr', cost: 2900000 }] },
+        { id: 't3', name: 'Premium', price: 36000000, used: false, bom: [{ materialId: 'm6', qty: '8 lbr', cost: 3900000 }] }
+      ]},
+      { id: 'p1c', name: 'Kitchen Set Custom', material: 'Multiplek HPL', itemType: 'Kitchen Set', collection: 'Modern Collection', size: '90 x 140 x 195 cm', tiers: [
+        { id: 't1', name: 'Ekonomis', price: 10500000, used: false, bom: [{ materialId: 'm7', qty: '4 lbr', cost: 1300000 }] },
+        { id: 't2', name: 'Standard', price: 15500000, used: false, bom: [{ materialId: 'm7', qty: '6 lbr', cost: 1900000 }] }
+      ]},
+      { id: 'p2', name: 'Wardrobe 2 Pintu', material: 'MDF Laminasi', itemType: 'Wardrobe', collection: 'Bedroom Set', size: '90 x 60 x 200 cm', tiers: [
+        { id: 't1', name: 'Ekonomis', price: 8000000, used: true, bom: [{ materialId: 'm8', qty: '3 lbr', cost: 900000 }] },
+        { id: 't2', name: 'Standard', price: 12000000, used: false, bom: [{ materialId: 'm8', qty: '4 lbr', cost: 1200000 }] },
+        { id: 't3', name: 'Premium', price: 18000000, used: false, bom: [{ materialId: 'm9', qty: '4 lbr', cost: 2000000 }] }
+      ]},
+      { id: 'p3', name: 'Meja Kerja Custom', material: 'Kayu Pinus', itemType: 'Meja', collection: 'Office Set', size: '120 x 60 x 75 cm', tiers: [
+        { id: 't1', name: 'Standard', price: 5000000, used: false, bom: [{ materialId: 'm10', qty: '2 lbr', cost: 700000 }] },
+        { id: 't2', name: 'Premium', price: 9000000, used: false, bom: [{ materialId: 'm11', qty: '3 lbr', cost: 1300000 }] }
+      ]},
+      { id: 'p4', name: 'Sofa Custom L-Shape', material: 'Rotan Sintetis', itemType: 'Sofa', collection: 'Living Room Set', size: '250 x 150 x 85 cm', tiers: [
+        { id: 't1', name: 'Standard', price: 11000000, used: false, bom: [{ materialId: 'm12', qty: '1 set', cost: 2200000 }, { materialId: 'm13', qty: '6 m', cost: 1400000 }] },
+        { id: 't2', name: 'Premium', price: 17500000, used: false, bom: [{ materialId: 'm14', qty: '1 set', cost: 3200000 }, { materialId: 'm15', qty: '6 m', cost: 2400000 }] }
+      ]},
+      { id: 'p5', name: 'Meja Makan Marmer', material: 'Marmer Import', itemType: 'Meja Makan', collection: 'Dining Set', size: '180 x 90 x 75 cm', tiers: [
+        { id: 't1', name: 'Ekonomis', price: 14000000, used: false, bom: [{ materialId: 'm16', qty: '1.6 m²', cost: 3000000 }, { materialId: 'm17', qty: '1 set', cost: 900000 }] },
+        { id: 't2', name: 'Standard', price: 21000000, used: false, bom: [{ materialId: 'm18', qty: '1.6 m²', cost: 5200000 }, { materialId: 'm19', qty: '1 set', cost: 1500000 }] },
+        { id: 't3', name: 'Bespoke', price: 38000000, used: false, bom: [{ materialId: 'm20', qty: '1.6 m²', cost: 9800000 }, { materialId: 'm21', qty: '1 set', cost: 3200000 }] }
+      ]}
+    ],
+    items: [
+      { id: 1, productQuery: '', productId: null, tierId: '', qty: 1, note: '', productOpen: false }
+    ],
+    productMasterSelectedId: 'p1',
+    productSearch: '',
+    bomCombo: {},
+    currentMonthOffset: 0,
+    selectedListDocId: 'd1',
+    penawaranDocs: [
+      { id: 'd1', month: '2026-07', doc: 'PNW-2026-014', customer: 'PT Sinar Abadi', project: 'Renovasi Kantor Pusat', sales: 'Andika', status: 'approved', date: '24 Jul 2026',
+        items: [
+          { produk: 'Kitchen Set Custom', tier: 'Standard', qty: 1, harga: 22000000 },
+          { produk: 'Meja Kerja Custom', tier: 'Premium', qty: 2, harga: 9000000 }
+        ], discountPercent: 5 },
+      { id: 'd2', month: '2026-07', doc: 'PNW-2026-013', customer: 'CV Karya Mandiri', project: '—', sales: 'Rani', status: 'sent', date: '22 Jul 2026',
+        items: [{ produk: 'Wardrobe 2 Pintu', tier: 'Ekonomis', qty: 3, harga: 8000000 }], discountPercent: 0 },
+      { id: 'd3', month: '2026-07', doc: 'PNW-2026-012', customer: 'PT Nusantara Jaya', project: 'Proyek Interior GF', sales: 'Andika', status: 'draft', date: '19 Jul 2026',
+        items: [{ produk: 'Meja Makan Marmer', tier: 'Bespoke', qty: 4, harga: 38000000 }], discountPercent: 0 },
+      { id: 'd4', month: '2026-07', doc: 'PNW-2026-011', customer: 'Bpk. Yusuf Hartono', project: '—', sales: 'Rani', status: 'rejected', date: '15 Jul 2026',
+        items: [{ produk: 'Sofa Custom L-Shape', tier: 'Standard', qty: 1, harga: 11000000 }], discountPercent: 0 },
+      { id: 'd5', month: '2026-06', doc: 'PNW-2026-009', customer: 'PT Graha Lestari', project: '—', sales: 'Andika', status: 'approved', date: '28 Jun 2026',
+        items: [{ produk: 'Kitchen Set Custom', tier: 'Premium', qty: 1, harga: 34000000 }], discountPercent: 10 }
+    ],
+    selectedRequestId: 'req1',
+    selectedProjectId: '',
+    newProjectName: '',
+    showNewProjectInput: false,
+    projects: [
+      { id: 'proj1', name: 'Renovasi Kantor Pusat' },
+      { id: 'proj2', name: 'Proyek Interior GF' }
+    ],
+    selectedPoId: 'po1',
+    poMonthOffset: 0,
+    matReqMonthOffset: 0,
+    invFormProjectId: '',
+    invFormQuotationId: '',
+    invFormScheme: 'full',
+    invFormDpType: 'percent',
+    invFormDpValue: 50,
+    vendors: ['CV Kayu Makmur', 'Toko Marmer Jaya', 'PT Logam Sentosa', 'UD Rotan Nusantara'],
+    purchaseOrders: [
+      { id: 'po1', month: '2026-07', poNo: 'PO-2026-009', vendor: 'CV Kayu Makmur', tipe: 'Bahan Baku', status: 'ordered', projectId: 'proj2', requestId: 'req3', invoiceRef: 'INV-2026-019', items: [
+        { materialName: 'Marmer Import Grade A', unit: 'm²', qty: 1.6, cost: 6125000 }
+      ]}
+    ],
+    invMonthOffset: 0,
+    selectedInvId: 'INV-2026-021',
+    invoicingRows: [
+      { doc: 'INV-2026-021', month: '2026-07', customer: 'PT Sinar Abadi', sales: 'Andika', total: 'Rp 84.500.000', status: 'paid', date: '25 Jul 2026', requestId: 'req1', quotationRef: 'd1', scheme: 'full', dpLabel: '' },
+      { doc: 'INV-2026-020', month: '2026-07', customer: 'CV Karya Mandiri', sales: 'Rani', total: 'Rp 11.050.000', status: 'issued', date: '23 Jul 2026', requestId: 'req2', quotationRef: 'd2', scheme: 'dp', dpLabel: 'DP 50%' },
+      { doc: 'INV-2026-019', month: '2026-07', customer: 'PT Nusantara Jaya', sales: 'Andika', total: 'Rp 156.000.000', status: 'paid', date: '20 Jul 2026', requestId: 'req3', quotationRef: 'd3', scheme: 'full', dpLabel: '' },
+      { doc: 'INV-2026-018', month: '2026-07', customer: 'Bpk. Yusuf Hartono', sales: 'Rani', total: 'Rp 9.800.000', status: 'draft', date: '16 Jul 2026', requestId: null, quotationRef: 'd4', scheme: 'full', dpLabel: '' },
+      { doc: 'INV-2026-017', month: '2026-06', customer: 'PT Graha Lestari', sales: 'Andika', total: 'Rp 45.500.000', status: 'paid', date: '12 Jun 2026', requestId: 'req4', quotationRef: 'd5', scheme: 'full', dpLabel: '' }
+    ],
+    materialRequests: [
+      { id: 'req1', month: '2026-07', requestNo: 'MR-2026-014', invoiceRef: 'INV-2026-021', invoiceDate: '25 Jul 2026', quotationRef: 'PNW-2026-014', quotationDate: '18 Jul 2026', customer: 'PT Sinar Abadi', projectId: 'proj1', products: [
+        { productLabel: 'Kitchen Set Custom — Standard',
+          productSpec: { material: 'Kayu Jati', itemType: 'Kitchen Set', collection: 'Kitchen Collection', size: '100 x 150 x 200 cm' },
+          lines: [
+            { materialName: 'Kayu Jati Board', unit: 'lbr', needQty: 6, stockQty: 10, poCreated: false },
+            { materialName: 'Engsel + Handle', unit: 'set', needQty: 1, stockQty: 4, poCreated: false }
+          ]}
+      ]},
+      { id: 'req2', month: '2026-07', requestNo: 'MR-2026-013', invoiceRef: 'INV-2026-020', invoiceDate: '23 Jul 2026', quotationRef: 'PNW-2026-013', quotationDate: '15 Jul 2026', customer: 'CV Karya Mandiri', projectId: '', products: [
+        { productLabel: 'Wardrobe 2 Pintu — Ekonomis',
+          productSpec: { material: 'MDF Laminasi', itemType: 'Wardrobe', collection: 'Bedroom Set', size: '90 x 60 x 200 cm' },
+          lines: [
+            { materialName: 'MDF Board', unit: 'lbr', needQty: 3, stockQty: 1, poCreated: false }
+          ]}
+      ]},
+      { id: 'req3', month: '2026-07', requestNo: 'MR-2026-012', invoiceRef: 'INV-2026-019', invoiceDate: '20 Jul 2026', quotationRef: 'PNW-2026-012', quotationDate: '10 Jul 2026', customer: 'PT Nusantara Jaya', projectId: 'proj2', products: [
+        { productLabel: 'Meja Makan Marmer — Bespoke',
+          productSpec: { material: 'Marmer Import', itemType: 'Meja Makan', collection: 'Dining Set', size: '180 x 90 x 75 cm' },
+          lines: [
+            { materialName: 'Marmer Import Grade A', unit: 'm²', needQty: 1.6, stockQty: 0, poCreated: true },
+            { materialName: 'Kaki Custom Ukir', unit: 'set', needQty: 1, stockQty: 2, poCreated: false }
+          ]}
+      ]},
+      { id: 'req4', month: '2026-06', requestNo: 'MR-2026-011', invoiceRef: 'INV-2026-017', invoiceDate: '12 Jun 2026', quotationRef: 'PNW-2026-009', quotationDate: '2 Jul 2026', customer: 'PT Graha Lestari', projectId: '', products: [
+        { productLabel: 'Kitchen Set Custom — Premium',
+          productSpec: { material: 'Kayu Jati', itemType: 'Kitchen Set', collection: 'Kitchen Collection', size: '100 x 150 x 200 cm' },
+          lines: [
+            { materialName: 'Kayu Jati Board', unit: 'lbr', needQty: 8, stockQty: 3, poCreated: false },
+            { materialName: 'Finishing Duco', unit: 'unit', needQty: 1, stockQty: 2, poCreated: false }
+          ]},
+        { productLabel: 'Meja Kerja Custom — Standard',
+          productSpec: { material: 'Kayu Pinus', itemType: 'Meja', collection: 'Office Set', size: '120 x 60 x 75 cm' },
+          lines: [
+            { materialName: 'Kayu Pinus', unit: 'lbr', needQty: 2, stockQty: 5, poCreated: false }
+          ]}
+      ]}
+    ],
+    termsId: '',
+    termsCatalog: [
+      { id: 'tnc1', title: 'Standar Umum (DP 50%)', preview: 'DP 50% saat penawaran disetujui, pelunasan 50% sebelum barang dikirim. Garansi 1 tahun untuk kerusakan produksi.' },
+      { id: 'tnc2', title: 'Proyek Besar (Termin 3x)', preview: 'Pembayaran dibagi 3 termin: 30% DP, 40% saat produksi 50%, 30% pelunasan sebelum pengiriman. Estimasi produksi 4-6 minggu.' },
+      { id: 'tnc3', title: 'Retail / Cash', preview: 'Pelunasan penuh di muka. Barang siap kirim 3-7 hari kerja setelah pembayaran dikonfirmasi.' }
+    ]
+  };
+
+  formatRp(n) {
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+
+  monthInfo(offset) {
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const base = new Date(2026, 6, 1);
+    const target = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+    return {
+      key: `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`,
+      label: `${monthNames[target.getMonth()]} ${target.getFullYear()}`
+    };
+  }
+
+  updateItem(id, patch) {
+    this.setState(s => ({ items: s.items.map(it => it.id === id ? { ...it, ...patch } : it) }));
+  }
+
+  componentDidMount() {
+    this._onResize = () => this.setState({ isMobile: window.innerWidth < 860 });
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+
+  navItem(label, active) {
+    return {
+      label,
+      onClick: (e) => {
+        e.preventDefault();
+        if (label === 'Penawaran') this.setState({ view: 'list' });
+        if (label === 'Invoicing') this.setState({ view: 'invoicing' });
+        if (label === 'Request Material') this.setState({ view: 'materialRequest' });
+        if (label === 'Purchase Order') this.setState({ view: 'po' });
+        if (label === 'Invoicing') this.setState({ view: 'invoicing' });
+      },
+      color: active ? 'oklch(0.97 0 0)' : 'oklch(0.78 0.01 260)',
+      bg: active ? 'oklch(1 0 0 / 0.08)' : 'transparent'
+    };
+  }
+
+  renderVals() {
+    const isMobile = this.state.isMobile;
+    const drawerOpen = this.state.drawerOpen;
+
+    const transaksiItems = [
+      this.navItem('Dashboard', false),
+      this.navItem('Penawaran', this.state.view === 'list' || this.state.view === 'form'),
+      this.navItem('Invoicing', this.state.view === 'invoicing'),
+      this.navItem('Request Material', this.state.view === 'materialRequest'),
+      this.navItem('Purchase Order', this.state.view === 'po'),
+      this.navItem('SPK Produksi', false),
+      this.navItem('Penerimaan Barang', false),
+      this.navItem('Delivery Order', false),
+      this.navItem('Kuitansi', false),
+      this.navItem('Kontak', false),
+      this.navItem('Laporan', false)
+    ];
+    const view = this.state.view;
+    const masterItems = ['Produk & Tier', 'Material', 'Gudang', 'Syarat & Ketentuan'].map(l => {
+      const active = l === 'Produk & Tier' && view === 'productMaster';
+      return {
+        label: l,
+        onClick: l === 'Produk & Tier' ? (e) => { e.preventDefault(); this.setState({ view: 'productMaster' }); } : (e) => e.preventDefault(),
+        color: active ? 'oklch(0.97 0 0)' : 'oklch(0.78 0.01 260)',
+        bg: active ? 'oklch(1 0 0 / 0.08)' : 'transparent'
+      };
+    });
+    const adminItems = ['Admin User', 'Roles & Akses'].map(l => ({ label: l }));
+
+    const catalog = this.state.catalog;
+    const items = this.state.items.map((it) => {
+      const query = it.productQuery || '';
+      const filteredProducts = catalog
+        .filter(p => query.length === 0 || p.name.toLowerCase().includes(query.toLowerCase()))
+        .map(p => ({
+          id: p.id,
+          name: p.name,
+          specSummary: `${p.material} · ${p.itemType} · ${p.collection} · ${p.size}`,
+          onSelect: () => this.updateItem(it.id, { productId: p.id, productQuery: p.name, tierId: '', productOpen: false })
+        }));
+      const exactMatch = catalog.some(p => p.name.toLowerCase() === query.toLowerCase());
+      const selectedProduct = catalog.find(p => p.id === it.productId);
+      const tierOptions = selectedProduct ? selectedProduct.tiers.map(t => ({ id: t.id, label: `${t.name} — ${this.formatRp(t.price)}` })) : [];
+      const selectedTier = selectedProduct ? selectedProduct.tiers.find(t => t.id === it.tierId) : null;
+      const price = selectedTier ? selectedTier.price : 0;
+      const qty = Number(it.qty) || 0;
+      const lineTotal = price * qty;
+      return {
+        ...it,
+        filteredProducts,
+        showCreateOption: query.trim().length > 0 && !exactMatch,
+        onProductQueryChange: (e) => this.updateItem(it.id, { productQuery: e.target.value, productId: null, tierId: '', productOpen: true }),
+        onProductFocus: () => this.updateItem(it.id, { productOpen: true }),
+        onProductBlur: () => setTimeout(() => this.updateItem(it.id, { productOpen: false }), 120),
+        onCreateProduct: () => {
+          const name = it.productQuery.trim();
+          const newProduct = { id: 'p' + Date.now(), name, material: '—', itemType: '—', collection: '—', size: '—', tiers: [{ id: 't1', name: 'Standard', price: 0 }] };
+          this.setState(s => ({ catalog: [...s.catalog, newProduct] }));
+          this.updateItem(it.id, { productId: newProduct.id, productQuery: name, tierId: '', productOpen: false });
+        },
+        tierOptions,
+        hasTierInfo: !!selectedProduct,
+        tierInfoText: selectedProduct ? `Material: ${selectedProduct.material}  ·  Item: ${selectedProduct.itemType}  ·  Collection: ${selectedProduct.collection}  ·  Ukuran: ${selectedProduct.size}` : '',
+        tierDisabled: !selectedProduct,
+        tierPlaceholder: selectedProduct ? 'Pilih Tier' : 'Pilih produk dulu',
+        onTierChange: (e) => this.updateItem(it.id, { tierId: e.target.value }),
+        onQtyChange: (e) => this.updateItem(it.id, { qty: e.target.value }),
+        onNoteChange: (e) => this.updateItem(it.id, { note: e.target.value }),
+        priceLabel: selectedTier ? this.formatRp(price) : '—',
+        lineTotalLabel: this.formatRp(lineTotal),
+        lineTotal,
+        onRemove: () => this.setState(s => ({ items: s.items.filter(x => x.id !== it.id) }))
+      };
+    });
+
+    return {
+      isMobile: isMobile ? 'flex' : 'none',
+      isDesktopTopbar: isMobile ? 'none' : 'flex',
+      isMobilePageTitle: isMobile ? 'block' : 'none',
+      drawerOverlayDisplay: (isMobile && drawerOpen) ? 'block' : 'none',
+      sidebarStyle: isMobile
+        ? `position: fixed; top: 0; bottom: 0; left: 0; width: 260px; background: oklch(0.16 0.01 260); display: flex; flex-direction: column; z-index: 50; transform: translateX(${drawerOpen ? '0' : '-100%'}); transition: transform 0.25s ease;`
+        : `width: 250px; flex-shrink: 0; background: oklch(0.16 0.01 260); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;`,
+      mainMarginStyle: isMobile ? 'margin-top: 56px;' : '',
+      toggleDrawer: () => this.setState(s => ({ drawerOpen: !s.drawerOpen })),
+      closeDrawer: () => this.setState({ drawerOpen: false }),
+      pageTitle: view === 'productMaster' ? 'Produk & Tier' : (view === 'invoicing' ? 'Invoicing' : (view === 'materialRequest' ? 'Request Material' : (view === 'po' ? 'Purchase Order' : (view === 'list' ? 'Penawaran' : 'Buat Penawaran')))),
+      transaksiItems, masterItems, adminItems,
+      showList: view === 'list',
+      showForm: view === 'form',
+      showProductMaster: view === 'productMaster',
+      showInvoicing: view === 'invoicing',
+      showMaterialRequest: view === 'materialRequest',
+      showPo: view === 'po',
+      showInvoiceForm: view === 'invoiceForm',
+      goToInvoiceForm: () => this.setState({ view: 'invoiceForm', invFormProjectId: '', invFormQuotationId: '', invFormScheme: 'full' }),
+      backToInvoicing: () => this.setState({ view: 'invoicing' }),
+      ...this.buildInvoiceFormVals(),
+      ...this.buildPoVals(),
+      productMasterHeight: isMobile ? 'calc(100vh - 56px - 44px)' : 'calc(100vh - 73px)',
+      goToForm: () => this.setState({ view: 'form' }),
+      goToList: () => this.setState({ view: 'list' }),
+      ...this.buildProductMasterVals(),
+      ...this.buildListVals(),
+      items,
+      addItem: () => this.setState(s => ({ items: [...s.items, { id: Date.now(), productQuery: '', productId: null, tierId: '', qty: 1, note: '', productOpen: false }] })),
+      termsId: this.state.termsId,
+      termsOptions: this.state.termsCatalog.map(t => ({ id: t.id, title: t.title })),
+      onTermsChange: (e) => this.setState({ termsId: e.target.value }),
+      hasTermsPreview: !!this.state.termsCatalog.find(t => t.id === this.state.termsId),
+      termsPreview: (this.state.termsCatalog.find(t => t.id === this.state.termsId) || {}).preview || '',
+      selectedProjectId: this.state.selectedProjectId,
+      projectOptions: this.state.projects,
+      onProjectChange: (e) => this.setState({ selectedProjectId: e.target.value }),
+      showNewProjectInput: this.state.showNewProjectInput,
+      showAddProjectButton: !this.state.showNewProjectInput,
+      newProjectName: this.state.newProjectName,
+      onNewProjectNameChange: (e) => this.setState({ newProjectName: e.target.value }),
+      onToggleNewProject: () => this.setState({ showNewProjectInput: true }),
+      onConfirmNewProject: () => {
+        const name = this.state.newProjectName.trim();
+        if (!name) return;
+        const newProj = { id: 'proj' + Date.now(), name };
+        this.setState(s => ({ projects: [...s.projects, newProj], selectedProjectId: newProj.id, newProjectName: '', showNewProjectInput: false }));
+      },
+      invoicingColumns: ['No. Dokumen', 'Customer', 'Sales', 'Total', 'Status', 'Material', 'Tanggal'],
+      ...this.buildInvoicingVals(),
+      ...this.buildMaterialRequestVals(),
+      ...this.calcTotals(items)
+    };
+  }
+
+  requestStatus(req) {
+    const lines = req.products.flatMap(p => p.lines);
+    const allStocked = lines.every(l => l.stockQty >= l.needQty);
+    if (allStocked) return { label: 'Terpenuhi dari Stok', color: 'oklch(0.35 0.12 150)', bg: 'oklch(0.92 0.06 150)' };
+    const anyPoPending = lines.some(l => l.stockQty < l.needQty && l.poCreated);
+    const anyNeedsPo = lines.some(l => l.stockQty < l.needQty && !l.poCreated);
+    if (anyNeedsPo) return { label: 'Perlu PO', color: 'oklch(0.5 0.15 25)', bg: 'oklch(0.93 0.06 25)' };
+    if (anyPoPending) return { label: 'Menunggu PO', color: 'oklch(0.5 0.13 75)', bg: 'oklch(0.93 0.05 75)' };
+    return { label: 'Siap Produksi', color: 'oklch(0.4 0.13 250)', bg: 'oklch(0.92 0.05 250)' };
+  }
+
+  buildInvoicingVals() {
+    const statusMap = {
+      draft: { label: 'Draft', color: 'oklch(0.45 0.01 260)', bg: 'oklch(0.92 0.003 90)' },
+      issued: { label: 'Issued', color: 'oklch(0.4 0.13 250)', bg: 'oklch(0.92 0.05 250)' },
+      paid: { label: 'Paid', color: 'oklch(0.35 0.12 150)', bg: 'oklch(0.92 0.06 150)' },
+      cancelled: { label: 'Batal', color: 'oklch(0.5 0.13 75)', bg: 'oklch(0.93 0.05 75)' },
+      void: { label: 'Void', color: 'oklch(0.5 0.15 25)', bg: 'oklch(0.93 0.06 25)' }
+    };
+    const mi = this.monthInfo(this.state.invMonthOffset);
+    const rowsThisMonth = this.state.invoicingRows.filter(r => r.month === mi.key);
+    const selected = rowsThisMonth.find(r => r.doc === this.state.selectedInvId) || rowsThisMonth[0];
+
+    const matStatusFor = (row) => {
+      const req = this.state.materialRequests.find(r => r.id === row.requestId);
+      return { req, status: req ? this.requestStatus(req) : { label: '—', color: 'oklch(0.6 0.01 260)', bg: 'oklch(0.95 0.003 90)' } };
+    };
+
+    const invListItems = rowsThisMonth.map(row => {
+      const s = statusMap[row.status];
+      const active = selected && row.doc === selected.doc;
+      return {
+        docNo: row.doc, customer: row.customer, total: row.total, date: row.date,
+        statusLabel: s.label, statusColor: s.color, statusBg: s.bg,
+        onSelect: () => this.setState({ selectedInvId: row.doc }),
+        bg: active ? 'oklch(0.94 0.04 255)' : 'transparent',
+        border: active ? 'oklch(0.8 0.08 255)' : 'transparent',
+        textColor: active ? 'oklch(0.4 0.13 255)' : 'oklch(0.3 0.01 260)'
+      };
+    });
+
+    let selectedVals = {
+      hasSelectedInv: false, selectedInvNo: '', selectedInvStatusLabel: '', selectedInvStatusColor: '', selectedInvStatusBg: '',
+      selectedInvCustomer: '', selectedInvSales: '', selectedInvDate: '', selectedInvTotal: '',
+      selectedInvMaterialLabel: '', selectedInvMaterialColor: '', selectedInvMaterialBg: '', selectedInvOnMaterialClick: () => {},
+      selectedInvItems: [], selectedInvSubtotal: '', selectedInvDiscount: '', selectedInvPpn: '', selectedInvQuotationTotal: '',
+      selectedInvIsDp: false, selectedInvDpLabel: '',
+      invCancelDisabled: true, invVoidDisabled: true
+    };
+    if (selected) {
+      const s = statusMap[selected.status];
+      const m = matStatusFor(selected);
+      const quotation = this.state.penawaranDocs.find(d => d.id === selected.quotationRef);
+      let quotationVals = { selectedInvItems: [], selectedInvSubtotal: '—', selectedInvDiscount: '—', selectedInvPpn: '—', selectedInvQuotationTotal: '—' };
+      if (quotation) {
+        const subtotal = quotation.items.reduce((s2, it) => s2 + it.qty * it.harga, 0);
+        const discount = subtotal * (quotation.discountPercent || 0) / 100;
+        const ppn = (subtotal - discount) * 0.11;
+        quotationVals = {
+          selectedInvItems: quotation.items.map(it => ({ produk: it.produk, tier: it.tier, qty: it.qty, hargaLabel: this.formatRp(it.harga), totalLabel: this.formatRp(it.qty * it.harga) })),
+          selectedInvSubtotal: this.formatRp(subtotal), selectedInvDiscount: this.formatRp(discount), selectedInvPpn: this.formatRp(ppn),
+          selectedInvQuotationTotal: this.formatRp(subtotal - discount + ppn)
+        };
+      }
+      selectedVals = {
+        hasSelectedInv: true,
+        selectedInvNo: selected.doc, selectedInvStatusLabel: s.label, selectedInvStatusColor: s.color, selectedInvStatusBg: s.bg,
+        selectedInvCustomer: selected.customer, selectedInvSales: selected.sales, selectedInvDate: selected.date, selectedInvTotal: selected.total,
+        selectedInvMaterialLabel: m.status.label, selectedInvMaterialColor: m.status.color, selectedInvMaterialBg: m.status.bg,
+        selectedInvOnMaterialClick: () => { if (m.req) this.setState({ view: 'materialRequest', selectedRequestId: m.req.id }); },
+        selectedInvIsDp: selected.scheme === 'dp', selectedInvDpLabel: selected.dpLabel,
+        ...quotationVals,
+        invCancelDisabled: selected.status === 'cancelled' || selected.status === 'void',
+        invVoidDisabled: selected.status === 'void'
+      };
+    }
+
+    return {
+      invMonthLabel: mi.label,
+      onInvPrevMonth: () => this.setState(s => ({ invMonthOffset: s.invMonthOffset - 1 })),
+      onInvNextMonth: () => this.setState(s => ({ invMonthOffset: s.invMonthOffset + 1 })),
+      onInvThisMonth: () => this.setState({ invMonthOffset: 0 }),
+      invListItems,
+      isInvListEmpty: invListItems.length === 0,
+      onCancelInv: () => selected && this.setState(s => ({ invoicingRows: s.invoicingRows.map(r => r.doc === selected.doc ? { ...r, status: 'cancelled' } : r) })),
+      onVoidInv: () => selected && this.setState(s => ({ invoicingRows: s.invoicingRows.map(r => r.doc === selected.doc ? { ...r, status: 'void' } : r) })),
+      ...selectedVals
+    };
+  }
+
+  buildListVals() {
+    const statusMap = {
+      draft: { label: 'Draft', color: 'oklch(0.45 0.01 260)', bg: 'oklch(0.92 0.003 90)' },
+      sent: { label: 'Sent', color: 'oklch(0.4 0.13 250)', bg: 'oklch(0.92 0.05 250)' },
+      approved: { label: 'Approved', color: 'oklch(0.35 0.12 150)', bg: 'oklch(0.92 0.06 150)' },
+      rejected: { label: 'Rejected', color: 'oklch(0.5 0.15 25)', bg: 'oklch(0.93 0.06 25)' },
+      cancelled: { label: 'Batal', color: 'oklch(0.5 0.13 75)', bg: 'oklch(0.93 0.05 75)' },
+      void: { label: 'Void', color: 'oklch(0.5 0.01 260)', bg: 'oklch(0.9 0.003 90)' }
+    };
+    const mi = this.monthInfo(this.state.currentMonthOffset);
+    const currentMonthLabel = mi.label;
+    const docsThisMonth = this.state.penawaranDocs.filter(d => d.month === mi.key);
+    const selected = docsThisMonth.find(d => d.id === this.state.selectedListDocId) || docsThisMonth[0];
+
+    const docTotal = (d) => {
+      const subtotal = d.items.reduce((s, it) => s + it.qty * it.harga, 0);
+      const discount = subtotal * (d.discountPercent || 0) / 100;
+      const ppn = (subtotal - discount) * 0.11;
+      return { subtotal, discount, ppn, total: subtotal - discount + ppn };
+    };
+
+    const listDocItems = docsThisMonth.map(d => {
+      const s = statusMap[d.status];
+      const t = docTotal(d);
+      const active = selected && d.id === selected.id;
+      return {
+        docNo: d.doc, customer: d.customer, total: this.formatRp(t.total), date: d.date,
+        statusLabel: s.label, statusColor: s.color, statusBg: s.bg,
+        onSelect: () => this.setState({ selectedListDocId: d.id }),
+        bg: active ? 'oklch(0.94 0.04 255)' : 'transparent',
+        border: active ? 'oklch(0.8 0.08 255)' : 'transparent',
+        textColor: active ? 'oklch(0.4 0.13 255)' : 'oklch(0.3 0.01 260)'
+      };
+    });
+
+    let selectedVals = {
+      hasSelectedDoc: false, selectedDocNo: '', selectedDocStatusLabel: '', selectedDocStatusColor: '', selectedDocStatusBg: '',
+      selectedDocCustomer: '', selectedDocProject: '', selectedDocSales: '', selectedDocDate: '',
+      selectedDocItems: [], selectedDocSubtotal: '', selectedDocDiscount: '', selectedDocPpn: '', selectedDocTotal: '',
+      cancelDisabled: true, voidDisabled: true
+    };
+    if (selected) {
+      const s = statusMap[selected.status];
+      const t = docTotal(selected);
+      selectedVals = {
+        hasSelectedDoc: true,
+        selectedDocNo: selected.doc, selectedDocStatusLabel: s.label, selectedDocStatusColor: s.color, selectedDocStatusBg: s.bg,
+        selectedDocCustomer: selected.customer, selectedDocProject: selected.project, selectedDocSales: selected.sales, selectedDocDate: selected.date,
+        selectedDocItems: selected.items.map(it => ({ produk: it.produk, tier: it.tier, qty: it.qty, hargaLabel: this.formatRp(it.harga), totalLabel: this.formatRp(it.qty * it.harga) })),
+        selectedDocSubtotal: this.formatRp(t.subtotal), selectedDocDiscount: this.formatRp(t.discount), selectedDocPpn: this.formatRp(t.ppn), selectedDocTotal: this.formatRp(t.total),
+        cancelDisabled: selected.status === 'cancelled' || selected.status === 'void',
+        voidDisabled: selected.status === 'void'
+      };
+    }
+
+    return {
+      currentMonthLabel,
+      onPrevMonth: () => this.setState(s => ({ currentMonthOffset: s.currentMonthOffset - 1 })),
+      onNextMonth: () => this.setState(s => ({ currentMonthOffset: s.currentMonthOffset + 1 })),
+      onThisMonth: () => this.setState({ currentMonthOffset: 0 }),
+      listDocItems,
+      isListEmpty: listDocItems.length === 0,
+      onPrintDoc: () => window.print(),
+      onCancelDoc: () => selected && this.setState(s => ({ penawaranDocs: s.penawaranDocs.map(d => d.id === selected.id ? { ...d, status: 'cancelled' } : d) })),
+      onVoidDoc: () => selected && this.setState(s => ({ penawaranDocs: s.penawaranDocs.map(d => d.id === selected.id ? { ...d, status: 'void' } : d) })),
+      ...selectedVals
+    };
+  }
+
+  buildInvoiceFormVals() {
+    const projectId = this.state.invFormProjectId;
+    const approved = this.state.penawaranDocs.filter(d => d.status === 'approved' && (!projectId || this.projectIdOf(d) === projectId));
+    const docTotal = (d) => {
+      const subtotal = d.items.reduce((s, it) => s + it.qty * it.harga, 0);
+      const discount = subtotal * (d.discountPercent || 0) / 100;
+      const ppn = (subtotal - discount) * 0.11;
+      return subtotal - discount + ppn;
+    };
+    const selectedQ = approved.find(d => d.id === this.state.invFormQuotationId);
+    const termsTitleFor = () => (this.state.termsCatalog.find(t => t.id === this.state.termsId) || {}).title || 'Belum ditentukan';
+
+    const invFormQuotations = approved.map(d => ({
+      doc: d.doc, customer: d.customer, date: d.date, total: this.formatRp(docTotal(d)),
+      termsTitle: termsTitleFor(),
+      selected: selectedQ && selectedQ.id === d.id,
+      borderColor: selectedQ && selectedQ.id === d.id ? 'oklch(0.6 0.14 255)' : 'oklch(0.9 0.003 90)',
+      radioColor: selectedQ && selectedQ.id === d.id ? 'oklch(0.55 0.14 255)' : 'oklch(0.75 0.01 260)',
+      onSelect: () => this.setState({ invFormQuotationId: d.id })
+    }));
+
+    let extra = { invFormHasQuotation: false };
+    if (selectedQ) {
+      const total = docTotal(selectedQ);
+      const dpAmount = this.state.invFormDpType === 'percent' ? total * (Number(this.state.invFormDpValue) || 0) / 100 : (Number(this.state.invFormDpValue) || 0);
+      const billed = this.state.invFormScheme === 'full' ? total : Math.min(dpAmount, total);
+      extra = {
+        invFormHasQuotation: true,
+        invFormHasTerms: !!this.state.termsId,
+        invFormTermsTitle: termsTitleFor(),
+        invFormTermsPreview: (this.state.termsCatalog.find(t => t.id === this.state.termsId) || {}).preview || '',
+        invFormSchemeOptions: [
+          { label: 'Lunas Sekaligus', onSelect: () => this.setState({ invFormScheme: 'full' }), borderColor: this.state.invFormScheme === 'full' ? 'oklch(0.6 0.14 255)' : 'oklch(0.87 0.003 90)', bg: this.state.invFormScheme === 'full' ? 'oklch(0.94 0.04 255)' : 'white', textColor: this.state.invFormScheme === 'full' ? 'oklch(0.4 0.13 255)' : 'oklch(0.35 0.01 260)' },
+          { label: 'DP / Termin', onSelect: () => this.setState({ invFormScheme: 'dp' }), borderColor: this.state.invFormScheme === 'dp' ? 'oklch(0.6 0.14 255)' : 'oklch(0.87 0.003 90)', bg: this.state.invFormScheme === 'dp' ? 'oklch(0.94 0.04 255)' : 'white', textColor: this.state.invFormScheme === 'dp' ? 'oklch(0.4 0.13 255)' : 'oklch(0.35 0.01 260)' }
+        ],
+        invFormIsDp: this.state.invFormScheme === 'dp',
+        invFormDpType: this.state.invFormDpType,
+        onInvFormDpTypeChange: (e) => this.setState({ invFormDpType: e.target.value }),
+        invFormDpValue: this.state.invFormDpValue,
+        onInvFormDpValueChange: (e) => this.setState({ invFormDpValue: e.target.value }),
+        invFormQuotationTotal: this.formatRp(total),
+        invFormInvoiceLabel: this.state.invFormScheme === 'full' ? 'Ditagihkan Penuh' : `DP (${this.state.invFormDpType === 'percent' ? this.state.invFormDpValue + '%' : this.formatRp(this.state.invFormDpValue)})`,
+        invFormPortionLabel: this.state.invFormScheme === 'full' ? '100%' : this.formatRp(billed),
+        invFormBilledAmount: this.formatRp(billed),
+        invFormShowRemaining: this.state.invFormScheme === 'dp',
+        invFormRemainingLabel: this.formatRp(Math.max(total - billed, 0))
+      };
+    }
+
+    return {
+      invFormProjectId: this.state.invFormProjectId,
+      onInvFormProjectChange: (e) => this.setState({ invFormProjectId: e.target.value, invFormQuotationId: '' }),
+      invFormHasProject: !!projectId,
+      invFormQuotations,
+      invFormNoQuotations: !!projectId && invFormQuotations.length === 0,
+      ...extra
+    };
+  }
+
+  projectIdOf(doc) {
+    const proj = this.state.projects.find(p => p.name === doc.project);
+    return proj ? proj.id : '';
+  }
+
+  buildPoVals() {
+    const statusMap = {
+      draft: { label: 'Draft', color: 'oklch(0.45 0.01 260)', bg: 'oklch(0.92 0.003 90)' },
+      ordered: { label: 'Ordered', color: 'oklch(0.4 0.13 250)', bg: 'oklch(0.92 0.05 250)' },
+      received: { label: 'Received', color: 'oklch(0.35 0.12 150)', bg: 'oklch(0.92 0.06 150)' }
+    };
+    const mi = this.monthInfo(this.state.poMonthOffset);
+    const pos = this.state.purchaseOrders.filter(p => p.month === mi.key);
+    const selected = pos.find(p => p.id === this.state.selectedPoId) || pos[pos.length - 1];
+    const projectName = (id) => (this.state.projects.find(pr => pr.id === id) || {}).name || '—';
+
+    const poListItems = pos.map(p => {
+      const s = statusMap[p.status];
+      const active = selected && p.id === selected.id;
+      return {
+        poNo: p.poNo, vendor: p.vendor || 'Belum ada vendor',
+        statusLabel: s.label, statusColor: s.color, statusBg: s.bg,
+        onSelect: () => this.setState({ selectedPoId: p.id }),
+        bg: active ? 'oklch(0.94 0.04 255)' : 'transparent',
+        border: active ? 'oklch(0.8 0.08 255)' : 'transparent',
+        textColor: active ? 'oklch(0.4 0.13 255)' : 'oklch(0.3 0.01 260)'
+      };
+    });
+
+    const setPoField = (field, value) => {
+      this.setState(s => ({ purchaseOrders: s.purchaseOrders.map(p => p.id === selected.id ? { ...p, [field]: value } : p) }));
+    };
+
+    const poItems = selected ? selected.items.map((it, idx) => ({
+      materialName: it.materialName, unit: it.unit, qty: it.qty, costLabel: this.formatRp(it.cost),
+      subtotalLabel: this.formatRp(it.qty * it.cost),
+      onCostChange: (e) => {
+        const cost = Number(e.target.value.replace(/[^0-9]/g, '')) || 0;
+        this.setState(s => ({ purchaseOrders: s.purchaseOrders.map(p => p.id === selected.id
+          ? { ...p, items: p.items.map((x, i) => i === idx ? { ...x, cost } : x) } : p) }));
+      }
+    })) : [];
+    const poTotal = selected ? selected.items.reduce((sum, it) => sum + it.qty * it.cost, 0) : 0;
+    const s = selected ? statusMap[selected.status] : {};
+
+    return {
+      poMonthLabel: mi.label,
+      onPoPrevMonth: () => this.setState(s => ({ poMonthOffset: s.poMonthOffset - 1 })),
+      onPoNextMonth: () => this.setState(s => ({ poMonthOffset: s.poMonthOffset + 1 })),
+      onPoThisMonth: () => this.setState({ poMonthOffset: 0 }),
+      isPoListEmpty: poListItems.length === 0,
+      poListItems,
+      selectedPoNo: selected ? selected.poNo : '',
+      selectedPoStatusLabel: s.label || '',
+      selectedPoStatusColor: s.color || '',
+      selectedPoStatusBg: s.bg || '',
+      selectedPoVendor: selected ? selected.vendor : '',
+      onPoVendorChange: (e) => setPoField('vendor', e.target.value),
+      poVendorOptions: this.state.vendors,
+      selectedPoTipe: selected ? selected.tipe : '',
+      selectedPoProjectName: selected ? projectName(selected.projectId) : '',
+      selectedPoRequestNo: selected ? ((this.state.materialRequests.find(r => r.id === selected.requestId) || {}).requestNo || selected.requestId) : '',
+      selectedPoInvoiceRef: selected ? selected.invoiceRef : '',
+      selectedPoInvoiceDate: selected ? ((this.state.materialRequests.find(r => r.id === selected.requestId) || {}).invoiceDate || '—') : '',
+      selectedPoQuotationRef: selected ? ((this.state.materialRequests.find(r => r.id === selected.requestId) || {}).quotationRef || '—') : '',
+      selectedPoQuotationDate: selected ? ((this.state.materialRequests.find(r => r.id === selected.requestId) || {}).quotationDate || '—') : '',
+      selectedPoCustomer: selected ? ((this.state.materialRequests.find(r => r.id === selected.requestId) || {}).customer || '—') : '',
+      poItems,
+      poTotalLabel: this.formatRp(poTotal),
+      onMarkOrdered: () => setPoField('status', 'ordered')
+    };
+  }
+
+  buildMaterialRequestVals() {
+    const mi = this.monthInfo(this.state.matReqMonthOffset);
+    const requests = this.state.materialRequests.filter(r => r.month === mi.key);
+    const selected = requests.find(r => r.id === this.state.selectedRequestId) || requests[0];
+
+    const materialRequestListItems = requests.map(r => {
+      const s = this.requestStatus(r);
+      const active = selected && r.id === selected.id;
+      const prodSummary = r.products.length > 1
+        ? `${r.products[0].productLabel} + ${r.products.length - 1} produk lain`
+        : r.products[0].productLabel;
+      return {
+        requestNo: r.requestNo, customer: r.customer, productLabel: prodSummary,
+        statusLabel: s.label, statusColor: s.color, statusBg: s.bg,
+        onSelect: () => this.setState({ selectedRequestId: r.id }),
+        bg: active ? 'oklch(0.94 0.04 255)' : 'transparent',
+        border: active ? 'oklch(0.8 0.08 255)' : 'transparent',
+        textColor: active ? 'oklch(0.4 0.13 255)' : 'oklch(0.3 0.01 260)'
+      };
+    });
+
+    const markPo = (reqId, productIdx, lineIdx) => {
+      this.setState(s => ({
+        materialRequests: s.materialRequests.map(r => r.id === reqId
+          ? { ...r, products: r.products.map((p, pi) => pi === productIdx
+              ? { ...p, lines: p.lines.map((l, i) => i === lineIdx ? { ...l, poCreated: true } : l) }
+              : p) }
+          : r)
+      }));
+    };
+
+    const buildLines = (product, productIdx) => product.lines.map((l, idx) => {
+      const fromStockQty = Math.min(l.needQty, l.stockQty);
+      const fromPoQty = Math.max(l.needQty - l.stockQty, 0);
+      let statusLabel, statusColor, statusBg, showPoButton = false;
+      if (fromPoQty <= 0) { statusLabel = 'Cukup dari Stok'; statusColor = 'oklch(0.35 0.12 150)'; statusBg = 'oklch(0.92 0.06 150)'; }
+      else if (l.poCreated) { statusLabel = 'Sebagian Menunggu PO'; statusColor = 'oklch(0.5 0.13 75)'; statusBg = 'oklch(0.93 0.05 75)'; }
+      else { statusLabel = fromStockQty > 0 ? 'Sebagian dari Stok, Sisanya Perlu PO' : 'Perlu PO'; statusColor = 'oklch(0.5 0.15 25)'; statusBg = 'oklch(0.93 0.06 25)'; showPoButton = true; }
+      return {
+        materialName: l.materialName, unit: l.unit, needQty: l.needQty, stockQty: l.stockQty,
+        fromStockQty, fromPoQty: fromPoQty > 0 ? fromPoQty : '—',
+        statusLabel, statusColor, statusBg, showPoButton,
+        onCreatePo: () => {
+          markPo(selected.id, productIdx, idx);
+          const newPo = {
+            id: 'po' + Date.now(), month: this.monthInfo(this.state.poMonthOffset).key, poNo: 'PO-2026-' + Math.floor(900 + Math.random() * 99),
+            vendor: '', tipe: 'Bahan Baku', status: 'draft',
+            projectId: selected.projectId || '', requestId: selected.id, invoiceRef: selected.invoiceRef,
+            items: [{ materialName: l.materialName, unit: l.unit, qty: fromPoQty, cost: 0 }]
+          };
+          this.setState(s => ({ purchaseOrders: [...s.purchaseOrders, newPo], selectedPoId: newPo.id, view: 'po' }));
+        }
+      };
+    });
+
+    const selectedRequestProducts = selected ? selected.products.map((p, pIdx) => ({
+      productLabel: p.productLabel,
+      specMaterial: p.productSpec.material,
+      specItemType: p.productSpec.itemType,
+      specCollection: p.productSpec.collection,
+      specSize: p.productSpec.size,
+      lines: buildLines(p, pIdx)
+    })) : [];
+
+    const overall = selected ? this.requestStatus(selected) : { label: '', color: '', bg: '' };
+    const ready = overall.label === 'Siap Produksi' || overall.label === 'Terpenuhi dari Stok';
+
+    return {
+      matReqMonthLabel: mi.label,
+      onMatReqPrevMonth: () => this.setState(s => ({ matReqMonthOffset: s.matReqMonthOffset - 1 })),
+      onMatReqNextMonth: () => this.setState(s => ({ matReqMonthOffset: s.matReqMonthOffset + 1 })),
+      onMatReqThisMonth: () => this.setState({ matReqMonthOffset: 0 }),
+      isMatReqListEmpty: materialRequestListItems.length === 0,
+      materialRequestListItems,
+      selectedRequestNo: selected ? selected.requestNo : '',
+      selectedRequestInvoice: selected ? selected.invoiceRef : '',
+      selectedRequestInvoiceDate: selected ? selected.invoiceDate : '',
+      selectedRequestQuotationRef: selected ? selected.quotationRef : '',
+      selectedRequestQuotationDate: selected ? selected.quotationDate : '',
+      selectedRequestCustomer: selected ? selected.customer : '',
+      selectedRequestProjectName: selected ? ((this.state.projects.find(pr => pr.id === selected.projectId) || {}).name || '—') : '',
+      selectedRequestProductCount: selected ? selected.products.length : 0,
+      selectedRequestStatusLabel: overall.label,
+      selectedRequestStatusColor: overall.color,
+      selectedRequestStatusBg: overall.bg,
+      selectedRequestProducts,
+      productionButtonDisabled: !ready,
+      productionButtonBg: ready ? 'oklch(0.55 0.14 255)' : 'oklch(0.85 0.003 90)',
+      productionButtonCursor: ready ? 'pointer' : 'not-allowed',
+      productionButtonLabel: ready ? 'Lanjut ke Produksi (Buat SPK)' : 'Menunggu Material Terpenuhi'
+    };
+  }
+
+  updateProduct(id, patch) {
+    this.setState(s => ({ catalog: s.catalog.map(p => p.id === id ? { ...p, ...patch } : p) }));
+  }
+
+  setBomCombo(key, patch) {
+    this.setState(s => ({ bomCombo: { ...s.bomCombo, [key]: { ...(s.bomCombo[key] || { query: '', open: false }), ...patch } } }));
+  }
+
+  buildProductMasterVals() {
+    const catalog = this.state.catalog;
+    const search = (this.state.productSearch || '').toLowerCase();
+    const filtered = catalog.filter(p => !search || p.name.toLowerCase().includes(search));
+    const selected = catalog.find(p => p.id === this.state.productMasterSelectedId) || filtered[0] || catalog[0];
+
+    const productListItems = filtered.map(p => ({
+      id: p.id,
+      name: p.name,
+      collection: p.collection,
+      onSelect: () => this.setState({ productMasterSelectedId: p.id }),
+      bg: selected && p.id === selected.id ? 'oklch(0.94 0.04 255)' : 'transparent',
+      border: selected && p.id === selected.id ? 'oklch(0.8 0.08 255)' : 'transparent',
+      textColor: selected && p.id === selected.id ? 'oklch(0.4 0.13 255)' : 'oklch(0.3 0.01 260)'
+    }));
+
+    const updateTierBom = (tierId, newBom) => {
+      this.updateProduct(selected.id, { tiers: selected.tiers.map(t => t.id === tierId ? { ...t, bom: newBom } : t) });
+    };
+    const bomComboKey = (tierId, idx) => `${selected ? selected.id : ''}_${tierId}_${idx}`;
+    const materialCatalog = this.state.materialCatalog;
+
+    const tierCards = selected ? selected.tiers.map(t => {
+      const totalCost = t.bom.reduce((sum, b) => sum + (b.cost || 0), 0);
+      const bomRows = t.bom.map((b, idx) => {
+        const comboKey = bomComboKey(t.id, idx);
+        const combo = this.state.bomCombo[comboKey] || { query: '', open: false };
+        const mat = materialCatalog.find(m => m.id === b.materialId);
+        const query = combo.query || (mat ? mat.name : '');
+        const filteredMaterials = materialCatalog
+          .filter(m => !query || m.name.toLowerCase().includes(query.toLowerCase()))
+          .map(m => ({
+            id: m.id,
+            name: m.name,
+            unit: m.unit,
+            onSelect: () => {
+              const newBom = t.bom.map((x, i) => i === idx ? { ...x, materialId: m.id, cost: x.cost || m.defaultCost } : x);
+              updateTierBom(t.id, newBom);
+              this.setBomCombo(comboKey, { query: '', open: false });
+            }
+          }));
+        const exactMatch = materialCatalog.some(m => m.name.toLowerCase() === query.toLowerCase());
+        return {
+          materialId: b.materialId,
+          materialQuery: query,
+          materialOpen: combo.open,
+          filteredMaterials,
+          showCreateMaterial: query.trim().length > 0 && !exactMatch,
+          unit: mat ? mat.unit : '',
+          qty: b.qty,
+          costLabel: this.formatRp(b.cost || 0),
+          onMaterialQueryChange: (e) => this.setBomCombo(comboKey, { query: e.target.value, open: true }),
+          onMaterialFocus: () => this.setBomCombo(comboKey, { open: true }),
+          onMaterialBlur: () => setTimeout(() => this.setBomCombo(comboKey, { open: false }), 120),
+          onCreateMaterial: () => {
+            const name = (this.state.bomCombo[comboKey] || {}).query.trim();
+            const newMaterial = { id: 'm' + Date.now(), name, unit: 'unit', defaultCost: 0 };
+            this.setState(s => ({ materialCatalog: [...s.materialCatalog, newMaterial] }));
+            const newBom = t.bom.map((x, i) => i === idx ? { ...x, materialId: newMaterial.id } : x);
+            updateTierBom(t.id, newBom);
+            this.setBomCombo(comboKey, { query: '', open: false });
+          },
+          onQtyChange: (e) => updateTierBom(t.id, t.bom.map((x, i) => i === idx ? { ...x, qty: e.target.value } : x)),
+          onCostChange: (e) => updateTierBom(t.id, t.bom.map((x, i) => i === idx ? { ...x, cost: Number(e.target.value.replace(/[^0-9]/g, '')) || 0 } : x)),
+          onRemove: () => updateTierBom(t.id, t.bom.filter((_, i) => i !== idx))
+        };
+      });
+      return {
+        id: t.id,
+        name: t.name,
+        used: t.used,
+        priceLabel: this.formatRp(t.price),
+        bomRows,
+        onAddComponent: () => updateTierBom(t.id, [...t.bom, { materialId: null, qty: '', cost: 0 }]),
+        totalCostLabel: this.formatRp(totalCost)
+      };
+    }) : [];
+
+    const extraSpecs = selected ? (selected.extraSpecs || []).map((sp, idx) => ({
+      label: sp.label,
+      value: sp.value,
+      onLabelChange: (e) => this.updateProduct(selected.id, { extraSpecs: selected.extraSpecs.map((x, i) => i === idx ? { ...x, label: e.target.value } : x) }),
+      onValueChange: (e) => this.updateProduct(selected.id, { extraSpecs: selected.extraSpecs.map((x, i) => i === idx ? { ...x, value: e.target.value } : x) }),
+      onRemove: () => this.updateProduct(selected.id, { extraSpecs: selected.extraSpecs.filter((_, i) => i !== idx) })
+    })) : [];
+
+    return {
+      productSearch: this.state.productSearch,
+      onProductSearchChange: (e) => this.setState({ productSearch: e.target.value }),
+      productListItems,
+      selectedProductName: selected ? selected.name : '',
+      onSelectedProductNameChange: (e) => selected && this.updateProduct(selected.id, { name: e.target.value }),
+      selectedProductMaterial: selected ? selected.material : '',
+      selectedProductItemType: selected ? selected.itemType : '',
+      selectedProductCollection: selected ? selected.collection : '',
+      selectedProductSize: selected ? selected.size : '',
+      extraSpecs,
+      addExtraSpec: () => selected && this.updateProduct(selected.id, { extraSpecs: [...(selected.extraSpecs || []), { label: 'Spec Baru', value: '' }] }),
+      tierCards
+    };
+  }
+
+  calcTotals(items) {
+    const subtotalNumber = items.reduce((sum, it) => sum + (it.lineTotal || 0), 0);
+    const { discountType, discountValue } = this.state;
+    const discountAmount = discountType === 'percent'
+      ? subtotalNumber * (Number(discountValue) || 0) / 100
+      : (Number(discountValue) || 0);
+    const afterDiscount = Math.max(subtotalNumber - discountAmount, 0);
+    const ppnAmount = afterDiscount * 0.11;
+    const grandTotal = afterDiscount + ppnAmount;
+    return {
+      subtotal: this.formatRp(subtotalNumber),
+      discountType,
+      discountValue,
+      onDiscountTypeChange: (e) => this.setState({ discountType: e.target.value }),
+      onDiscountValueChange: (e) => this.setState({ discountValue: e.target.value }),
+      ppnAmount: this.formatRp(ppnAmount),
+      grandTotal: this.formatRp(grandTotal)
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <!-- ===============================================-->
+    <!--    Document Title-->
+    <!-- ===============================================-->
+    <title>SVASHTAHOME</title>
+
+
+    <!-- ===============================================-->
+    <!--    Favicons-->
+    <!-- ===============================================-->
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/img/favicons/logo_svashtahome.png">
+    <link rel="manifest" href="../assets/img/favicons/manifest.json">
+    <meta name="msapplication-TileImage" content="../assets/img/favicons/mstile-150x150.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../vendors/overlayscrollbars/OverlayScrollbars.min.js"></script>
+
+
+    <!-- ===============================================-->
+    <!--    Stylesheets-->
+    <!-- ===============================================-->
+    <link href="../vendors/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="../assets/css/theme.css" rel="stylesheet" />
+    <link href="../assets/css/user.css" rel="stylesheet" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;900&amp;family=Roboto:wght@100;300;400;500;700;900&amp;display=swap" rel="stylesheet">
+  </head>
+
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-theme fixed-top p-0" data-navbar-on-scroll="data-navbar-on-scroll">
+		<div class="container-fluid">
+			  <a class="navbar-brand brand-tight" href="../index.html">
+				<img src="../assets/img/favicons/svashta_symbol_white.png" alt="Svashta Icon" width="80" height="50">
+				<span>SVASHTA HOME</span>
+			  </a>
+			
+			<button class="navbar-toggler p-0" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNavbarCollapse" aria-controls="primaryNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+			<div class="collapse navbar-collapse" id="primaryNavbarCollapse">
+			  <ul class="navbar-nav ms-auto">
+				<li class="nav-item"><a class="nav-link fw-medium " href="../index.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Home</span></a>
+				<!--  
+				  <div class="dropdown-menu dropdown-menu-end py-0 overflow-hidden" aria-labelledby="navbarDropdownMenuLink1"><a class="dropdown-item" href="homes/one-page.html">One page</a><a class="dropdown-item" href="homes/header-static.html">Static header</a><a class="dropdown-item" href="homes/static-classic.html">Static classic</a><a class="dropdown-item" href="homes/slider-header.html">Slider header</a><a class="dropdown-item" href="homes/slider-classic.html">Slider classic</a><a class="dropdown-item" href="homes/text-left-header.html">Text left header</a><a class="dropdown-item" href="homes/text-left-classic.html">Text left classic</a><a class="dropdown-item" href="homes/typed-text-header.html">Typed text header</a><a class="dropdown-item" href="homes/typed-text-classic.html">Typed text classic</a><a class="dropdown-item" href="homes/text-left-slider.html">Text left slider</a><a class="dropdown-item" href="homes/text-left-classic-slider.html">Text left classic slider</a><a class="dropdown-item" href="homes/video-background.html">Video background</a><a class="dropdown-item" href="homes/video-classic.html">Video classic</a><a class="dropdown-item" href="homes/gradient-background.html">Gradient background</a><a class="dropdown-item" href="homes/gradient-classic.html">Gradient classic</a></div>
+				--!>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/blog.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Blog</span></a>
+				<!--  
+				  <div class="dropdown-menu dropdown-menu-end py-0 overflow-hidden" aria-labelledby="navbarDropdownMenuLink1"><a class="dropdown-item" href="homes/one-page.html">One page</a><a class="dropdown-item" href="homes/header-static.html">Static header</a><a class="dropdown-item" href="homes/static-classic.html">Static classic</a><a class="dropdown-item" href="homes/slider-header.html">Slider header</a><a class="dropdown-item" href="homes/slider-classic.html">Slider classic</a><a class="dropdown-item" href="homes/text-left-header.html">Text left header</a><a class="dropdown-item" href="homes/text-left-classic.html">Text left classic</a><a class="dropdown-item" href="homes/typed-text-header.html">Typed text header</a><a class="dropdown-item" href="homes/typed-text-classic.html">Typed text classic</a><a class="dropdown-item" href="homes/text-left-slider.html">Text left slider</a><a class="dropdown-item" href="homes/text-left-classic-slider.html">Text left classic slider</a><a class="dropdown-item" href="homes/video-background.html">Video background</a><a class="dropdown-item" href="homes/video-classic.html">Video classic</a><a class="dropdown-item" href="homes/gradient-background.html">Gradient background</a><a class="dropdown-item" href="homes/gradient-classic.html">Gradient classic</a></div>
+				--!>
+				</li>
+				<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink2" href="#" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Product</span></a>
+				  <div class="dropdown-menu dropdown-menu-end dropdown-pages py-3" aria-labelledby="navbarDropdownMenuLink2">
+					<div class="row">
+					  <div class="col-6 col-md-6 px-1">
+						<ul class="nav flex-column">
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_sofa.html">Sofa</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_table.html">Table</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_chair.html">Chair</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_bed.html">Bed</a></li>
+						</ul>
+					  </div>
+					  <div class="col-6 col-md-6 px-1">
+						<ul class="nav flex-column">
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_cabinet.html">Cabinet</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_outdoor.html">Outdoor</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_collections.html">Collections</a></li>
+						  <li class="nav-item"><a class="nav-link fw-medium px-0 py-2" href="../pages/gallery_collaborations.html">Collaborations</a></li>
+						</ul>
+					  </div>
+					
+					</div>
+				  </div>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/work-wide.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Projects</span></a>
+				</li>
+				<li class="nav-item"><a class="nav-link fw-medium "  href="../pages/custom_order.html" data-bs-toggle="dropdown-on-hover" aria-haspopup="true" aria-expanded="false"><span class="nav-link-text">Custom Order</span></a>
+				</li>
+			  </ul>
+			</div>
+		</div>
+      </div>
+    </nav>
+
+    <!-- ===============================================-->
+    <!--    Main Content-->
+    <!-- ===============================================-->
+    <main class="main" id="top">
+      <div class="preloader" id="preloader" data-preloader>
+        <div class="preloader-wrapper big active" data-preloader>
+          <div class="spinner-layer spinner-white-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+              <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="text-center overflow-hidden py-0" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+
+        <div class="bg-holder overlay  parallax" style="background-image:url(../assets/img/headers/header-9.jpg);">
+        </div>
+        <!--/.bg-holder-->
+
+        <div class="container-fluid">
+          <div class="header-overlay"></div>
+          <div class="position-relative pt-10 pb-8">
+            <div class="header-text">
+              <div class="overflow-hidden">
+                <h1 class="display-3 fs-7 text-white fw-lighter ls-2" data-zanim-xs='{"duration":2,"delay":0}'>Projects</h1>
+              </div>
+              <div class="overflow-hidden">
+                <div class="d-flex justify-content-center" data-zanim-xs='{"duration":2,"delay":0.1}'>
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb text-uppercase ls-2">
+                      <li class="breadcrumb-item"><a class="text-400 hover-color-white" href="../homes/header-static.html">Home</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">Projects</li>
+                    </ol>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="text-center pb-3 pb-3" id="portfolio">
+
+        <div class="container-fluid">
+          <ul class="nav font-sans-serif mb-3 justify-content-center pb-3" data-filter-nav="data-filter-nav">
+            <li class="nav-item"><a class="isotope-nav text-uppercase font-base active" href="#!" data-filter="*">Collections</a></li>
+			<!--
+            <li class="nav-item"> <a class="isotope-nav text-uppercase font-base" href="#!" data-filter=".collections">Collections</a></li>
+            <li class="nav-item"> <a class="isotope-nav text-uppercase font-base" href="#!" data-filter=".outdoor">Outdoor</a></li>
+            <li class="nav-item"> <a class="isotope-nav text-uppercase font-base" href="#!" data-filter=".indoor">Indoor</a></li>
+            <li class="nav-item"> <a class="isotope-nav text-uppercase font-base" href="#!" data-filter=".marketing">Marketing </a></li>
+			--!>
+          </ul>
+          <div class="row g-3 mt-3" data-rp-isotope='{"layoutMode":"packery"}'>
+            <div class="col-sm-6 col-lg-4 px-2 isotope-item collections" data-zanim-xs='{"delay":0}'>
+              <div class="hoverdir-item my-0" data-zanim-xs='{"duration":1.5,"animation":"zoom-in","delay":0}'>
+                <div class="hoverdir-item-content"><a class="d-block" href="../pages/projects_goa.html"><img class="img-fluid rounded" src="../assets/img/projects/project_goa.jpg" alt="" />
+                    <div class="hoverdir-text">
+                      <h3 class="text-white lh-1 fs-2">POOL TERRACE</h3>
+                      <p class="ls-1 mb-0 text-700">COLVA VILLA <br> Goa, India</p>
+                    </div>
+                  </a></div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-4 px-2 isotope-item collections" data-zanim-xs='{"delay":0.2}'>
+              <div class="hoverdir-item my-0" data-zanim-xs='{"duration":1.5,"animation":"zoom-in","delay":0}'>
+                <div class="hoverdir-item-content"><a class="d-block" href="../pages/projects_sanctuary.html"><img class="img-fluid rounded" src="../assets/img/projects/project_sanctuary.jpg" alt="" />
+                    <div class="hoverdir-text">
+                      <h3 class="text-white lh-1 fs-2">SANCTUARY PROJECTS</h3>
+                      <p class="ls-1 mb-0 text-700"></p>
+                    </div>
+                  </a></div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-4 px-2 isotope-item collections" data-zanim-xs='{"delay":0.2}'>
+              <div class="hoverdir-item my-0" data-zanim-xs='{"duration":1.5,"animation":"zoom-in","delay":0}'>
+                <div class="hoverdir-item-content"><a class="d-block" href="../pages/projects_urban_tropical.html"><img class="img-fluid rounded" src="../assets/img/projects/project_urban_tropical.jpg" alt="" />
+                    <div class="hoverdir-text">
+                      <h3 class="text-white lh-1 fs-2">URBAN TROPICAL</h3>
+                      <p class="ls-1 mb-0 text-700"></p>
+                    </div>
+                  </a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="testimonial">
+
+        <div class="bg-holder overlay overlay-0" style="background-image:url(../assets/img/backgrounds/testimonial.jpg);">
+        </div>
+        <!--/.bg-holder-->
+
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-12 mb-4 text-center" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+              <div class="overflow-hidden">
+                <h2 class="fs-md-5 text-white mb-2" data-zanim-xs='{"duration":1.5,"delay":0}'>Client's testimonial</h2>
+              </div>
+              <div class="overflow-hidden">
+                <p class="fs--1 text-uppercase text-white ls-1 mb-0" data-zanim-xs='{"duration":1.5,"delay":0.1}'>see what our top valuable clients say Blog</p>
+              </div>
+              <div class="overflow-hidden">
+                <hr class="hr-short bg-white" data-zanim-xs='{"duration":1.5,"delay":0.2}' />
+              </div>
+            </div>
+            <div class="col-sm-10 col-lg-8 text-center text-md-start px-sm-0">
+              <div class="border rounded px-3 px-sm-4 px-md-6 py-5 mt-5">
+                <div class="testimonial-quote"></div>
+                <div class="rounded-circle testimonial-avatar"></div>
+                <div class="swiper-testimonial-container">
+                  <div class="swiper-nav d-none d-lg-block">
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                  </div>
+                  <div class="swiper testimonial-slider" data-swiper='{"navigation":{"nextEl":".swiper-testimonial-container .swiper-button-next","prevEl":".swiper-testimonial-container .swiper-button-prev"},"spaceBetween":5,"loop":true,"loopedSlides":5,"slideToClickedSlide":true}'>
+                    <div class="swiper-wrapper">
+                      <div class="swiper-slide">
+                        <div class="item px-2" data-avatar="../assets/img/team/9.jpg">
+                          <p class="text-white font-base mt-4 mt-md-0"> Reign superbly blends all the best elements. It offers the power of bootstrap with useful blocks and extensions. It also includes the most elegant typographic features and unique sections which makes our developers incredibly happy.</p>
+                          <div class="row g-0 justify-content-between align-items-end">
+                            <div class="col-12 col-md mb-3 mb-md-0">
+                              <h4 class="text-white fw-normal mb-0 fs-1 ls-1">Peter Gregory</h4>
+                              <p class="fs--1 text-uppercase text-500 mb-0 ls-2">CEO &amp; Founder</p>
+                            </div>
+                            <div class="col-12 col-md-4 text-center text-md-end"><img class="testimonial-company-logo" src="../assets/img/logo/b&amp;w/1.png" alt="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="swiper-slide">
+                        <div class="item px-2" data-avatar="../assets/img/team/10.jpg">
+                          <p class="text-white font-base mt-4 mt-md-0">Reign template is an indispensable collection of powerful tools to do just that. I’m a long-time customer of Reign template and highly recommend it to anyone who is serious about to grow his/her company through web all over the world.</p>
+                          <div class="row g-0 justify-content-between align-items-end">
+                            <div class="col-12 col-md mb-3 mb-md-0">
+                              <h4 class="text-white fw-normal mb-0 fs-1 ls-1">Lily Rose</h4>
+                              <p class="fs--1 text-uppercase text-500 mb-0 ls-2">Customer Support</p>
+                            </div>
+                            <div class="col-12 col-md-4 text-center text-md-end"><img class="testimonial-company-logo" src="../assets/img/logo/b&amp;w/7.png" alt="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="swiper-slide">
+                        <div class="item px-2" data-avatar="../assets/img/team/13.jpg">
+                          <p class="text-white font-base mt-4 mt-md-0">The team behind Reign sure know what they are doing and their responsibility! If you’re looking for managed hosting, you’ll find a stable, secure and so well optimized option in Reign sites and all other products price range.</p>
+                          <div class="row g-0 justify-content-between align-items-end">
+                            <div class="col-12 col-md mb-3 mb-md-0">
+                              <h4 class="text-white fw-normal mb-0 fs-1 ls-1">Richard Mark</h4>
+                              <p class="fs--1 text-uppercase text-500 mb-0 ls-2">Marketing Manager</p>
+                            </div>
+                            <div class="col-12 col-md-4 text-center text-md-end"><img class="testimonial-company-logo" src="../assets/img/logo/b&amp;w/4.png" alt="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="swiper-pagination d-block d-lg-none"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="bg-black py-6 clients">
+
+        <div class="container">
+          <div class="swiper-container swiper-clients">
+            <div class="swiper-nav d-none d-lg-block">
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+            </div>
+            <div class="swiper" data-swiper='{"navigation":{"nextEl":".swiper-container .swiper-button-next","prevEl":".swiper-container .swiper-button-prev"},"autoplay":true,"loop":true,"slidesPerView":2,"grabCursor":true,"breakpoints":{"576":{"slidesPerView":3},"768":{"slidesPerView":3},"992":{"slidesPerView":4},"1200":{"slidesPerView":6}}}'>
+              <div class="swiper-wrapper">
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+                <div class="swiper-slide d-flex justify-content-center" style="width:140px"><img class="opacity-50" src="../assets/img/favicons/svashta_symbol_white.png" alt="" width="130" /></div>
+              </div>
+              <div class="swiper-pagination d-block d-lg-none"></div>
+            </div>
+          </div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+
+
+      <!-- ============================================-->
+      <!-- <section> begin ============================-->
+      <section class="text-center" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+
+        <div class="container">
+          <div class="overflow-hidden">
+            <h4 class="fw-medium mb-1" data-zanim-xs='{"duration":1.5,"delay":0}'>Make a project With Us</h4>
+          </div>
+          <div class="overflow-hidden">
+            <p data-zanim-xs='{"duration":1.5,"delay":0.1}'>Our Team is always ready to help you</p>
+          </div>
+          <div data-zanim-xs='{"from":{"opacity":0,"y":30},"to":{"opacity":1,"y":0},"duration":1.5,"delay":0.3}'><a class="btn btn-dark btn-sm hvr-sweep-top mt-2" href="https://wa.me/6281320300880">Start Now</a></div>
+        </div>
+        <!-- end of .container-->
+
+      </section>
+      <!-- <section> close ============================-->
+      <!-- ============================================-->
+
+
+    </main>
+    <!-- ===============================================-->
+    <!--    End of Main Content-->
+    <!-- ===============================================-->
+
+
+
+
+    <!--===============================================-->
+    <!--    Footer-->
+    <!--===============================================-->
+
+
+    <!-- ============================================-->
+    <!-- <section> begin ============================-->
+    <section class="bg-1100 py-6 pb-9 px-3 px-lg-0" id = "reach-us">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="row">
+              <div class="col-6 col-md-3 ps-lg-4 mb-4 mb-lg-0">
+                <h5 class="text-white mb-3">Company</h5>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html#about-us">About</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html#services">Our Services</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html">Certifications</a></li>
+                  <li class="mb-1"><a class="text-700 hover-color-white" href="../index.html">Careers</a></li>
+                </ul>
+              </div>
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+				<div class="col-6 col-md-3 ps-4 mb-4 mb-lg-0">
+				  <h5 class="text-white mb-3">Contact US</h5>
+				  <ul class="list-unstyled text-white">
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/whatsapp.png" alt="WhatsApp" class="me-2">
+					  <a href="https://wa.me/6281320300880" class="text-white text-decoration-none" target="_blank">0813-2030-0880</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/instagram-new--v1.png" alt="Instagram" class="me-2">
+					  <a href="https://instagram.com/svashta_home" class="text-white text-decoration-none" target="_blank">@svashta_home</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/youtube-play.png" alt="YouTube" class="me-2">
+					  <a href="https://youtube.com/@SvashtaHome" class="text-white text-decoration-none" target="_blank">Svashta Home</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/domain.png" alt="Website" class="me-2">
+					  <a href="https://www.svashtahome.com" class="text-white text-decoration-none" target="_blank">svashtahome.com</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/new-post.png" alt="Email" class="me-2">
+					  <a href="mailto:project@svashtahome.com" class="text-white text-decoration-none">project@svashtahome.com</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+					  <img src="https://img.icons8.com/ios-filled/24/ffffff/link.png" alt="Linktree" class="me-2">
+					  <a href="https://linktr.ee/svashtahome" class="text-white text-decoration-none" target="_blank">svashtahome</a>
+					</li>
+					<li class="mb-2 d-flex align-items-center">
+                        <img src="https://img.icons8.com/ios-filled/24/ffffff/marker.png" alt="Location" class="me-2">
+                        <a href="https://www.google.com/maps/place/Svashta+Home+-+Bespoke+Fine+Furnishings/@-6.3170114,106.6476314,17z/data=!3m1!4b1!4m6!3m5!1s0x2e69e56a7880e9bb:0x100b633685e43986!8m2!3d-6.3170168!4d106.6525023!16s%2Fg%2F11sv6dj5ls?entry=ttu&g_ep=EgoyMDI1MDUwNy4wIKXMDSoASAFQAw%3D%3D"
+                            class="text-white text-decoration-none"
+                            target="_blank" rel="noopener noreferrer">
+                            Ruko 92 Avenix A/11 - BSD City, Kab. Tangerang, Banten, Indonesia
+                        </a>
+                    </li>
+				  </ul>
+				</div>
+              <div class="col-md-6 ps-md-4">
+                <h5 class="text-white mb-3">FROM THE BLOG</h5>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog1_post.html">Why Javanese Teak Stands Out: A Comparative Guide to Premium Furniture Woods</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog2_post.html">Choosing High-Quality Furniture: A Sustainable Way of Living</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                  <li class="mb-3"><a class="text-700 hover-color-white" href="../pages/blog3_post.html">Designing for Comfort: Why Ergonomic Furniture is Essential for Health and Beauty</a>
+                    <p class="text-900 hover-color-white mb-0">May 18, 2025</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end of .container-->
+
+    </section>
+    <!-- <section> close ============================-->
+    <!-- ============================================-->
+
+
+    <footer class="footer text-center bg-black py-3 position-absolute w-100 bottom-0">
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col-12 col-md-auto mb-1 mb-md-0">
+            <p class="mb-0">COPYRIGHT © SVASHTAHOME 2025<span class="mx-2"></span></P>
+          </div>
+        </div>
+      </div>
+    </footer><a class="btn-back-to-top" href="#top"><img src="../assets/img/line-icons/upload-arrow.svg" width="8" alt=""></a>
+
+
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script src="../vendors/popper/popper.min.js"></script>
+    <script src="../vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="../vendors/anchorjs/anchor.min.js"></script>
+    <script src="../vendors/is/is.min.js"></script>
+    <script src="../vendors/hover-dir/hoverDir.min.js"></script>
+    <script src="../vendors/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="../vendors/isotope-packery/packery-mode.pkgd.min.js"></script>
+    <script src="../vendors/swiper/swiper-bundle.min.js"></script>
+    <script src="../vendors/fontawesome/all.min.js"></script>
+    <script src="../vendors/lodash/lodash.min.js"></script>
+    <script src="../vendors/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="../vendors/gsap/gsap.js"></script>
+    <script src="../vendors/gsap/customEase.js"></script>
+    <script src="../assets/js/theme.js"></script>
+
+	<style>
+    /* Prevent horizontal scroll caused by fixed buttons */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* WhatsApp Floating Button */
+    .whatsapp-float {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25d366;
+      color: white;
+      border-radius: 50px;
+      text-align: center;
+      box-shadow: 2px 2px 3px #999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+    }
+
+    .whatsapp-float img {
+      width: 35px;
+      height: 35px;
+    }
+
+    /* Speaker Toggle */
+    .speaker-toggle {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      bottom: 90px;
+      right: 20px;
+      background-color: #808080;
+      border-radius: 40px;
+      text-align: center;
+      box-shadow: 2px 2px 3px #999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+
+    .speaker-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .speaker-toggle img {
+      width: 35px;
+      height: 35px;
+    }
+
+    /* Optional: adjust spacing for small screens */
+    @media (max-width: 375px) {
+      .whatsapp-float,
+      .speaker-toggle {
+        right: 10px;
+      }
+    }
+  </style>
+<!-- Background Music -->
+  <audio id="background-music" loop >
+    <source src="es_creamer.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Speaker Button -->
+  <div class="speaker-toggle" onclick="toggleAudio()" aria-label="Toggle Music">
+    <img id="speaker-icon" src="https://img.icons8.com/ios-filled/50/ffffff/speaker.png" alt="Speaker" />
+  </div>
+  <!-- WhatsApp Floating Button -->
+  <a
+    href="https://wa.me/6281320300880?text=Hello%20Svashta%20Home%20I'm%20Interested%20in%20the%20Product"
+    class="whatsapp-float"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Chat on WhatsApp"
+  >
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/whatsapp.png" alt="WhatsApp Icon" />
+  </a>
+<script>
+  const music = document.getElementById("background-music");
+  const speakerIcon = document.getElementById("speaker-icon");
+  const playMusicButton = document.querySelector(".play-music-button");
+  let isPlaying = false;
+
+  // This function will be called when the speaker button is clicked
+  function toggleAudio() {
+    if (isPlaying) {
+      music.pause();
+      speakerIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/mute.png";
+    } else {
+      music.play().then(() => {
+        speakerIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/speaker.png";
+      }).catch(error => {
+        console.error("Error playing audio:", error);
+      });
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // Function to start the music when the user clicks "Play Music"
+  function startMusic() {
+    music.play().then(() => {
+      console.log("Music started after user interaction.");
+      playMusicButton.style.display = "none"; // Hide the button after music starts
+    }).catch(error => {
+      console.error("Error starting music:", error);
+    });
+  }
+
+  </body>
+
+</html>
