@@ -1,0 +1,67 @@
+name: Deploy ke cPanel
+
+# Tiap push ke main langsung naik ke server.
+# Kalau mau MANUAL doang (lebih aman buat produksi), hapus blok "push:" di bawah —
+# nanti deploy cuma jalan kalau lo pencet tombol "Run workflow" di tab Actions.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backoffice.svashtahome.com/**'
+      - 'backoffice-shared/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Webroot subdomain ---
+      - name: Upload webroot
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./backoffice.svashtahome.com/
+          server-dir: backoffice.svashtahome.com/
+          dry-run: true   # <-- PERCOBAAN PERTAMA: cuma simulasi, server tidak disentuh
+          # File di server yang cocok pola ini TIDAK diupload DAN TIDAK dihapus.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            uploads/**
+            **/uploads/**
+            .ftpquota
+            error_log
+            **/error_log
+            **/*.log
+
+      # --- Kode share di luar webroot ---
+      - name: Upload backoffice-shared
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./backoffice-shared/
+          server-dir: backoffice-shared/
+          dry-run: true   # <-- PERCOBAAN PERTAMA: cuma simulasi, server tidak disentuh
+          # config.php = kredensial DB asli, cuma ada di server. JANGAN disentuh.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            config.php
+            config.local.php
+            **/*.log
