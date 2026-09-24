@@ -28,6 +28,58 @@ const MP_PRICE_CATEGORY_SPEC = [
 ];
 
 /**
+ * Berkas wajib sebelum Tagihan Pelunasan boleh dibuat (brief PPT slide 3).
+ * Disimpan sebagai qc_type di manufaktur_penawaran_qc — tambah jenis baru cukup di sini,
+ * gak perlu ALTER TABLE.
+ */
+const MP_QC_TYPES = [
+    'foto_barang_jadi' => 'Foto Hasil Barang Jadi',
+    'qc_bahan_mentah' => 'Form QC Bahan Mentah',
+    'qc_komponen' => 'Form QC Komponen',
+    'qc_gerinda_amplas' => 'Form QC Gerinda dan Amplas',
+    'qc_finishing' => 'Form QC Finishing',
+    'qc_packaging' => 'Form QC Packaging',
+];
+
+/** Kode organisasi di nomor dokumen — ikut format yang dipakai user: 0001-MJ-VIII-26. */
+const MP_DOC_ORG_CODE = 'MJ';
+
+/** Bulan angka -> romawi, buat nomor dokumen gaya user (VIII = Agustus). */
+function mp_roman_month(int $month): string
+{
+    return ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][$month] ?? '';
+}
+
+/** Rakit nomor dokumen: {prefix}{urut 4 digit}-MJ-{bulan romawi}-{2 digit tahun}. */
+function mp_format_doc_number(int $seq, int $year, int $month, string $prefix = ''): string
+{
+    return sprintf('%s%04d-%s-%s-%02d', $prefix, $seq, MP_DOC_ORG_CODE, mp_roman_month($month), $year % 100);
+}
+
+/** Total harga 1 baris (jumlah semua komponen biaya) — belum dikali qty. */
+function mp_line_unit_total(array $line): float
+{
+    return array_sum(array_map(fn($p) => (float) $p['price_value'], $line['prices'] ?? []));
+}
+
+/** Grand total dokumen = SUM(total harga per unit x qty) — sama kayak di form contoh MJ/MMT. */
+function mp_grand_total(array $lines): float
+{
+    $total = 0.0;
+    foreach ($lines as $l) {
+        $total += mp_line_unit_total($l) * (float) ($l['qty'] ?? 0);
+    }
+    return $total;
+}
+
+/** Ambil angka persen dari teks ketentuan DP ("DP 50%" -> 50.0). Null kalau gak kebaca. */
+function mp_parse_dp_percent(?string $dpTerms): ?float
+{
+    if (!$dpTerms || !preg_match('/(\d+(?:[.,]\d+)?)\s*%/', $dpTerms, $m)) return null;
+    return (float) str_replace(',', '.', $m[1]);
+}
+
+/**
  * Nomor dokumen khusus Manufaktur: PH/{tahun}/{bulan 2 digit}/{nomor 4 digit} —
  * beda dari pola next_doc_number() umum (yang pakai prefix organisasi), jadi ditulis
  * terpisah di sini biar gak ngerubah format dokumen lain (Penawaran biasa, Invoice, dst).
@@ -57,7 +109,7 @@ function next_manufaktur_ph_number(PDO $pdo, int $organizationId): string
         if ($ownTransaction) $pdo->rollBack();
         throw $e;
     }
-    return sprintf('PH/%d/%02d/%04d', $year, $month, $next);
+    return mp_format_doc_number($next, $year, $month);
 }
 
 /**
@@ -90,6 +142,66 @@ function next_manufaktur_update_no(PDO $pdo, int $organizationId): string
         throw $e;
     }
     return sprintf('UPD/%d/%02d/%04d', $year, $month, $next);
+}
+
+/**
+ * Nomor Tagihan DP / Pelunasan. Format ngikut nomor dokumen manufaktur, dikasih prefix
+ * biar kebedain sekilas: DP-0001-MJ-VIII-26 dan PL-0001-MJ-VIII-26.
+ * Counter-nya kepisah per jenis tagihan (doc_type beda), jadi urutan DP dan Pelunasan
+ * masing-masing mulai dari 1.
+ */
+function next_manufaktur_tagihan_number(PDO $pdo, int $organizationId, string $tagihanType): string
+{
+    $docType = $tagihanType === 'dp' ? 'MTG-DP' : 'MTG-PL';
+    $prefix = $tagihanType === 'dp' ? 'DP-' : 'PL-';
+    $year = (int) date('Y');
+    $month = (int) date('n');
+    $ownTransaction = !$pdo->inTransaction();
+    if ($ownTransaction) $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT last_number FROM doc_counters WHERE organization_id=? AND doc_type=? AND year=? FOR UPDATE');
+        $stmt->execute([$organizationId, $docType, $year]);
+        $row = $stmt->fetch();
+        if ($row) {
+            $next = (int) $row['last_number'] + 1;
+            $pdo->prepare('UPDATE doc_counters SET last_number=? WHERE organization_id=? AND doc_type=? AND year=?')
+                ->execute([$next, $organizationId, $docType, $year]);
+        } else {
+            $next = 1;
+            $pdo->prepare('INSERT INTO doc_counters (organization_id, doc_type, year, last_number) VALUES (?,?,?,?)')
+                ->execute([$organizationId, $docType, $year, $next]);
+        }
+        if ($ownTransaction) $pdo->commit();
+    } catch (Throwable $e) {
+        if ($ownTransaction) $pdo->rollBack();
+        throw $e;
+    }
+    return mp_format_doc_number($next, $year, $month, $prefix);
+}
+
+/** Ambil semua berkas QC 1 dokumen, dikelompokin per qc_type. */
+function mp_load_qc(PDO $pdo, int $headerId): array
+{
+    $stmt = $pdo->prepare('SELECT q.*, u.name AS uploaded_by_name FROM manufaktur_penawaran_qc q
+                           LEFT JOIN users u ON u.id=q.uploaded_by
+                           WHERE q.manufaktur_penawaran_id=? ORDER BY q.uploaded_at');
+    $stmt->execute([$headerId]);
+    $byType = array_fill_keys(array_keys(MP_QC_TYPES), []);
+    foreach ($stmt->fetchAll() as $row) {
+        if (!array_key_exists($row['qc_type'], $byType)) continue;
+        $byType[$row['qc_type']][] = $row;
+    }
+    return $byType;
+}
+
+/** Jenis QC yang belum ada berkasnya sama sekali — ini yang ngunci Tagihan Pelunasan. */
+function mp_qc_missing(array $qcByType): array
+{
+    $missing = [];
+    foreach (MP_QC_TYPES as $key => $label) {
+        if (empty($qcByType[$key])) $missing[] = $label;
+    }
+    return $missing;
 }
 
 // Dropdown searchable (combobox) di form ini: ketik nama yang udah ada = dipakai lagi,
@@ -306,6 +418,153 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 touch_manufaktur_header($pdo, $id, $user['id']);
                 $flash = ['ok', 'Status diperbarui.'];
             }
+
+        // ---- Persetujuan Mirjov atas Form Penawaran Harga dari MMT (brief PPT slide 3) ----
+        // Ini gerbangnya: selama belum disetujui, Tagihan DP gak bisa dibuat.
+        } elseif ($action === 'approve_penawaran') {
+            require_module_access('manufaktur_penawaran', 'can_edit');
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            $stmt = $pdo->prepare('SELECT approved_at FROM manufaktur_penawaran WHERE id=? AND organization_id=?');
+            $stmt->execute([$id, $org['organization_id']]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                throw new RuntimeException('Dokumen tidak ditemukan.');
+            }
+            if ($row['approved_at']) {
+                $flash = ['error', 'Dokumen ini sudah disetujui sebelumnya.'];
+            } else {
+                $pdo->prepare('UPDATE manufaktur_penawaran SET approved_by=?, approved_at=NOW(), status=? WHERE id=? AND organization_id=?')
+                    ->execute([$user['id'], 'diproses', $id, $org['organization_id']]);
+                touch_manufaktur_header($pdo, $id, $user['id']);
+                $flash = ['ok', 'Form Penawaran Harga disetujui. Tagihan DP sekarang bisa dibuat.'];
+            }
+
+        } elseif ($action === 'unapprove_penawaran') {
+            require_module_access('manufaktur_penawaran', 'can_edit');
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            // Batal setuju cuma boleh selama belum ada tagihan yang terbit — kalau sudah,
+            // tagihannya harus di-void dulu biar gak ada tagihan yatim.
+            $cnt = $pdo->prepare("SELECT COUNT(*) FROM manufaktur_tagihan WHERE manufaktur_penawaran_id=? AND status<>'void'");
+            $cnt->execute([$id]);
+            if ((int) $cnt->fetchColumn() > 0) {
+                $flash = ['error', 'Gak bisa batal setuju: sudah ada tagihan aktif. Void dulu tagihannya.'];
+            } else {
+                $pdo->prepare('UPDATE manufaktur_penawaran SET approved_by=NULL, approved_at=NULL WHERE id=? AND organization_id=?')
+                    ->execute([$id, $org['organization_id']]);
+                touch_manufaktur_header($pdo, $id, $user['id']);
+                $flash = ['ok', 'Persetujuan dibatalkan.'];
+            }
+
+        // ---- Upload berkas QC + foto barang jadi ----
+        } elseif ($action === 'upload_qc') {
+            require_module_access('manufaktur_penawaran', 'can_edit');
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            $qcType = $_POST['qc_type'] ?? '';
+            if (!array_key_exists($qcType, MP_QC_TYPES)) {
+                throw new RuntimeException('Jenis berkas QC tidak dikenal.');
+            }
+            $own = $pdo->prepare('SELECT id FROM manufaktur_penawaran WHERE id=? AND organization_id=?');
+            $own->execute([$id, $org['organization_id']]);
+            if (!$own->fetch()) throw new RuntimeException('Dokumen tidak ditemukan.');
+
+            $files = $_FILES['qc_files'] ?? null;
+            $saved = 0;
+            if ($files && !empty($files['name'])) {
+                $ins = $pdo->prepare('INSERT INTO manufaktur_penawaran_qc (manufaktur_penawaran_id, qc_type, file_path, original_name, uploaded_by) VALUES (?,?,?,?,?)');
+                foreach ($files['name'] as $j => $name) {
+                    if (($files['error'][$j] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
+                    $file = ['name' => $name, 'type' => $files['type'][$j], 'tmp_name' => $files['tmp_name'][$j], 'error' => $files['error'][$j], 'size' => $files['size'][$j]];
+                    $stored = save_manufaktur_line_attachment($file);
+                    $ins->execute([$id, $qcType, $stored['file_path'], $stored['original_name'], $user['id']]);
+                    $saved++;
+                }
+            }
+            if ($saved === 0) {
+                $flash = ['error', 'Gak ada file yang dipilih.'];
+            } else {
+                touch_manufaktur_header($pdo, $id, $user['id']);
+                $flash = ['ok', $saved . ' berkas ' . MP_QC_TYPES[$qcType] . ' diupload.'];
+            }
+
+        } elseif ($action === 'delete_qc') {
+            require_module_access('manufaktur_penawaran', 'can_edit');
+            $qcId = (int) ($_POST['qc_id'] ?? 0);
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            $stmt = $pdo->prepare('SELECT q.file_path FROM manufaktur_penawaran_qc q
+                                   JOIN manufaktur_penawaran h ON h.id=q.manufaktur_penawaran_id
+                                   WHERE q.id=? AND h.id=? AND h.organization_id=?');
+            $stmt->execute([$qcId, $id, $org['organization_id']]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $pdo->prepare('DELETE FROM manufaktur_penawaran_qc WHERE id=?')->execute([$qcId]);
+                delete_manufaktur_line_attachment($row['file_path']);
+                touch_manufaktur_header($pdo, $id, $user['id']);
+                $flash = ['ok', 'Berkas QC dihapus.'];
+            }
+
+        // ---- Tagihan DP & Pelunasan ----
+        } elseif ($action === 'create_tagihan') {
+            require_module_access('manufaktur_penawaran', 'can_create');
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            $type = $_POST['tagihan_type'] ?? '';
+            if (!in_array($type, ['dp', 'pelunasan'], true)) {
+                throw new RuntimeException('Jenis tagihan tidak dikenal.');
+            }
+            $hStmt = $pdo->prepare('SELECT * FROM manufaktur_penawaran WHERE id=? AND organization_id=?');
+            $hStmt->execute([$id, $org['organization_id']]);
+            $header = $hStmt->fetch();
+            if (!$header) throw new RuntimeException('Dokumen tidak ditemukan.');
+
+            // Gerbang 1 (dua-duanya): harga harus sudah disetujui Mirjov.
+            if (!$header['approved_at']) {
+                throw new RuntimeException('Form Penawaran Harga belum disetujui Mirjov.');
+            }
+            // Gerbang 2 (khusus pelunasan): semua berkas QC + foto barang jadi harus lengkap.
+            if ($type === 'pelunasan') {
+                $missing = mp_qc_missing(mp_load_qc($pdo, $id));
+                if ($missing) {
+                    throw new RuntimeException('Tagihan Pelunasan terkunci — belum diupload: ' . implode(', ', $missing) . '.');
+                }
+            }
+            $dupe = $pdo->prepare("SELECT COUNT(*) FROM manufaktur_tagihan WHERE manufaktur_penawaran_id=? AND tagihan_type=? AND status<>'void'");
+            $dupe->execute([$id, $type]);
+            if ((int) $dupe->fetchColumn() > 0) {
+                throw new RuntimeException('Tagihan ' . strtoupper($type) . ' untuk dokumen ini sudah ada.');
+            }
+
+            $amount = (float) preg_replace('/[^0-9]/', '', (string) ($_POST['amount'] ?? '0'));
+            if ($amount <= 0) throw new RuntimeException('Nilai tagihan harus lebih dari 0.');
+            $percentRaw = $_POST['percent'] ?? '';
+            $percent = $percentRaw !== '' ? (float) $percentRaw : null;
+            $notes = trim($_POST['notes'] ?? '') ?: null;
+
+            $pdo->beginTransaction();
+            try {
+                $docNumber = next_manufaktur_tagihan_number($pdo, $org['organization_id'], $type);
+                $pdo->prepare('INSERT INTO manufaktur_tagihan (organization_id, manufaktur_penawaran_id, doc_number, tagihan_type, amount, percent, notes, created_by) VALUES (?,?,?,?,?,?,?,?)')
+                    ->execute([$org['organization_id'], $id, $docNumber, $type, $amount, $percent, $notes, $user['id']]);
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            touch_manufaktur_header($pdo, $id, $user['id']);
+            $flash = ['ok', 'Tagihan ' . ($type === 'dp' ? 'DP' : 'Pelunasan') . ' ' . $docNumber . ' dibuat.'];
+
+        } elseif ($action === 'update_tagihan_status') {
+            require_module_access('manufaktur_penawaran', 'can_edit');
+            $tagihanId = (int) ($_POST['tagihan_id'] ?? 0);
+            $id = (int) ($_POST['manufaktur_penawaran_id'] ?? 0);
+            $status = $_POST['tagihan_status'] ?? '';
+            if (!in_array($status, ['belum_dibayar', 'lunas', 'void'], true)) {
+                throw new RuntimeException('Status tagihan tidak dikenal.');
+            }
+            $paidAt = $status === 'lunas' ? date('Y-m-d H:i:s') : null;
+            $pdo->prepare('UPDATE manufaktur_tagihan SET status=?, paid_at=?, updated_by=?, updated_at=NOW() WHERE id=? AND manufaktur_penawaran_id=? AND organization_id=?')
+                ->execute([$status, $paidAt, $user['id'], $tagihanId, $id, $org['organization_id']]);
+            touch_manufaktur_header($pdo, $id, $user['id']);
+            $flash = ['ok', 'Status tagihan diperbarui.'];
+
         } elseif ($action === 'update_line_mj') {
             require_module_access('manufaktur_penawaran', 'can_edit');
             $lineId = (int) ($_POST['line_id'] ?? 0);
@@ -460,6 +719,53 @@ if (!$isNewForm) {
             $pjStmt->execute([$selected['project_id']]);
             $projName = $pjStmt->fetch()['name'] ?? null;
         }
+
+        // ---- Approval, berkas QC, dan tagihan (alur brief PPT slide 3) ----
+        // Kolom & tabel di bawah datang dari migrasi 2026-09-04. Kalau migrasinya belum
+        // dijalanin di server, query-nya bakal gagal — sengaja ditangkep di sini biar
+        // halaman ini tetap kebuka seperti sedia kala, bukan fatal error buat semua user.
+        $mpSchemaReady = true;
+        $approvedByName = null;
+        $qcByType = array_fill_keys(array_keys(MP_QC_TYPES), []);
+        $qcMissing = array_values(MP_QC_TYPES);
+        $tagihanList = [];
+        $tagihanAktif = ['dp' => null, 'pelunasan' => null];
+        $sudahDitagih = 0.0;
+
+        // Grand total = SUM(harga per unit x qty) — dasar hitungan nilai DP & pelunasan.
+        // Cuma baca tabel lama, jadi dihitung di luar try.
+        $grandTotal = mp_grand_total($selectedLines);
+        $dpPercent = mp_parse_dp_percent($selected['dp_terms'] ?? null);
+
+        try {
+            $approvedByName = $fetchUserName($selected['approved_by'] ?? null);
+            $qcByType = mp_load_qc($pdo, (int) $selected['id']);
+            $qcMissing = mp_qc_missing($qcByType);
+
+            $tgStmt = $pdo->prepare('SELECT t.*, cu.name AS created_by_name, uu.name AS updated_by_name
+                                     FROM manufaktur_tagihan t
+                                     LEFT JOIN users cu ON cu.id=t.created_by
+                                     LEFT JOIN users uu ON uu.id=t.updated_by
+                                     WHERE t.manufaktur_penawaran_id=? ORDER BY t.created_at');
+            $tgStmt->execute([$selected['id']]);
+            $tagihanList = $tgStmt->fetchAll();
+
+            // Yang sudah ditagih (di luar yang di-void) — sisanya jadi usulan nilai pelunasan.
+            foreach ($tagihanList as $t) {
+                if ($t['status'] === 'void') continue;
+                $sudahDitagih += (float) $t['amount'];
+                $tagihanAktif[$t['tagihan_type']] = $t;
+            }
+        } catch (Throwable $e) {
+            $mpSchemaReady = false;
+        }
+
+        $sisaTagihan = max(0.0, $grandTotal - $sudahDitagih);
+        $dpSuggested = $dpPercent !== null ? round($grandTotal * $dpPercent / 100) : 0.0;
+
+        $isApproved = $mpSchemaReady && !empty($selected['approved_at']);
+        $canBillDp = $isApproved && !$tagihanAktif['dp'] && $grandTotal > 0;
+        $canBillPelunasan = $isApproved && !$tagihanAktif['pelunasan'] && !$qcMissing && $sisaTagihan > 0;
     }
 }
 ?>
@@ -697,7 +1003,7 @@ if (!$isNewForm) {
 
         <div class="card">
           <div class="mp-detail-header-card">
-            <h2><?= htmlspecialchars($selected['doc_number']) ?> <span class="pill pill-<?= $selected['status'] ?>"><?= strtoupper($selected['status']) ?></span></h2>
+            <h2><?= htmlspecialchars($selected['doc_number']) ?> <span class="pill pill-<?= $selected['status'] ?>"><?= strtoupper($selected['status']) ?></span><?php if ($mpSchemaReady && !empty($selected['approved_at'])): ?> <span class="pill" style="background:var(--ok-bg, #e7f6ec); color:var(--ok, #2f9e5e);">✔ DISETUJUI</span><?php endif; ?></h2>
             <div class="txn-detail-actions">
               <a class="btn btn-sm btn-ghost" href="manufaktur-penawaran-print.php?id=<?= $selected['id'] ?>" target="_blank">Print</a>
               <a class="btn btn-sm btn-ghost" href="manufaktur-penawaran-pdf.php?id=<?= $selected['id'] ?>" target="_blank">📎 PDF Gabungan (+lampiran)</a>
@@ -935,6 +1241,253 @@ if (!$isNewForm) {
             </div>
           </div>
         <?php endforeach; ?>
+
+        <?php
+          // ===================== ALUR LANJUTAN (brief PPT slide 3) =====================
+          // Setujui harga -> Tagihan DP -> upload QC + foto barang jadi -> Tagihan Pelunasan.
+          $mpCanEdit = has_access('manufaktur_penawaran', 'can_edit');
+          $mpIsVoidDoc = !empty($selected['deleted_at']) || $selected['status'] === 'void';
+        ?>
+        <style>
+          .mp-flow-card { margin-top:16px; }
+          .mp-flow-card h3 { margin:0 0 4px; font-size:14px; display:flex; align-items:center; gap:7px; }
+          .mp-flow-card .mp-flow-sub { margin:0 0 14px; font-size:12px; color:var(--ink-muted); }
+          .mp-total-strip { display:flex; flex-wrap:wrap; gap:20px; padding:14px 16px; border:1px solid var(--border); border-radius:10px; background:oklch(0.98 0.003 90); margin-bottom:14px; }
+          .mp-total-strip .item { display:flex; flex-direction:column; gap:3px; }
+          .mp-total-strip .k { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; color:var(--ink-muted); }
+          .mp-total-strip .v { font-size:15px; font-weight:700; }
+          .mp-approved-banner { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; background:var(--ok-bg, #e7f6ec); border:1px solid var(--ok, #2f9e5e); font-size:12.5px; }
+          .mp-warn-banner { padding:12px 14px; border-radius:10px; background:var(--amber-bg, #fdf3e2); border:1px solid var(--amber, #d9a441); font-size:12.5px; }
+          .mp-qc-row { border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+          .mp-qc-head { display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:13px; }
+          .mp-qc-head .chip { font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; }
+          .mp-qc-head .chip.ok { background:var(--ok-bg, #e7f6ec); color:var(--ok, #2f9e5e); }
+          .mp-qc-head .chip.pending { background:var(--danger-bg, #fde2e2); color:var(--danger, #b91c1c); }
+          .mp-qc-head .count { font-size:11.5px; color:var(--ink-muted); margin-left:auto; }
+          .mp-qc-files { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+          .mp-qc-file { position:relative; }
+          .mp-qc-file img { width:74px; height:74px; object-fit:cover; border-radius:7px; border:1px solid var(--border); cursor:pointer; display:block; }
+          .mp-qc-file .del { position:absolute; top:-6px; right:-6px; background:var(--danger, #b91c1c); color:#fff; border:none; border-radius:999px; width:19px; height:19px; font-size:11px; line-height:1; cursor:pointer; }
+          .mp-qc-upload { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+          .mp-qc-upload input[type=file] { font-size:12px; flex:1; min-width:180px; }
+          .mp-tagihan-table { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:14px; }
+          .mp-tagihan-table th { text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.02em; color:var(--ink-muted); padding:7px 9px; border-bottom:1px solid var(--border); }
+          .mp-tagihan-table td { padding:9px; border-bottom:1px solid var(--border); vertical-align:middle; }
+          .mp-tagihan-table td.amount { text-align:right; font-weight:700; white-space:nowrap; }
+          .mp-bill-form { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; padding:12px 14px; border:1px dashed var(--border); border-radius:10px; margin-bottom:10px; }
+          .mp-bill-form label { display:block; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; color:var(--ink-muted); margin-bottom:5px; }
+          .mp-bill-form input { padding:8px 10px; border:1px solid var(--border); border-radius:7px; font-size:13px; box-sizing:border-box; }
+        </style>
+
+        <?php if (!$mpSchemaReady): ?>
+          <div class="card mp-flow-card">
+            <h3>⏳ Fitur Approval, QC &amp; Tagihan belum aktif</h3>
+            <p class="mp-flow-sub" style="margin-bottom:0;">
+              Tabel pendukungnya belum ada di database — migrasi belum dijalanin.
+              Selain bagian ini, semua isi halaman tetap normal dan bisa dipakai seperti biasa.
+              <?php if (($org['role_name'] ?? '') === 'Owner'): ?>
+                <br><a href="manufaktur-migrate-qc-tagihan.php">Jalankan migrasi sekarang →</a>
+              <?php else: ?>
+                <br>Minta Owner buat menjalankan migrasinya.
+              <?php endif; ?>
+            </p>
+          </div>
+        <?php else: ?>
+
+        <!-- ============ 3a. PERSETUJUAN MIRJOV ============ -->
+        <div class="card mp-flow-card">
+          <h3>✅ Persetujuan Mirjov</h3>
+          <p class="mp-flow-sub">Kalau harga dari MMT sudah cocok, setujui di sini. Tagihan DP baru kebuka setelah disetujui.</p>
+
+          <div class="mp-total-strip">
+            <div class="item"><span class="k">Grand Total</span><span class="v">Rp <?= number_format($grandTotal, 0, ',', '.') ?></span></div>
+            <div class="item"><span class="k">Ketentuan DP</span><span class="v"><?= $selected['dp_terms'] ? htmlspecialchars($selected['dp_terms']) : '—' ?></span></div>
+            <div class="item"><span class="k">Sudah Ditagih</span><span class="v">Rp <?= number_format($sudahDitagih, 0, ',', '.') ?></span></div>
+            <div class="item"><span class="k">Sisa</span><span class="v">Rp <?= number_format($sisaTagihan, 0, ',', '.') ?></span></div>
+          </div>
+
+          <?php if ($isApproved): ?>
+            <div class="mp-approved-banner">
+              <span>✔</span>
+              <span>Disetujui oleh <strong><?= htmlspecialchars($approvedByName ?? '—') ?></strong> pada <?= htmlspecialchars(date('d M Y, H:i', strtotime($selected['approved_at']))) ?></span>
+              <?php if ($mpCanEdit && !$mpIsVoidDoc): ?>
+                <form method="post" style="margin-left:auto;" onsubmit="return confirm('Batalkan persetujuan dokumen ini?');">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="unapprove_penawaran">
+                  <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                  <button type="submit" class="btn btn-sm btn-ghost">Batal Setuju</button>
+                </form>
+              <?php endif; ?>
+            </div>
+          <?php elseif ($grandTotal <= 0): ?>
+            <div class="mp-warn-banner">Harga belum diisi tim manufaktur — belum ada yang bisa disetujui.</div>
+          <?php elseif ($mpIsVoidDoc): ?>
+            <div class="mp-warn-banner">Dokumen ini sudah void, gak bisa disetujui.</div>
+          <?php elseif ($mpCanEdit): ?>
+            <form method="post" onsubmit="return confirm('Setujui Form Penawaran Harga senilai Rp <?= number_format($grandTotal, 0, ',', '.') ?>?');">
+              <?= csrf_field() ?>
+              <input type="hidden" name="action" value="approve_penawaran">
+              <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+              <button type="submit" class="btn">✔ Mirjov Menyetujui Form Penawaran Harga</button>
+            </form>
+          <?php else: ?>
+            <div class="mp-warn-banner">Belum disetujui. Kamu gak punya akses buat menyetujui dokumen ini.</div>
+          <?php endif; ?>
+        </div>
+
+        <!-- ============ 3b. BERKAS QC + FOTO BARANG JADI ============ -->
+        <div class="card mp-flow-card">
+          <h3>📸 Berkas QC &amp; Foto Barang Jadi</h3>
+          <p class="mp-flow-sub">
+            Wajib lengkap semua sebelum Tagihan Pelunasan bisa dibuat —
+            <strong><?= count(MP_QC_TYPES) - count($qcMissing) ?> dari <?= count(MP_QC_TYPES) ?></strong> sudah diupload.
+          </p>
+
+          <?php foreach (MP_QC_TYPES as $qcKey => $qcLabel): $qcFiles = $qcByType[$qcKey] ?? []; ?>
+            <div class="mp-qc-row">
+              <div class="mp-qc-head">
+                <span class="chip <?= $qcFiles ? 'ok' : 'pending' ?>"><?= $qcFiles ? '✔ ADA' : '○ BELUM' ?></span>
+                <strong><?= htmlspecialchars($qcLabel) ?></strong>
+                <span class="count"><?= count($qcFiles) ?> berkas</span>
+              </div>
+
+              <?php if ($qcFiles): ?>
+                <div class="mp-qc-files">
+                  <?php foreach ($qcFiles as $qf):
+                    $qExt = strtolower(pathinfo($qf['file_path'], PATHINFO_EXTENSION));
+                    $qIsImage = in_array($qExt, ['jpg', 'jpeg', 'png', 'webp'], true);
+                  ?>
+                    <div class="mp-qc-file">
+                      <?php if ($qIsImage): ?>
+                        <img src="<?= htmlspecialchars($qf['file_path']) ?>" alt="<?= htmlspecialchars($qf['original_name']) ?>" title="<?= htmlspecialchars($qf['original_name']) ?> · <?= htmlspecialchars($qf['uploaded_by_name'] ?? '—') ?>" onclick="mpPreviewImage('<?= htmlspecialchars($qf['file_path'], ENT_QUOTES) ?>', '<?= htmlspecialchars($qf['original_name'], ENT_QUOTES) ?>')">
+                      <?php else: ?>
+                        <a href="<?= htmlspecialchars($qf['file_path']) ?>" target="_blank" class="mp-pdf-chip"><span class="mp-pdf-badge">PDF</span><span class="mp-pdf-fname"><?= htmlspecialchars($qf['original_name']) ?></span></a>
+                      <?php endif; ?>
+                      <?php if ($mpCanEdit && !$mpIsVoidDoc): ?>
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Hapus berkas ini?');">
+                          <?= csrf_field() ?>
+                          <input type="hidden" name="action" value="delete_qc">
+                          <input type="hidden" name="qc_id" value="<?= $qf['id'] ?>">
+                          <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                          <button type="submit" class="del" title="Hapus">&times;</button>
+                        </form>
+                      <?php endif; ?>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($mpCanEdit && !$mpIsVoidDoc): ?>
+                <form method="post" enctype="multipart/form-data" class="mp-qc-upload">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="upload_qc">
+                  <input type="hidden" name="qc_type" value="<?= $qcKey ?>">
+                  <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                  <input type="file" name="qc_files[]" multiple accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+                  <button type="submit" class="btn btn-sm btn-ghost">Upload</button>
+                </form>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+
+        <!-- ============ 3c. TAGIHAN DP & PELUNASAN ============ -->
+        <div class="card mp-flow-card">
+          <h3>🧾 Tagihan DP &amp; Pelunasan</h3>
+          <p class="mp-flow-sub">Tagihan MMT ke Mirjov. Nilainya disnapshot saat dibuat — harga yang berubah belakangan gak mengubah tagihan yang sudah terbit.</p>
+
+          <?php if ($tagihanList): ?>
+            <table class="mp-tagihan-table">
+              <tr><th>No. Tagihan</th><th>Jenis</th><th style="text-align:right;">Nilai</th><th>Status</th><th>Dibuat</th></tr>
+              <?php foreach ($tagihanList as $t): ?>
+                <tr<?= $t['status'] === 'void' ? ' style="opacity:.5;"' : '' ?>>
+                  <td><strong><?= htmlspecialchars($t['doc_number']) ?></strong></td>
+                  <td><?= $t['tagihan_type'] === 'dp' ? 'DP' . ($t['percent'] !== null ? ' ' . rtrim(rtrim(number_format((float) $t['percent'], 2, ',', '.'), '0'), ',') . '%' : '') : 'Pelunasan' ?></td>
+                  <td class="amount">Rp <?= number_format((float) $t['amount'], 0, ',', '.') ?></td>
+                  <td>
+                    <?php if ($mpCanEdit && !$mpIsVoidDoc): ?>
+                      <form method="post" style="display:inline;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="action" value="update_tagihan_status">
+                        <input type="hidden" name="tagihan_id" value="<?= $t['id'] ?>">
+                        <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                        <select name="tagihan_status" onchange="this.form.submit();" style="padding:5px 8px; border:1px solid var(--border); border-radius:4px; font-size:11.5px;">
+                          <?php foreach (['belum_dibayar' => 'BELUM DIBAYAR', 'lunas' => 'LUNAS', 'void' => 'VOID'] as $sv => $sl): ?>
+                            <option value="<?= $sv ?>" <?= $t['status'] === $sv ? 'selected' : '' ?>><?= $sl ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </form>
+                    <?php else: ?>
+                      <?= strtoupper(str_replace('_', ' ', $t['status'])) ?>
+                    <?php endif; ?>
+                  </td>
+                  <td style="font-size:11.5px; color:var(--ink-muted);"><?= htmlspecialchars($t['created_by_name'] ?? '—') ?> · <?= htmlspecialchars(date('d M Y', strtotime($t['created_at']))) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </table>
+          <?php endif; ?>
+
+          <?php if (!$isApproved): ?>
+            <div class="mp-warn-banner">Tagihan terkunci — Form Penawaran Harga belum disetujui Mirjov.</div>
+          <?php elseif (!$mpCanEdit || $mpIsVoidDoc): ?>
+            <div class="mp-warn-banner">Kamu gak punya akses buat bikin tagihan di dokumen ini.</div>
+          <?php else: ?>
+
+            <?php if ($canBillDp): ?>
+              <form method="post" class="mp-bill-form">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="create_tagihan">
+                <input type="hidden" name="tagihan_type" value="dp">
+                <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                <div>
+                  <label>Nilai Tagihan DP</label>
+                  <input type="text" class="rupiah-input" name="amount" value="<?= (int) $dpSuggested ?>" style="width:170px;" required>
+                </div>
+                <div>
+                  <label>Persen DP</label>
+                  <input type="number" name="percent" value="<?= $dpPercent !== null ? htmlspecialchars((string) $dpPercent) : '' ?>" step="0.01" min="0" max="100" style="width:100px;" placeholder="cth. 50">
+                </div>
+                <div style="flex:1; min-width:180px;">
+                  <label>Catatan</label>
+                  <input type="text" name="notes" placeholder="Opsional" style="width:100%;">
+                </div>
+                <button type="submit" class="btn">Buat Tagihan DP</button>
+              </form>
+            <?php elseif ($tagihanAktif['dp']): ?>
+              <div style="font-size:12.5px; color:var(--ink-muted); margin-bottom:10px;">Tagihan DP sudah dibuat: <strong><?= htmlspecialchars($tagihanAktif['dp']['doc_number']) ?></strong></div>
+            <?php endif; ?>
+
+            <?php if ($canBillPelunasan): ?>
+              <form method="post" class="mp-bill-form">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="create_tagihan">
+                <input type="hidden" name="tagihan_type" value="pelunasan">
+                <input type="hidden" name="manufaktur_penawaran_id" value="<?= $selected['id'] ?>">
+                <div>
+                  <label>Nilai Tagihan Pelunasan</label>
+                  <input type="text" class="rupiah-input" name="amount" value="<?= (int) $sisaTagihan ?>" style="width:170px;" required>
+                </div>
+                <input type="hidden" name="percent" value="">
+                <div style="flex:1; min-width:180px;">
+                  <label>Catatan</label>
+                  <input type="text" name="notes" placeholder="Opsional" style="width:100%;">
+                </div>
+                <button type="submit" class="btn">Buat Tagihan Pelunasan</button>
+              </form>
+            <?php elseif ($tagihanAktif['pelunasan']): ?>
+              <div style="font-size:12.5px; color:var(--ink-muted);">Tagihan Pelunasan sudah dibuat: <strong><?= htmlspecialchars($tagihanAktif['pelunasan']['doc_number']) ?></strong></div>
+            <?php elseif ($qcMissing): ?>
+              <div class="mp-warn-banner">
+                🔒 <strong>Tagihan Pelunasan terkunci.</strong> Belum diupload: <?= htmlspecialchars(implode(', ', $qcMissing)) ?>.
+              </div>
+            <?php elseif ($sisaTagihan <= 0): ?>
+              <div style="font-size:12.5px; color:var(--ink-muted);">Semua nilai kontrak sudah tertagih.</div>
+            <?php endif; ?>
+
+          <?php endif; ?>
+        </div>
+
+        <?php endif; ?>
 
         <style>
           .mp-final-form-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; }
