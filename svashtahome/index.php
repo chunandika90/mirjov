@@ -25,6 +25,9 @@ function svashta_homepage_data(): array
         'review_bg' => 'assets/img/backgrounds/testimonial.jpg',
         'partner_logos' => [],
         'latest_posts' => [],
+        // Teks hero sekarang satu setelan global (tabel homepage_hero, 1 baris),
+        // bukan per slide — lihat sql/2026-10-05-homepage-hero-text.sql.
+        'hero' => ['title' => '', 'subtitle' => '', 'cta_label' => '', 'cta_link' => '#about-us'],
     ];
 
     try {
@@ -35,6 +38,14 @@ function svashta_homepage_data(): array
             foreach ($slides as &$s) { $s['image_url'] = image_url($s['image_path']); }
             unset($s);
             $data['slides'] = $slides;
+        }
+
+        // Dibungkus sendiri: kalau migrasi homepage_hero belum jalan di server,
+        // cuma bagian ini yang dilewati — query di bawahnya tetap jalan.
+        try {
+            $hero = $pdo->query('SELECT * FROM homepage_hero WHERE id = 1')->fetch();
+            if ($hero) $data['hero'] = $hero;
+        } catch (Throwable $e) {
         }
 
         $video = $pdo->query('SELECT * FROM homepage_video WHERE id = 1')->fetch();
@@ -212,40 +223,47 @@ $hp = svashta_homepage_data();
         </div>
       </div>
       <section class="py-0 overflow-hidden" id = "home">
-	  
-	  
-	  
-        <div class="swiper theme-slider" data-swiper='{"autoplay":{ "delay": 10000 },"loopedSlides":5,"loop":true,"slideToClickedSlide":true}'>
-          <div class="swiper-wrapper">
-            <?php foreach ($hp['slides'] as $slide): ?>
-            <div class="swiper-slide">
-			  <img class="header-slider" src="<?= htmlspecialchars($slide['image_url']) ?>" alt="image" />
-			  <div class="header-overlay" data-zanim-timeline='{"delay":0.1}'>
-				<div class="container">
-				  <div class="d-flex align-items-center justify-content-between vh-100 w-100">
-					<!-- Left Side Text -->
-					<div class="header-text">
-					  <div class="overflow-hidden">
-						<h1 class="display-3 text-white fs-5 fs-md-7" data-zanim-xs='{"duration":2,"delay":0}'><?= htmlspecialchars($slide['title']) ?></h1>
-					  </div>
-					  <div class="overflow-hidden">
-						<p class="text-uppercase text-400 ls-3 mt-2" data-zanim-xs='{"duration":2,"delay":0.1}'>
-						  <?= nl2br(htmlspecialchars($slide['subtitle'])) ?>
-						</p>
-					  </div>
-					  <div data-zanim-xs='{"from":{"opacity":0,"y":30},"to":{"opacity":1,"y":0},"duration":1.5,"delay":0.5}'>
-						<a class="btn btn-sm btn-outline-light hvr-sweep-top mt-5 px-4" href="#services">OUR SERVICES</a>
-					  </div>
-					</div>
-				  </div>
-				</div>
-			  </div>
-			</div>
-            <?php endforeach; ?>
+        <style>
+          /* Teks hero DIAM di depan, cuma fotonya yang berganti (catatan Canva hal. 1).
+             Sebelumnya judul+subjudul ada di dalam tiap slide, jadi ikut berganti. */
+          .hp-hero { position: relative; }
+          /* Overlay menutupi slider, tapi klik tetap tembus ke tombol next/prev slider. */
+          .hp-hero .hp-hero-text { z-index: 3; pointer-events: none; }
+          .hp-hero .hp-hero-text a { pointer-events: auto; }
+          .hp-hero .swiper-nav { z-index: 4; }
+        </style>
+
+        <div class="hp-hero">
+          <div class="swiper theme-slider" data-swiper='{"autoplay":{ "delay": 6000 },"effect":"fade","fadeEffect":{"crossFade":true},"loop":true,"allowTouchMove":false}'>
+            <div class="swiper-wrapper">
+              <?php foreach ($hp['slides'] as $slide): ?>
+                <div class="swiper-slide">
+                  <img class="header-slider" src="<?= htmlspecialchars($slide['image_url']) ?>" alt="<?= htmlspecialchars($hp['hero']['title'] ?: 'Svashta Home') ?>" />
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <div class="swiper-nav">
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+            </div>
           </div>
-          <div class="swiper-nav">
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
+
+          <!-- Di luar swiper-wrapper, jadi tidak ikut berganti slide. Animasi zanim
+               sengaja dilepas: teksnya memang diminta diam, bukan muncul berulang. -->
+          <div class="header-overlay hp-hero-text">
+            <div class="container">
+              <div class="d-flex align-items-center justify-content-between vh-100 w-100">
+                <div class="header-text">
+                  <h1 class="display-3 text-white fs-5 fs-md-7"><?= htmlspecialchars($hp['hero']['title']) ?></h1>
+                  <p class="text-uppercase text-400 ls-3 mt-2"><?= nl2br(htmlspecialchars($hp['hero']['subtitle'])) ?></p>
+                  <?php if (!empty($hp['hero']['cta_label'])): ?>
+                    <div>
+                      <a class="btn btn-sm btn-outline-light hvr-sweep-top mt-5 px-4" href="<?= htmlspecialchars($hp['hero']['cta_link'] ?: '#about-us') ?>"><?= htmlspecialchars($hp['hero']['cta_label']) ?></a>
+                    </div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -561,18 +579,33 @@ something loved, our services are designed to meet the highest standards of desi
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-sm-6 col-lg-4 mb-4" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+          <style>
+            /* Slide samping sengaja diburamkan + diturunkan opacity-nya supaya
+               fokus jatuh ke kartu tengah (catatan Canva hal. 1). */
+            .hp-services .swiper-slide { filter: blur(3px); opacity: .4; transform: scale(.94);
+              transition: filter .45s ease, opacity .45s ease, transform .45s ease; }
+            .hp-services .swiper-slide-active { filter: none; opacity: 1; transform: none; }
+            .hp-services { padding-bottom: 46px; }
+            .hp-services .swiper-pagination { bottom: 0; }
+            .hp-services .service-item { height: 100%; }
+            /* Di layar sempit tampilkan satu kartu penuh tanpa blur, biar tetap terbaca. */
+            @media (max-width: 767.98px) {
+              .hp-services .swiper-slide { filter: none; opacity: 1; transform: none; }
+            }
+          </style>
+          <div class="swiper hp-services" data-swiper='{"slidesPerView":1.15,"spaceBetween":16,"centeredSlides":true,"loop":true,"watchSlidesProgress":true,"pagination":{"el":".hp-services .swiper-pagination","clickable":true},"breakpoints":{"768":{"slidesPerView":1.8,"spaceBetween":24},"992":{"slidesPerView":2.4,"spaceBetween":30}}}'>
+            <div class="swiper-wrapper">
+            <div class="swiper-slide h-auto">
               <div class="overflow-hidden">
                 <div class="service-item p-3 p-md-4 h-100">
                   <div class="overflow-hidden">
-                    <div class="px-4" data-zanim-xs='{"duration":1.5,"delay":"0"}'><img class="service-icon" src="assets/img/line-icons/icons/fountain-pen.svg" alt="" /></div>
+                    <div class="px-4"><img class="service-icon" src="assets/img/line-icons/icons/fountain-pen.svg" alt="" /></div>
                   </div>
                   <div class="overflow-hidden">
-                    <h5 class="fw-normal ls-3 mb-2" data-zanim-xs='{"duration":1.5,"delay":"0.1"}'>Bespoke Loose Furniture</h5>
+                    <h5 class="fw-normal ls-3 mb-2">Bespoke Loose Furniture</h5>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="fw-normal" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'>Crafted for you, designed around you. 
+                    <p class="fw-normal">Crafted for you, designed around you. 
 					<br class="d-block d-sm-none"> From armchairs to beds and sofas, our artisan-made loose furniture is fully 
 					<br class="d-block d-sm-none"> customizable and built using premium solid teakwood, genuine leather, and handpicked fabrics.
 					<br class="d-block d-sm-none"> Made for your space, your posture, and your lifestyle.
@@ -581,17 +614,17 @@ something loved, our services are designed to meet the highest standards of desi
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-lg-4 mb-4" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+            <div class="swiper-slide h-auto">
               <div class="overflow-hidden">
                 <div class="service-item p-3 p-md-4 h-100">
                   <div class="overflow-hidden">
-                    <div class="px-4" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'><img class="service-icon" src="assets/img/line-icons/icons/pear.svg" alt="" /></div>
+                    <div class="px-4"><img class="service-icon" src="assets/img/line-icons/icons/pear.svg" alt="" /></div>
                   </div>
                   <div class="overflow-hidden">
-                    <h5 class="fw-normal ls-3 mb-2" data-zanim-xs='{"duration":1.5,"delay":"0.1"}'>Restoration of Aged Bespoke Fine Furnishings</h5>
+                    <h5 class="fw-normal ls-3 mb-2">Restoration of Aged Bespoke Fine Furnishings</h5>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="fw-normal" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'>Preserve the soul. Renew the structure.
+                    <p class="fw-normal">Preserve the soul. Renew the structure.
 					<br class="d-block d-sm-none"> We restore aged or heirloom-quality furniture with the utmost care repairing, refinishing, and reviving each piece while honoring its original craftsmanship.
 					<br class="d-block d-sm-none"> Sustainable, sentimental, and artisan-led.
 					</p>
@@ -599,17 +632,17 @@ something loved, our services are designed to meet the highest standards of desi
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-lg-4 mb-4" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+            <div class="swiper-slide h-auto">
               <div class="overflow-hidden">
                 <div class="service-item p-3 p-md-4 h-100">
                   <div class="overflow-hidden">
-                    <div class="px-4" data-zanim-xs='{"duration":1.5,"delay":"0.3"}'><img class="service-icon" src="assets/img/line-icons/icons/export.svg" alt="" /></div>
+                    <div class="px-4"><img class="service-icon" src="assets/img/line-icons/icons/export.svg" alt="" /></div>
                   </div>
                   <div class="overflow-hidden">
-                    <h5 class="fw-normal ls-3 mb-2" data-zanim-xs='{"duration":1.5,"delay":"0.1"}'>Drapery & Soft Furnishing Solutions</h5>
+                    <h5 class="fw-normal ls-3 mb-2">Drapery & Soft Furnishing Solutions</h5>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="fw-normal" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'>The finishing touch that defines the room. 
+                    <p class="fw-normal">The finishing touch that defines the room. 
 					<br class="d-block d-sm-none"> We offer custom curtains, sheers, and textile accessories that complete your space with
 softness and sophistication.
 					<br class="d-block d-sm-none"> All tailored to your interiors using premium fabric selections.
@@ -619,19 +652,17 @@ softness and sophistication.
                 </div>
               </div>
             </div>
-		</div>
-		<div class="row justify-content-center">
-            <div class="col-sm-6 col-md-6 col-lg-4 mb-4" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+            <div class="swiper-slide h-auto">
               <div class="overflow-hidden">
                 <div class="service-item p-3 p-md-4 h-100">
                   <div class="overflow-hidden">
-                    <div class="px-4" data-zanim-xs='{"duration":1.5,"delay":"0.3"}'><img class="service-icon" src="assets/img/line-icons/icons/light-bulb.svg" alt="" /></div>
+                    <div class="px-4"><img class="service-icon" src="assets/img/line-icons/icons/light-bulb.svg" alt="" /></div>
                   </div>
                   <div class="overflow-hidden">
-                    <h5 class="fw-normal ls-3 mb-2" data-zanim-xs='{"duration":1.5,"delay":"0.4"}'>Material & Finish Consultation</h5>
+                    <h5 class="fw-normal ls-3 mb-2">Material & Finish Consultation</h5>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="fw-normal" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'>Guidance grounded in craftsmanship.
+                    <p class="fw-normal">Guidance grounded in craftsmanship.
 					<br class="d-block d-sm-none"> Choose the right textures and finishes with expert help.
 					<br class="d-block d-sm-none"> We guide you through our range of teak tones, leather types, and fabric options so your furniture looks and feels just right.
 					<br class="d-block d-sm-none"> We help you design with clarity and confidence.
@@ -640,17 +671,17 @@ softness and sophistication.
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-md-6 col-lg-6 mb-4" data-zanim-timeline="{}" data-zanim-trigger="scroll">
+            <div class="swiper-slide h-auto">
               <div class="overflow-hidden">
                 <div class="service-item p-3 p-md-4 h-100">
                   <div class="overflow-hidden">
-                    <div class="px-4" data-zanim-xs='{"duration":1.5,"delay":"0.4"}'><img class="service-icon" src="assets/img/line-icons/icons/pie-chart.svg" alt="" /></div>
+                    <div class="px-4"><img class="service-icon" src="assets/img/line-icons/icons/pie-chart.svg" alt="" /></div>
                   </div>
                   <div class="overflow-hidden">
-                    <h5 class="fw-normal ls-3 mb-2" data-zanim-xs='{"duration":1.5,"delay":"0.5"}'>End-to-End Custom Design Support</h5>
+                    <h5 class="fw-normal ls-3 mb-2">End-to-End Custom Design Support</h5>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="fw-normal" data-zanim-xs='{"duration":1.5,"delay":"0.2"}'>From concept to completion.
+                    <p class="fw-normal">From concept to completion.
 					<br class="d-block d-sm-none"> We work with homeowners, designers, and architects to co-create furniture that suits
 specific spatial and aesthetic needs — from sketches to installation.
 					<br class="d-block d-sm-none"> Your ideas. Our craftsmanship.
@@ -660,6 +691,8 @@ specific spatial and aesthetic needs — from sketches to installation.
                 </div>
               </div>
             </div>
+            </div>
+            <div class="swiper-pagination"></div>
           </div>
         </div>
         <!-- end of .container-->
