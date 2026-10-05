@@ -1,6 +1,8 @@
 # Kredensial asli — JANGAN pernah di-commit. Pakai config.example.php sebagai template.
 backoffice-shared/config.php
 backoffice-shared/config.local.php
+shared/config.php
+shared/config.local.php
 
 # File OS/editor
 .DS_Store
@@ -16,3 +18,8 @@ backoffice.svashtahome.com/error_log
 
 # File referensi/contoh dari user (PDF/xlsx dokumen asli, foto) — data, bukan kode
 doc/
+
+# Dump database dari server - JANGAN pernah ke-commit (berisi hash password admin
+# dan data customer). Pola ini cuma kena file .sql di root; skema & migrasi di
+# folder sql/ tetap ikut ter-commit seperti biasa.
+/*.sql

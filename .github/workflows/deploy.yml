@@ -9,6 +9,9 @@ on:
     paths:
       - 'backoffice.svashtahome.com/**'
       - 'backoffice-shared/**'
+      - 'svashtahome/**'
+      - 'svashtahome-cms/**'
+      - 'shared/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -59,6 +62,78 @@ jobs:
           server-dir: backoffice-shared/
           dry-run: false
           # config.php = kredensial DB asli, cuma ada di server. JANGAN disentuh.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            config.php
+            config.local.php
+            **/*.log
+
+      # --- Situs publik svashtahome.com ---
+      # Server menyajikannya lewat rewrite di public_html/.htaccess:
+      #   RewriteRule ^$ new_svashtahome/index.php [L]
+      - name: Upload website
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./svashtahome/
+          server-dir: public_html/new_svashtahome/
+          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          # uploads/ = foto produk & blog yang diunggah lewat CMS. Cuma ada di server,
+          # tidak pernah masuk git — kalau tidak dikecualikan, sinkronisasi menghapusnya.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            uploads/**
+            **/uploads/**
+            .ftpquota
+            error_log
+            **/error_log
+            **/*.log
+            *.ai
+            .htaccess-ROOT-public_html
+
+      # --- Admin CMS cms.svashtahome.com ---
+      - name: Upload CMS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./svashtahome-cms/
+          server-dir: cms.svashtahome.com/
+          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            uploads/**
+            **/uploads/**
+            .ftpquota
+            error_log
+            **/error_log
+            **/*.log
+
+      # --- Config bersama situs + CMS, di luar webroot ---
+      - name: Upload shared
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./shared/
+          server-dir: shared/
+          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          # config.php = kredensial DB asli milik server. JANGAN disentuh.
           exclude: |
             **/.git*
             **/.git*/**

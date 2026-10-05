@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $title = trim($_POST['title'] ?? '');
                 $excerpt = trim($_POST['excerpt'] ?? '');
                 $content = $_POST['content'] ?? '';
+                $quote = trim($_POST['quote'] ?? '') ?: null;
+                $quoteSource = trim($_POST['quote_source'] ?? '') ?: null;
                 $seoTitle = trim($_POST['seo_title'] ?? '') ?: null;
                 $seoDescription = trim($_POST['seo_description'] ?? '') ?: null;
                 if ($title === '') throw new RuntimeException('Judul wajib diisi.');
@@ -34,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($id > 0) {
                     // Slug dibawa dari hidden field "existing_slug" biar URL post stabil walau judul diedit.
                     $slug = $_POST['existing_slug'] ?? unique_slug($pdo, 'blog_posts', $title, $id);
-                    $pdo->prepare('UPDATE blog_posts SET title=?, slug=?, excerpt=?, content=?, seo_title=?, seo_description=?, cover_image=?, updated_by=? WHERE id=?')
-                        ->execute([$title, $slug, $excerpt, $content, $seoTitle, $seoDescription, $coverImage, $admin['id'], $id]);
+                    $pdo->prepare('UPDATE blog_posts SET title=?, slug=?, excerpt=?, content=?, quote=?, quote_source=?, seo_title=?, seo_description=?, cover_image=?, updated_by=? WHERE id=?')
+                        ->execute([$title, $slug, $excerpt, $content, $quote, $quoteSource, $seoTitle, $seoDescription, $coverImage, $admin['id'], $id]);
                     $postId = $id;
                 } else {
                     $slug = unique_slug($pdo, 'blog_posts', $title);
-                    $pdo->prepare('INSERT INTO blog_posts (title, slug, excerpt, content, seo_title, seo_description, cover_image, published_at, created_by, updated_by) VALUES (?,?,?,?,?,?,?,NOW(),?,?)')
-                        ->execute([$title, $slug, $excerpt, $content, $seoTitle, $seoDescription, $coverImage, $admin['id'], $admin['id']]);
+                    $pdo->prepare('INSERT INTO blog_posts (title, slug, excerpt, content, quote, quote_source, seo_title, seo_description, cover_image, published_at, created_by, updated_by) VALUES (?,?,?,?,?,?,?,?,?,NOW(),?,?)')
+                        ->execute([$title, $slug, $excerpt, $content, $quote, $quoteSource, $seoTitle, $seoDescription, $coverImage, $admin['id'], $admin['id']]);
                     $postId = (int) $pdo->lastInsertId();
                 }
 
@@ -207,6 +209,12 @@ require __DIR__ . '/includes/header.php';
         <div class="field"><label>Title</label><input type="text" name="title" value="<?= htmlspecialchars($editingPost['title'] ?? '') ?>" required></div>
         <div class="field"><label>Excerpt</label><textarea name="excerpt"><?= htmlspecialchars($editingPost['excerpt'] ?? '') ?></textarea></div>
         <div class="field"><label>Content</label><textarea name="content" style="min-height:160px;"><?= htmlspecialchars($editingPost['content'] ?? '') ?></textarea></div>
+
+        <!-- Kutipan tampil sebagai section tersendiri di halaman artikel, dan ditandai
+             schema.org/Quotation buat mesin pencari. Kosongin kalau artikel ini tidak
+             perlu kutipan - section-nya otomatis tidak muncul. -->
+        <div class="field"><label>Kutipan (opsional)</label><textarea name="quote" placeholder="Satu kalimat dari artikel yang mau ditonjolkan"><?= htmlspecialchars($editingPost['quote'] ?? '') ?></textarea></div>
+        <div class="field"><label>Sumber Kutipan</label><input type="text" name="quote_source" value="<?= htmlspecialchars($editingPost['quote_source'] ?? '') ?>" placeholder="cth. Wood Database, 2023"></div>
 
         <div class="seo-block">
           <div>

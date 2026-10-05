@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "svashtahome",
+      "runtimeExecutable": "C:/xampp/php/php.exe",
+      "runtimeArgs": ["-S", "localhost:8090", "-t", "svashtahome"],
+      "port": 8090
+    },
+    {
+      "name": "svashtahome-cms",
+      "runtimeExecutable": "C:/xampp/php/php.exe",
+      "runtimeArgs": ["-S", "localhost:8091", "-t", "svashtahome-cms"],
+      "port": 8091
+    }
+  ]
+}
