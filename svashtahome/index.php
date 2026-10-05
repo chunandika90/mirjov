@@ -47,6 +47,17 @@ function svashta_homepage_data(): array
             if ($hero) $data['hero'] = $hero;
         } catch (Throwable $e) {
         }
+        // Jaring pengaman: kalau tabelnya belum ada ATAU masih kosong, pakai judul
+        // dari slide pertama seperti perilaku lama, supaya hero tidak pernah tampil
+        // tanpa teks sama sekali.
+        if (empty($data['hero']['title']) && !empty($data['slides'][0])) {
+            $data['hero']['title'] = $data['slides'][0]['title'] ?? '';
+            $data['hero']['subtitle'] = $data['slides'][0]['subtitle'] ?? '';
+            if (empty($data['hero']['cta_label'])) {
+                $data['hero']['cta_label'] = 'OUR SERVICES';
+                $data['hero']['cta_link'] = '#services';
+            }
+        }
 
         $video = $pdo->query('SELECT * FROM homepage_video WHERE id = 1')->fetch();
         if ($video && ($video['headline'] || $video['slogan'] || $video['youtube_id'] || $video['video_path'])) {
