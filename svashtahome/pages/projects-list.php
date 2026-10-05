@@ -46,7 +46,10 @@ require __DIR__ . '/inc/nav.php';
             <a href="/projects/<?= urlencode($p['slug']) ?>"><img class="w-100 h-100" style="object-fit:cover;" src="<?= htmlspecialchars(image_url($p['cover_image'])) ?>" alt="<?= htmlspecialchars($p['name']) ?>" /></a>
           </div>
           <div class="card-body px-0 pt-3 prj-card-body">
-            <h5 class="card-title mb-1 fs-1 text-transform-none font-base lh-sm fw-medium"><a class="text-900" href="/projects/<?= urlencode($p['slug']) ?>"><?= htmlspecialchars($p['name']) ?></a></h5>
+            <!-- Judul sengaja tidak ditampilkan (catatan Canva hal. 3: "Judul disini gak
+                 usah ada") — nama proyek sudah tercetak di dalam foto covernya. Tetap
+                 ditulis untuk pembaca layar supaya tautannya punya nama. -->
+            <span class="visually-hidden"><?= htmlspecialchars($p['name']) ?></span>
             <p class="mb-0 text-body-secondary"><?= htmlspecialchars($p['location']) ?></p>
             <?php if (!empty($p['excerpt'])): ?>
               <p class="prj-excerpt"><?= htmlspecialchars($p['excerpt']) ?></p>

@@ -1398,6 +1398,32 @@ specific spatial and aesthetic needs — from sketches to installation.
         <!-- end of .container
 
       </section>
+
+      <!-- ============================================-->
+      <!-- STAY CONNECTED — catatan Canva hal. 1 -->
+      <section class="py-6 text-center" id="stay-connected" style="background:#faf8f5;">
+        <style>
+          .hp-social { display:flex; flex-wrap:wrap; justify-content:center; gap:14px 48px; margin-top:26px; }
+          .hp-social a {
+            font-family:'Jost', sans-serif; font-weight:500; font-size:13px; letter-spacing:3px;
+            text-transform:uppercase; color:#1c1a17; text-decoration:none;
+            display:inline-flex; align-items:center; gap:10px; transition:color .25s ease;
+          }
+          .hp-social a:hover { color:#a8895a; }
+          .hp-social .ico { font-size:19px; }
+        </style>
+        <div class="container">
+          <span class="d-block" style="font-family:'Jost',sans-serif; font-weight:500; font-size:12px; letter-spacing:4px; color:#a8895a;">STAY CONNECTED</span>
+          <h2 class="fs-md-5 mt-2 mb-0">Follow Our Craft</h2>
+          <div class="hp-social">
+            <a href="https://instagram.com/svashta_home" target="_blank" rel="noopener"><span class="ico fab fa-instagram"></span> Instagram</a>
+            <a href="https://youtube.com/@SvashtaHome" target="_blank" rel="noopener"><span class="ico fab fa-youtube"></span> YouTube</a>
+            <a href="https://wa.me/6281320300880" target="_blank" rel="noopener"><span class="ico fab fa-whatsapp"></span> WhatsApp</a>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================-->
+
       <!-- <section> close ============================-->
       <!-- ============================================-->
 
@@ -1407,7 +1433,7 @@ specific spatial and aesthetic needs — from sketches to installation.
       <!-- ============================================-->
       <!-- <section> begin ============================-->
       <!-- ============================================-->
-      <!-- <section> begin ============================
+      <!-- <section> begin ============================-->
       <section id="contact">
 
         <div class="container">
@@ -1424,57 +1450,49 @@ specific spatial and aesthetic needs — from sketches to installation.
               </div>
             </div>
           </div>
-          <div class="row justify-content-center">
-            <div class="col-lg-6 mb-5 mb-lg-0 d-flex flex-column justify-content-between">
-              <div class="row">
-                <div class="col-12">
-                  <h5 class="mb-3">Connect With Us</h5>
-                </div>
-                <div class="col-auto mb-2 mb-sm-0" style="width: 190px">
-                  <div class="row">
-                    <div class="col-1"><span class="fas fa-location-arrow text-700"></span></div>
-                    <div class="col px-2">
-                      <p class="mb-1 text-700"><strong>Svashta Home - Bespoke Fine Furnishings</strong></p>
-                      <p class="mb-0 text-600">Ruko 92 Avenix A/11 - BSD City, Kab. Tangerang, Banten, Indonesia</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-auto" style="width: 245px">
-                  <div class="row mb-2 mb-sm-1">
-                    <div class="col-1"><span class="fas fa-phone me-2 text-700"> </span></div>
-                    <div class="col px-2"><a class="text-600" href="https://wa.me/6281320300880">0813-2030-0880</a><br /></div>
-                  </div>
-                  <div class="row">
-                    <div class="col-1"><span class="fas fa-envelope me-2 text-700"></span></div>
-                    <div class="col px-2"><a class="text-600" href="mailto:project@svashtahome.com">project@svashtahome.com</a></div>
-                  </div>
-                </div>
+          <?php
+            // Alamat ditulis sekali di sini, dipakai untuk teks DAN query peta —
+            // jadi kalau kantor pindah, cukup ubah dua baris ini.
+            $alamatNama = 'Svashta Home - Bespoke Fine Furnishings';
+            $alamatLengkap = 'Ruko 92 Avenix A/11, BSD City, Kab. Tangerang, Banten, Indonesia';
+            $waNomor = '6281320300880';
+            $waTampil = '0813-2030-0880';
+            $emailKontak = 'project@svashtahome.com';
+          ?>
+          <div class="row justify-content-center g-4">
+
+            <!-- Kiri: alamat + peta. Peta pakai embed biasa, tanpa API key, dan
+                 titiknya diambil dari alamat di atas — bukan koordinat hardcode. -->
+            <div class="col-lg-7">
+              <h5 class="mb-3">Visit Us</h5>
+              <p class="mb-1 text-700"><strong><?= htmlspecialchars($alamatNama) ?></strong></p>
+              <p class="mb-3 text-600"><?= htmlspecialchars($alamatLengkap) ?></p>
+              <div class="rounded overflow-hidden" style="min-height:320px;">
+                <iframe
+                  src="https://www.google.com/maps?q=<?= urlencode($alamatLengkap) ?>&amp;output=embed"
+                  width="100%" height="320" style="border:0; display:block;"
+                  loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                  title="Peta lokasi <?= htmlspecialchars($alamatNama) ?>"></iframe>
               </div>
-              <div class="googlemap rounded data-map mt-4" data-latlng="48.8583701,2.2922873,17" data-scrollwheel="false" data-icon="assets/img/map-marker.png" data-zoom="17" data-theme="Default" style="min-height: 14.63rem;">
-                <div class="marker-content py-3">
-                  <h5>Eiffel Tower</h5>
-                  <p>Gustave Eiffel's iconic, wrought-iron 1889 tower,<br /> with steps and elevators to observation decks.</p>
-                </div>
-              </div>
+              <a class="d-inline-block mt-2 fs--1 text-600" target="_blank" rel="noopener"
+                 href="https://www.google.com/maps/search/?api=1&amp;query=<?= urlencode($alamatLengkap) ?>">Buka di Google Maps &rarr;</a>
             </div>
-            <div class="col-lg-6">
-              <h5 class="mb-3">Feel free to drop us a line!</h5>
-              <form class="zform text-left" method="post">
-                <input type="hidden" name="to" value="username@domain.extension" />
-                <div class="form-group mb-3">
-                  <input class="fs-0 form-control" type="text" placeholder="Your Name" required="required" />
-                </div>
-                <div class="form-group mb-3">
-                  <input class="fs-0 form-control" type="email" placeholder="Email Address" required="required" />
-                </div>
-                <div class="form-group mb-3">
-                  <textarea class="fs-0 form-control contact-message" rows="8" placeholder="Type your message here" required="required"></textarea>
-                </div>
-                <div class="zform-feedback d-grid">
-                  <button class="btn btn-dark hvr-sweep-top" type="submit">Give us a shot</button>
-                </div>
-              </form>
+
+            <!-- Kanan: cukup email dan WhatsApp. Form panjang dihapus — tujuannya
+                 placeholder template, jadi pesan yang dikirim tidak pernah terkirim. -->
+            <div class="col-lg-5">
+              <h5 class="mb-3">Connect With Us</h5>
+              <p class="text-600 mb-4">Hubungi kami langsung lewat WhatsApp atau email — biasanya kami balas di hari yang sama.</p>
+
+              <a class="btn btn-dark hvr-sweep-top w-100 mb-3 text-start py-3 px-4" href="https://wa.me/<?= htmlspecialchars($waNomor) ?>" target="_blank" rel="noopener">
+                <span class="fab fa-whatsapp me-2"></span> WhatsApp &middot; <?= htmlspecialchars($waTampil) ?>
+              </a>
+
+              <a class="btn btn-outline-dark hvr-sweep-top w-100 text-start py-3 px-4" href="mailto:<?= htmlspecialchars($emailKontak) ?>">
+                <span class="fas fa-envelope me-2"></span> <?= htmlspecialchars($emailKontak) ?>
+              </a>
             </div>
+
           </div>
         </div>
         <!-- end of .container

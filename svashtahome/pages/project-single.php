@@ -38,8 +38,10 @@ require __DIR__ . '/inc/nav.php';
 <?php else: ?>
   <style>
     /* Project detail page — same tone as product/category (.pdp-*/.pdf-*) */
-    .pdf-hero { padding: 150px 0 40px; text-align: center; background: #fff; }
-    @media (max-width: 767.98px) { .pdf-hero { padding: 110px 0 30px; } }
+    /* Jarak judul ke foto pertama dirapatkan (catatan Canva hal. 3:
+       "judul dan foto pertama terlalu jauh jaraknya ... jarak lbh dekat"). */
+    .pdf-hero { padding: 130px 0 18px; text-align: center; background: #fff; }
+    @media (max-width: 767.98px) { .pdf-hero { padding: 100px 0 14px; } }
     .pdf-eyebrow {
       display: block; font-family: 'Jost', sans-serif; font-weight: 500;
       font-size: 12px; letter-spacing: 4px; color: #a8895a; margin-bottom: 10px;
@@ -57,8 +59,11 @@ require __DIR__ . '/inc/nav.php';
 
     .pdf-project-gallery {
       display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
-      margin-top: 48px; background: #fff;
+      margin-top: 24px; background: #fff;
     }
+    /* Cerita proyek dibikin rata tengah dan selebar terbatas, biar judul, cerita,
+       dan foto pertama terbaca sebagai satu blok. */
+    .pdf-page .pdf-desc { text-align: center; max-width: 70ch; margin: 0 auto; }
     .pdf-gallery-item { overflow: hidden; aspect-ratio: 4/5; background: #fff; }
     .pdf-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pdf-gallery-item.pdf-landscape { grid-column: 1 / -1; aspect-ratio: 16/9; }
@@ -78,7 +83,7 @@ require __DIR__ . '/inc/nav.php';
     </div>
   </section>
 
-  <section class="py-6 pdf-page">
+  <section class="py-4 pdf-page">
     <div class="container" style="max-width:1000px;">
       <p class="pdf-desc"><?= nl2br(htmlspecialchars($project['story'])) ?></p>
     </div>
