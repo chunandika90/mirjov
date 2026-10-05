@@ -82,7 +82,7 @@ jobs:
           port: 21
           local-dir: ./svashtahome/
           server-dir: public_html/new_svashtahome/
-          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          dry-run: false
           # uploads/ = foto produk & blog yang diunggah lewat CMS. Cuma ada di server,
           # tidak pernah masuk git — kalau tidak dikecualikan, sinkronisasi menghapusnya.
           exclude: |
@@ -109,7 +109,7 @@ jobs:
           port: 21
           local-dir: ./svashtahome-cms/
           server-dir: cms.svashtahome.com/
-          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          dry-run: false
           exclude: |
             **/.git*
             **/.git*/**
@@ -132,7 +132,7 @@ jobs:
           port: 21
           local-dir: ./shared/
           server-dir: shared/
-          dry-run: true   # <-- UJI COBA: simulasi saja, server tidak disentuh
+          dry-run: false
           # config.php = kredensial DB asli milik server. JANGAN disentuh.
           exclude: |
             **/.git*
