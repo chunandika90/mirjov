@@ -120,7 +120,11 @@ require __DIR__ . '/inc/nav.php';
         $itemHidden = $cat !== '' && $p['category'] !== $cat;
       ?>
       <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item js-product-item<?= $itemHidden ? ' d-none' : '' ?>" data-cat="<?= htmlspecialchars($p['category']) ?>">
-        <img class="thumbnail-gridder" src="<?= htmlspecialchars(image_thumb_url($p['cover_image'])) ?>" alt="<?= htmlspecialchars($p['name']) ?>" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $i ?>" aria-expanded="false" aria-controls="collapse-<?= $i ?>" />
+        <?php // Foto sampul di daftar sengaja BOLEH beda dari foto di dalam
+              // (catatan Canva hal. 2). Kalau thumb_image kosong, jatuh kembali
+              // ke cover_image, jadi produk lama tampil persis seperti sekarang.
+              $fotoSampul = !empty($p['thumb_image']) ? $p['thumb_image'] : $p['cover_image']; ?>
+        <img class="thumbnail-gridder" src="<?= htmlspecialchars(image_thumb_url($fotoSampul)) ?>" alt="<?= htmlspecialchars($p['name']) ?>" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $i ?>" aria-expanded="false" aria-controls="collapse-<?= $i ?>" />
         <div class="position-absolute start-0">
           <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-<?= $i ?>">
             <div class="card card-body border-0 pdp-card m-0 px-3 py-2">

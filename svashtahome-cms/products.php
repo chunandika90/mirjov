@@ -37,18 +37,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Cover photo wajib diupload.');
                 }
 
+                // Thumbnail daftar OPSIONAL dan terpisah dari cover. Kosong = daftar
+                // memakai cover_image, sehingga produk lama tidak berubah tampilannya.
+                $thumbImage = $_POST['existing_thumb'] ?? null;
+                if (!empty($_FILES['thumb']['name'])) {
+                    $thumbImage = handle_image_upload($_FILES['thumb'], 'products/thumb', $name);
+                }
+
                 if ($id > 0) {
                     // Slug SENGAJA dibawa dari hidden field "existing_slug", bukan diregenerasi
                     // dari nama — biar URL produk tetap stabil walau namanya diedit (link lama,
                     // termasuk redirect halaman lama, tidak putus).
                     $slug = $_POST['existing_slug'] ?? unique_slug($pdo, 'products', $name, $id);
-                    $stmt = $pdo->prepare('UPDATE products SET name=?, slug=?, category=?, price=?, materials=?, description=?, seo_title=?, seo_description=?, cover_image=?, updated_by=? WHERE id=?');
-                    $stmt->execute([$name, $slug, $category, $price, $materials, $description, $seoTitle, $seoDescription, $coverImage, $admin['id'], $id]);
+                    $stmt = $pdo->prepare('UPDATE products SET name=?, slug=?, category=?, price=?, materials=?, description=?, seo_title=?, seo_description=?, cover_image=?, thumb_image=?, updated_by=? WHERE id=?');
+                    $stmt->execute([$name, $slug, $category, $price, $materials, $description, $seoTitle, $seoDescription, $coverImage, $thumbImage, $admin['id'], $id]);
                     $productId = $id;
                 } else {
                     $slug = unique_slug($pdo, 'products', $name);
-                    $stmt = $pdo->prepare('INSERT INTO products (name, slug, category, price, materials, description, seo_title, seo_description, cover_image, created_by, updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
-                    $stmt->execute([$name, $slug, $category, $price, $materials, $description, $seoTitle, $seoDescription, $coverImage, $admin['id'], $admin['id']]);
+                    $stmt = $pdo->prepare('INSERT INTO products (name, slug, category, price, materials, description, seo_title, seo_description, cover_image, thumb_image, created_by, updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
+                    $stmt->execute([$name, $slug, $category, $price, $materials, $description, $seoTitle, $seoDescription, $coverImage, $thumbImage, $admin['id'], $admin['id']]);
                     $productId = (int) $pdo->lastInsertId();
                 }
 
@@ -244,6 +251,17 @@ require __DIR__ . '/includes/header.php';
             <img id="product-cover-preview" class="preview" src="<?= $editingProduct ? htmlspecialchars(image_url($editingProduct['cover_image'])) : '' ?>" style="<?= $editingProduct ? '' : 'display:none;' ?>">
             <span>Klik untuk pilih cover</span>
           </label>
+        </div>
+
+        <input type="hidden" name="existing_thumb" value="<?= htmlspecialchars($editingProduct['thumb_image'] ?? '') ?>">
+        <div class="field">
+          <label>Thumbnail Daftar (opsional)</label>
+          <label class="dropzone">
+            <input type="file" name="thumb" accept="image/*" style="display:none;" data-preview-target="product-thumb-preview">
+            <img id="product-thumb-preview" class="preview" src="<?= !empty($editingProduct['thumb_image']) ? htmlspecialchars(image_url($editingProduct['thumb_image'])) : '' ?>" style="<?= !empty($editingProduct['thumb_image']) ? '' : 'display:none;' ?>">
+            <span>Klik untuk pilih thumbnail daftar</span>
+          </label>
+          <p style="font-size:12px; color:#777; margin:6px 0 0;">Foto yang tampil di halaman daftar produk. Kosongkan kalau mau sama dengan Cover Photo.</p>
         </div>
 
         <div class="field">

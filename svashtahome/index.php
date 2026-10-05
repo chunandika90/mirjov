@@ -28,6 +28,8 @@ function svashta_homepage_data(): array
         // Teks hero sekarang satu setelan global (tabel homepage_hero, 1 baris),
         // bukan per slide — lihat sql/2026-10-05-homepage-hero-text.sql.
         'hero' => ['title' => '', 'subtitle' => '', 'cta_label' => '', 'cta_link' => '#about-us'],
+        'about_photos' => [],
+        'featured' => null,
     ];
 
     try {
@@ -59,6 +61,20 @@ function svashta_homepage_data(): array
             }
         }
 
+        try {
+            $fc = $pdo->query('SELECT * FROM featured_collection WHERE id = 1 AND aktif = 1')->fetch();
+            if ($fc) $data['featured'] = $fc;
+        } catch (Throwable $e) {
+        }
+
+        try {
+            $ap = $pdo->query('SELECT image_path FROM about_photos ORDER BY sort_order LIMIT 4')->fetchAll();
+            foreach ($ap as &$a) { $a['image_url'] = image_url($a['image_path']); }
+            unset($a);
+            $data['about_photos'] = $ap;
+        } catch (Throwable $e) {
+        }
+
         $video = $pdo->query('SELECT * FROM homepage_video WHERE id = 1')->fetch();
         if ($video && ($video['headline'] || $video['slogan'] || $video['youtube_id'] || $video['video_path'])) {
             $data['video'] = $video;
@@ -86,7 +102,7 @@ function svashta_homepage_data(): array
         unset($pl);
         $data['partner_logos'] = $partnerLogos;
 
-        $data['latest_posts'] = $pdo->query('SELECT title, slug, COALESCE(published_at, created_at) AS post_date FROM blog_posts ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3')->fetchAll();
+        $data['latest_posts'] = $pdo->query('SELECT title, slug, cover_image, excerpt, COALESCE(published_at, created_at) AS post_date FROM blog_posts ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3')->fetchAll();
     } catch (Throwable $e) {
         // DB belum siap / error koneksi — pakai fallback statis di atas, situs tetap tampil.
     }
@@ -319,7 +335,27 @@ and modern precision, we handcraft furniture that is both structurally sound and
 
 			  <!-- IMAGE -->
 			  <div class="col-md-4 px-lg-3 px-md-2 my-4 my-md-0">
-				<img class="rounded w-100 w-sm-75 w-md-100" src="assets/img/about_us_new.jpg" alt="About Us Image" />
+				<?php if (count($hp['about_photos']) > 1): ?>
+				  <!-- Foto berganti otomatis (catatan Canva hal. 1). Kalau tabel about_photos
+				       kosong atau belum ada, blok di bawah memakai foto statis seperti dulu. -->
+				  <style>
+				    .hp-about-slider { border-radius: .375rem; overflow: hidden; }
+				    .hp-about-slider img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 3/4; }
+				    .hp-about-slider .swiper-pagination { bottom: 10px; }
+				    .hp-about-slider .swiper-pagination-bullet { background: #fff; opacity: .55; }
+				    .hp-about-slider .swiper-pagination-bullet-active { opacity: 1; }
+				  </style>
+				  <div class="swiper hp-about-slider w-100 w-sm-75 w-md-100" data-swiper='{"autoplay":{"delay":4500},"effect":"fade","fadeEffect":{"crossFade":true},"loop":true,"allowTouchMove":false,"pagination":{"el":".hp-about-slider .swiper-pagination","clickable":true}}'>
+				    <div class="swiper-wrapper">
+				      <?php foreach ($hp['about_photos'] as $foto): ?>
+				        <div class="swiper-slide"><img src="<?= htmlspecialchars($foto['image_url']) ?>" alt="Svashta Home" loading="lazy" /></div>
+				      <?php endforeach; ?>
+				    </div>
+				    <div class="swiper-pagination"></div>
+				  </div>
+				<?php else: ?>
+				  <img class="rounded w-100 w-sm-75 w-md-100" src="<?= htmlspecialchars($hp['about_photos'][0]['image_url'] ?? 'assets/img/about_us_new.jpg') ?>" alt="About Us Image" />
+				<?php endif; ?>
 			  </div>
 
 			  <!-- RIGHT POINTS -->
@@ -570,6 +606,56 @@ contemporary villa or a classic residence, Svashta pieces bring quiet elegance a
 
       <!-- ============================================-->
       <!-- <section> begin ============================-->
+      <!-- ============================================-->
+      <!-- KOLEKSI UNGGULAN — catatan Canva hal. 1 (#4, #5, #6).
+           Dua foto kanan-kiri, semua teks dan tautannya diatur dari CMS. -->
+      <?php if (!empty($hp['featured'])): $fc = $hp['featured']; ?>
+      <section class="hp-featured" id="featured-collection">
+        <style>
+          .hp-featured { position: relative; }
+          .hp-featured .foto { display: grid; grid-template-columns: 1fr 1fr; min-height: 560px; }
+          .hp-featured .foto > div { background-size: cover; background-position: center; }
+          /* Lapisan gelap supaya teks putih tetap terbaca di atas foto apa pun. */
+          .hp-featured .tirai { position: absolute; inset: 0; background: rgba(20,18,15,.52); }
+          .hp-featured .isi {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            color: #fff; padding: 40px 20px; text-decoration: none;
+          }
+          .hp-featured .eyebrow {
+            font-family: 'Jost', sans-serif; font-weight: 500; font-size: 12px;
+            letter-spacing: 4px; text-transform: uppercase; color: #e4d4bb;
+          }
+          .hp-featured h2 {
+            font-family: 'Cormorant Garamond', serif; font-weight: 500; color: #fff;
+            font-size: clamp(28px, 4vw, 52px); line-height: 1.15; margin: 14px 0 10px; max-width: 18ch;
+          }
+          .hp-featured .meta {
+            font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px;
+            text-transform: uppercase; color: #ded7cc; margin-bottom: 26px;
+          }
+          @media (max-width: 767.98px) {
+            .hp-featured .foto { grid-template-columns: 1fr; min-height: 460px; }
+            .hp-featured .foto > div:last-child { display: none; }
+          }
+        </style>
+        <div class="foto">
+          <div style="background-image:url('<?= htmlspecialchars(image_url($fc['image_left'])) ?>');"></div>
+          <div style="background-image:url('<?= htmlspecialchars(image_url($fc['image_right'])) ?>');"></div>
+        </div>
+        <div class="tirai"></div>
+        <a class="isi" href="<?= htmlspecialchars($fc['cta_link'] ?: '#') ?>">
+          <span class="eyebrow"><?= htmlspecialchars($fc['eyebrow']) ?></span>
+          <h2><?= htmlspecialchars($fc['title']) ?></h2>
+          <span class="meta"><?= htmlspecialchars($fc['meta']) ?></span>
+          <?php if (!empty($fc['cta_label'])): ?>
+            <span class="btn btn-sm btn-outline-light hvr-sweep-top px-4"><?= htmlspecialchars($fc['cta_label']) ?></span>
+          <?php endif; ?>
+        </a>
+      </section>
+      <?php endif; ?>
+      <!-- ============================================-->
+
       <section class="text-center" id="services">
 
         <div class="container">
@@ -1237,12 +1323,17 @@ specific spatial and aesthetic needs — from sketches to installation.
       <section class="bg-black py-6 clients">
 
         <div class="container">
+          <style>
+            /* Logo partner berjalan mulus terus-menerus (catatan Canva hal. 1:
+               "auto rolling kalau bisa"), bukan lompat per slide. */
+            .swiper-clients .swiper-wrapper { transition-timing-function: linear !important; }
+          </style>
           <div class="swiper-container swiper-clients">
             <div class="swiper-nav d-none d-lg-block">
               <div class="swiper-button-prev"></div>
               <div class="swiper-button-next"></div>
             </div>
-            <div class="swiper" data-swiper='{"navigation":{"nextEl":".swiper-container .swiper-button-next","prevEl":".swiper-container .swiper-button-prev"},"autoplay":true,"loop":true,"slidesPerView":2,"grabCursor":true,"breakpoints":{"576":{"slidesPerView":3},"768":{"slidesPerView":3},"992":{"slidesPerView":4},"1200":{"slidesPerView":6}}}'>
+            <div class="swiper" data-swiper='{"navigation":{"nextEl":".swiper-container .swiper-button-next","prevEl":".swiper-container .swiper-button-prev"},"autoplay":{"delay":0,"disableOnInteraction":false},"speed":5000,"loop":true,"slidesPerView":2,"freeMode":true,"grabCursor":true,"breakpoints":{"576":{"slidesPerView":3},"768":{"slidesPerView":3},"992":{"slidesPerView":4},"1200":{"slidesPerView":6}}}'>
               <div class="swiper-wrapper">
                 <?php if (!empty($hp['partner_logos'])): ?>
                   <?php foreach ($hp['partner_logos'] as $logo): ?>
@@ -1400,6 +1491,50 @@ specific spatial and aesthetic needs — from sketches to installation.
       </section>
 
       <!-- ============================================-->
+      <!-- ============================================-->
+      <!-- BLOG & INSIGHTS — catatan Canva hal. 1.
+           Membaca artikel asli dari tabel blog_posts. Section #blog bawaan
+           template berisi konten contoh dan sengaja dibiarkan tersembunyi. -->
+      <?php if (!empty($hp['latest_posts'])): ?>
+      <section class="py-6 text-center" id="blog-insights" style="background:#fff;">
+        <style>
+          .hp-blog-card { display:block; text-decoration:none; color:inherit; height:100%; }
+          .hp-blog-card .thumb { overflow:hidden; aspect-ratio:3/2; background:#f2efe9; }
+          .hp-blog-card .thumb img { width:100%; height:100%; object-fit:cover; display:block;
+            transition:transform .6s ease; }
+          .hp-blog-card:hover .thumb img { transform:scale(1.04); }
+          .hp-blog-card h3 {
+            font-family:'Cormorant Garamond', serif; font-weight:500; font-size:20px;
+            line-height:1.3; color:#1c1a17; margin:16px 0 8px; text-align:left;
+          }
+          .hp-blog-card .tgl {
+            font-family:'Jost', sans-serif; font-size:11px; letter-spacing:2px;
+            text-transform:uppercase; color:#8b8578; text-align:left; display:block;
+          }
+          .hp-blog-card:hover h3 { color:#a8895a; }
+        </style>
+        <div class="container">
+          <span class="d-block" style="font-family:'Jost',sans-serif; font-weight:500; font-size:12px; letter-spacing:4px; color:#a8895a;">BLOG &amp; INSIGHTS</span>
+          <h2 class="fs-md-5 mt-2 mb-5">Stories From The Workshop</h2>
+          <div class="row g-4">
+            <?php foreach ($hp['latest_posts'] as $post): ?>
+              <div class="col-md-4">
+                <a class="hp-blog-card" href="/blog/<?= urlencode($post['slug']) ?>">
+                  <?php if (!empty($post['cover_image'])): ?>
+                    <div class="thumb"><img src="<?= htmlspecialchars(image_url($post['cover_image'])) ?>" alt="<?= htmlspecialchars($post['title']) ?>" loading="lazy"></div>
+                  <?php endif; ?>
+                  <h3><?= htmlspecialchars($post['title']) ?></h3>
+                  <span class="tgl"><?= htmlspecialchars(date('d M Y', strtotime($post['post_date']))) ?></span>
+                </a>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <a class="btn btn-sm btn-outline-dark hvr-sweep-top mt-5 px-4" href="/blog">Read All Articles</a>
+        </div>
+      </section>
+      <?php endif; ?>
+      <!-- ============================================-->
+
       <!-- STAY CONNECTED — catatan Canva hal. 1 -->
       <section class="py-6 text-center" id="stay-connected" style="background:#faf8f5;">
         <style>

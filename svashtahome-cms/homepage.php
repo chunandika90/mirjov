@@ -56,6 +56,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             }
 
+            case 'save_hero_text': {
+                // Teks hero berlaku untuk SEMUA slide — fotonya saja yang berganti.
+                $stmt = $pdo->prepare('UPDATE homepage_hero SET title=?, subtitle=?, cta_label=?, cta_link=?, updated_at=NOW(), updated_by=? WHERE id=1');
+                $stmt->execute([
+                    trim($_POST['hero_title'] ?? ''),
+                    trim($_POST['hero_subtitle'] ?? ''),
+                    trim($_POST['hero_cta_label'] ?? ''),
+                    trim($_POST['hero_cta_link'] ?? '') ?: '#about-us',
+                    $admin['id'],
+                ]);
+                $flash = ['ok', 'Teks hero tersimpan.'];
+                break;
+            }
+
+            case 'save_featured': {
+                $kiri = $_POST['existing_left'] ?? '';
+                $kanan = $_POST['existing_right'] ?? '';
+                if (!empty($_FILES['image_left']['name'])) {
+                    $kiri = handle_image_upload($_FILES['image_left'], 'homepage/featured', 'featured-kiri');
+                }
+                if (!empty($_FILES['image_right']['name'])) {
+                    $kanan = handle_image_upload($_FILES['image_right'], 'homepage/featured', 'featured-kanan');
+                }
+                $stmt = $pdo->prepare('UPDATE featured_collection SET aktif=?, eyebrow=?, title=?, meta=?, cta_label=?, cta_link=?, image_left=?, image_right=?, updated_at=NOW(), updated_by=? WHERE id=1');
+                $stmt->execute([
+                    isset($_POST['aktif']) ? 1 : 0,
+                    trim($_POST['eyebrow'] ?? ''),
+                    trim($_POST['fc_title'] ?? ''),
+                    trim($_POST['meta'] ?? ''),
+                    trim($_POST['fc_cta_label'] ?? ''),
+                    trim($_POST['fc_cta_link'] ?? ''),
+                    $kiri, $kanan, $admin['id'],
+                ]);
+                $flash = ['ok', 'Koleksi unggulan tersimpan.'];
+                break;
+            }
+
+            case 'add_about_photo': {
+                if (empty($_FILES['about_photo']['name'])) throw new RuntimeException('Pilih foto dulu.');
+                $jml = (int) $pdo->query('SELECT COUNT(*) FROM about_photos')->fetchColumn();
+                if ($jml >= 4) throw new RuntimeException('Maksimal 4 foto. Hapus salah satu dulu.');
+                $path = handle_image_upload($_FILES['about_photo'], 'homepage/about', 'about');
+                $pdo->prepare('INSERT INTO about_photos (image_path, sort_order, updated_at, updated_by) VALUES (?,?,NOW(),?)')
+                    ->execute([$path, $jml, $admin['id']]);
+                $flash = ['ok', 'Foto ditambahkan.'];
+                break;
+            }
+
+            case 'delete_about_photo': {
+                $id = (int) ($_POST['photo_id'] ?? 0);
+                $row = $pdo->prepare('SELECT image_path FROM about_photos WHERE id=?');
+                $row->execute([$id]);
+                if ($ada = $row->fetch()) delete_uploaded_image($ada['image_path']);
+                $pdo->prepare('DELETE FROM about_photos WHERE id=?')->execute([$id]);
+                $flash = ['ok', 'Foto dihapus.'];
+                break;
+            }
+
             case 'save_video': {
                 $headline = trim($_POST['headline'] ?? '');
                 $slogan = trim($_POST['slogan'] ?? '');
@@ -231,6 +289,16 @@ $collaborators = $pdo->query(audit_select('collaborators') . ' ORDER BY t.sort_o
 $reviews = $pdo->query(audit_select('reviews') . ' ORDER BY t.sort_order')->fetchAll();
 $partnerLogos = $pdo->query(audit_select('partner_logos') . ' ORDER BY t.sort_order')->fetchAll();
 $backgrounds = $pdo->query(audit_select('homepage_backgrounds', 't', false) . ' WHERE t.id=1')->fetch();
+// Dibungkus: kalau migrasi 2026-10-05 belum dijalankan di server, tiga pengelola
+// di bawah tampil kosong — bukan bikin seluruh halaman CMS mati.
+$heroText = []; $featured = []; $aboutPhotos = []; $migrasiBelumJalan = false;
+try {
+    $heroText = $pdo->query('SELECT * FROM homepage_hero WHERE id=1')->fetch() ?: [];
+    $featured = $pdo->query('SELECT * FROM featured_collection WHERE id=1')->fetch() ?: [];
+    $aboutPhotos = $pdo->query('SELECT * FROM about_photos ORDER BY sort_order')->fetchAll();
+} catch (Throwable $e) {
+    $migrasiBelumJalan = true;
+}
 
 $editingSlide = null;
 if (!empty($_GET['edit_slide'])) {
@@ -259,6 +327,129 @@ require __DIR__ . '/includes/header.php';
 
 <?php if ($flash): ?>
   <div class="flash <?= $flash[0] === 'ok' ? 'ok' : 'error' ?>"><?= htmlspecialchars($flash[1]) ?></div>
+<?php endif; ?>
+
+<?php if ($migrasiBelumJalan): ?>
+  <div class="flash error">Migrasi database 2026-10-05 belum dijalankan, jadi pengelola Teks Hero, Koleksi Unggulan, dan Foto What Defines belum aktif. Bagian lain tetap bisa dipakai.</div>
+<?php else: ?>
+<!-- ============ TEKS HERO ============ -->
+<section class="section-card">
+  <div class="section-head">
+    <div><h2>Teks Hero</h2><div class="section-hint">Teks ini DIAM di depan — cuma fotonya yang berganti. Berlaku untuk semua slide.</div></div>
+  </div>
+  <form method="post" class="form-grid">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="save_hero_text">
+    <div class="field">
+      <label>Judul</label>
+      <input type="text" name="hero_title" value="<?= htmlspecialchars($heroText['title'] ?? '') ?>">
+    </div>
+    <div class="field">
+      <label>Subjudul</label>
+      <input type="text" name="hero_subtitle" value="<?= htmlspecialchars($heroText['subtitle'] ?? '') ?>">
+    </div>
+    <div class="field">
+      <label>Tulisan Tombol</label>
+      <input type="text" name="hero_cta_label" value="<?= htmlspecialchars($heroText['cta_label'] ?? '') ?>" placeholder="mis. Know Us Better">
+    </div>
+    <div class="field">
+      <label>Tombol Menuju</label>
+      <input type="text" name="hero_cta_link" value="<?= htmlspecialchars($heroText['cta_link'] ?? '') ?>" placeholder="mis. #about-us atau /product">
+    </div>
+    <div class="field"><button class="btn" type="submit">Simpan Teks Hero</button></div>
+  </form>
+</section>
+
+<!-- ============ KOLEKSI UNGGULAN ============ -->
+<section class="section-card">
+  <div class="section-head">
+    <div><h2>Koleksi Unggulan</h2><div class="section-hint">Blok besar dua foto di homepage. Ganti teks &amp; fotonya tiap kali koleksi yang ditonjolkan berganti.</div></div>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="form-grid">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="save_featured">
+    <input type="hidden" name="existing_left" value="<?= htmlspecialchars($featured['image_left'] ?? '') ?>">
+    <input type="hidden" name="existing_right" value="<?= htmlspecialchars($featured['image_right'] ?? '') ?>">
+    <div class="field">
+      <label><input type="checkbox" name="aktif" value="1" <?= !empty($featured['aktif']) ? 'checked' : '' ?>> Tampilkan section ini</label>
+    </div>
+    <div class="field">
+      <label>Nama Koleksi (teks kecil di atas)</label>
+      <input type="text" name="eyebrow" value="<?= htmlspecialchars($featured['eyebrow'] ?? '') ?>" placeholder="mis. PARADAGHDA COLLECTION">
+    </div>
+    <div class="field">
+      <label>Judul Besar</label>
+      <input type="text" name="fc_title" value="<?= htmlspecialchars($featured['title'] ?? '') ?>" placeholder="mis. The Heritage of Fire &amp; Preservation">
+    </div>
+    <div class="field">
+      <label>Keterangan Bawah</label>
+      <input type="text" name="meta" value="<?= htmlspecialchars($featured['meta'] ?? '') ?>" placeholder="mis. Svashta Home | 2026">
+    </div>
+    <div class="field">
+      <label>Tulisan Tombol</label>
+      <input type="text" name="fc_cta_label" value="<?= htmlspecialchars($featured['cta_label'] ?? '') ?>" placeholder="mis. Discover more">
+    </div>
+    <div class="field">
+      <label>Tombol Menuju (halaman koleksi)</label>
+      <input type="text" name="fc_cta_link" value="<?= htmlspecialchars($featured['cta_link'] ?? '') ?>" placeholder="mis. /product?category=sofa">
+    </div>
+    <div class="field">
+      <label>Foto Kiri</label>
+      <label class="dropzone">
+        <input type="file" name="image_left" accept="image/*" style="display:none;" data-preview-target="fc-left-preview">
+        <img id="fc-left-preview" class="preview" src="<?= !empty($featured['image_left']) ? htmlspecialchars(image_url($featured['image_left'])) : '' ?>" style="<?= !empty($featured['image_left']) ? '' : 'display:none;' ?>">
+        <span>Klik untuk ganti foto kiri</span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Foto Kanan</label>
+      <label class="dropzone">
+        <input type="file" name="image_right" accept="image/*" style="display:none;" data-preview-target="fc-right-preview">
+        <img id="fc-right-preview" class="preview" src="<?= !empty($featured['image_right']) ? htmlspecialchars(image_url($featured['image_right'])) : '' ?>" style="<?= !empty($featured['image_right']) ? '' : 'display:none;' ?>">
+        <span>Klik untuk ganti foto kanan</span>
+      </label>
+    </div>
+    <div class="field"><button class="btn" type="submit">Simpan Koleksi Unggulan</button></div>
+  </form>
+</section>
+
+<!-- ============ FOTO "WHAT DEFINES" ============ -->
+<section class="section-card">
+  <div class="section-head">
+    <div><h2>Foto Section "What Defines"</h2><div class="section-hint">Foto di tengah section What Defines Svashta Home. Lebih dari satu = berganti otomatis. Maksimal 4.</div></div>
+  </div>
+  <?php if (!$aboutPhotos): ?>
+    <div class="empty-row">Belum ada foto — halaman memakai foto bawaan.</div>
+  <?php else: ?>
+    <div class="tile-grid">
+      <?php foreach ($aboutPhotos as $ap): ?>
+        <div class="tile">
+          <img src="<?= htmlspecialchars(image_url($ap['image_path'])) ?>" alt="">
+          <div class="tile-actions">
+            <form method="post" onsubmit="return confirm('Hapus foto ini?');">
+              <?= csrf_field() ?>
+              <input type="hidden" name="action" value="delete_about_photo">
+              <input type="hidden" name="photo_id" value="<?= $ap['id'] ?>">
+              <button class="btn btn-danger" type="submit">Hapus</button>
+            </form>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+  <?php if (count($aboutPhotos) < 4): ?>
+    <form method="post" enctype="multipart/form-data" class="form-grid" style="margin-top:14px;">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="add_about_photo">
+      <div class="field">
+        <label>Tambah Foto (<?= count($aboutPhotos) ?>/4)</label>
+        <input type="file" name="about_photo" accept="image/*" required>
+      </div>
+      <div class="field"><button class="btn" type="submit">Tambah Foto</button></div>
+    </form>
+  <?php endif; ?>
+</section>
+
 <?php endif; ?>
 
 <!-- ============ HERO CAROUSEL ============ -->
