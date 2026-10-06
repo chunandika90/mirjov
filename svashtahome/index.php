@@ -320,7 +320,7 @@ craftsmanship, and comfort converge.</p>
 			<!-- Content Grid -->
 			<div class="row align-items-center text-md-start text-center">
 			  <!-- LEFT POINTS -->
-			  <div class="col-md-4 mb-4 mb-md-0 ps-md-4">
+			  <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 order-lg-2">
 				<div class="mb-4">
 				  <h5 class="ls-2 mb-2">Premium Materials</h5>
 				  <p class="mb-0">We work exclusively with the finest natural resources: solid Indonesian teakwood, premium veneers, genuine
@@ -334,7 +334,7 @@ and modern precision, we handcraft furniture that is both structurally sound and
 			  </div>
 
 			  <!-- IMAGE -->
-			  <div class="col-md-4 px-lg-3 px-md-2 my-4 my-md-0">
+			  <div class="col-lg-5 my-4 my-lg-0 order-lg-1 pe-lg-4">
 				<?php if (count($hp['about_photos']) > 1): ?>
 				  <!-- Foto berganti otomatis (catatan Canva hal. 1). Kalau tabel about_photos
 				       kosong atau belum ada, blok di bawah memakai foto statis seperti dulu. -->
@@ -359,7 +359,7 @@ and modern precision, we handcraft furniture that is both structurally sound and
 			  </div>
 
 			  <!-- RIGHT POINTS -->
-			  <div class="col-md-4 pe-md-4">
+			  <div class="col-lg-4 col-md-6 order-lg-3">
 				<div class="mb-4">
 				  <h5 class="ls-2 mb-2">Ergonomic Design</h5>
 				  <p class="mb-0">True comfort is not just felt — it is engineered. Every Svashta piece is thoughtfully designed to support the body
@@ -608,50 +608,83 @@ contemporary villa or a classic residence, Svashta pieces bring quiet elegance a
       <!-- <section> begin ============================-->
       <!-- ============================================-->
       <!-- KOLEKSI UNGGULAN — catatan Canva hal. 1 (#4, #5, #6).
-           Dua foto kanan-kiri, semua teks dan tautannya diatur dari CMS. -->
+           Susunan mengikuti mockup: dua foto berdampingan tanpa lapisan gelap,
+           judul & tombol menumpang di foto kiri (rata kiri, area bawah), nama
+           koleksi & tahun di foto kanan (area atas). Semua teks diatur dari CMS. -->
       <?php if (!empty($hp['featured'])): $fc = $hp['featured']; ?>
       <section class="hp-featured" id="featured-collection">
         <style>
-          .hp-featured { position: relative; }
-          .hp-featured .foto { display: grid; grid-template-columns: 1fr 1fr; min-height: 560px; }
-          .hp-featured .foto > div { background-size: cover; background-position: center; }
-          /* Lapisan gelap supaya teks putih tetap terbaca di atas foto apa pun. */
-          .hp-featured .tirai { position: absolute; inset: 0; background: rgba(20,18,15,.52); }
-          .hp-featured .isi {
-            position: absolute; inset: 0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
-            color: #fff; padding: 40px 20px; text-decoration: none;
+          .hp-featured { display: grid; grid-template-columns: 1fr 1fr; min-height: 560px; }
+          .hp-featured .sisi { position: relative; background-size: cover; background-position: center; }
+          /* Bayangan tipis hanya di sisi kiri, sekadar supaya teks putih tetap
+             terbaca di foto terang — bukan lapisan gelap menyeluruh. */
+          .hp-featured .sisi-kiri::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(20,18,15,.55) 0%, rgba(20,18,15,.12) 55%, transparent 100%);
           }
-          .hp-featured .eyebrow {
-            font-family: 'Jost', sans-serif; font-weight: 500; font-size: 12px;
-            letter-spacing: 4px; text-transform: uppercase; color: #e4d4bb;
+          .hp-featured .teks-kiri {
+            position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+            padding: 0 clamp(24px, 5vw, 70px) clamp(36px, 6vw, 72px);
+            text-align: left; color: #fff;
           }
-          .hp-featured h2 {
-            font-family: 'Cormorant Garamond', serif; font-weight: 500; color: #fff;
-            font-size: clamp(28px, 4vw, 52px); line-height: 1.15; margin: 14px 0 10px; max-width: 18ch;
+          .hp-featured .teks-kiri .baris1 {
+            display: block; font-family: 'Cormorant Garamond', serif; font-weight: 400;
+            font-size: clamp(26px, 3.4vw, 46px); line-height: 1.12;
           }
-          .hp-featured .meta {
-            font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px;
-            text-transform: uppercase; color: #ded7cc; margin-bottom: 26px;
+          .hp-featured .teks-kiri .baris2 {
+            display: block; font-family: 'Cormorant Garamond', serif; font-weight: 700;
+            font-size: clamp(26px, 3.4vw, 46px); line-height: 1.12; margin-bottom: 22px;
           }
+          .hp-featured .tombol {
+            display: inline-block; font-family: 'Jost', sans-serif; font-size: 13px;
+            letter-spacing: 1px; color: #fff; text-decoration: none;
+            border: 1px solid rgba(255,255,255,.85); border-radius: 999px;
+            padding: 9px 26px; transition: background .3s ease, color .3s ease;
+          }
+          .hp-featured .tombol:hover { background: #fff; color: #1c1a17; }
+          .hp-featured .teks-kanan {
+            position: absolute; left: 0; right: 0; top: clamp(40px, 7vw, 92px); z-index: 2;
+            text-align: center; padding: 0 20px; color: #1c1a17;
+          }
+          .hp-featured .teks-kanan .nama {
+            display: block; font-family: 'Jost', sans-serif; font-weight: 600;
+            font-size: clamp(15px, 1.7vw, 23px); letter-spacing: .5px; text-transform: uppercase;
+          }
+          .hp-featured .teks-kanan .tahun {
+            display: block; font-family: 'Jost', sans-serif; font-weight: 300;
+            font-size: clamp(12px, 1.1vw, 15px); margin-top: 7px;
+          }
+          /* Di layar sempit, dua foto ditumpuk supaya teksnya tidak berdesakan. */
           @media (max-width: 767.98px) {
-            .hp-featured .foto { grid-template-columns: 1fr; min-height: 460px; }
-            .hp-featured .foto > div:last-child { display: none; }
+            .hp-featured { grid-template-columns: 1fr; }
+            .hp-featured .sisi { min-height: 340px; }
           }
         </style>
-        <div class="foto">
-          <div style="background-image:url('<?= htmlspecialchars(image_url($fc['image_left'])) ?>');"></div>
-          <div style="background-image:url('<?= htmlspecialchars(image_url($fc['image_right'])) ?>');"></div>
+
+        <div class="sisi sisi-kiri" style="background-image:url('<?= htmlspecialchars(image_url($fc['image_left'])) ?>');">
+          <div class="teks-kiri">
+            <?php
+              // Judul dipecah dua baris: baris terakhir ditebalkan, seperti di mockup.
+              $judul = trim($fc['title']);
+              $spasi = strrpos($judul, ' ', -1);
+              $potong = strpos($judul, ' of ');
+              if ($potong !== false) { $b1 = substr($judul, 0, $potong + 3); $b2 = substr($judul, $potong + 4); }
+              else { $b1 = $judul; $b2 = ''; }
+            ?>
+            <span class="baris1"><?= htmlspecialchars($b1) ?></span>
+            <?php if ($b2 !== ''): ?><span class="baris2"><?= htmlspecialchars($b2) ?></span><?php endif; ?>
+            <?php if (!empty($fc['cta_label'])): ?>
+              <a class="tombol" href="<?= htmlspecialchars($fc['cta_link'] ?: '#') ?>"><?= htmlspecialchars($fc['cta_label']) ?></a>
+            <?php endif; ?>
+          </div>
         </div>
-        <div class="tirai"></div>
-        <a class="isi" href="<?= htmlspecialchars($fc['cta_link'] ?: '#') ?>">
-          <span class="eyebrow"><?= htmlspecialchars($fc['eyebrow']) ?></span>
-          <h2><?= htmlspecialchars($fc['title']) ?></h2>
-          <span class="meta"><?= htmlspecialchars($fc['meta']) ?></span>
-          <?php if (!empty($fc['cta_label'])): ?>
-            <span class="btn btn-sm btn-outline-light hvr-sweep-top px-4"><?= htmlspecialchars($fc['cta_label']) ?></span>
-          <?php endif; ?>
-        </a>
+
+        <div class="sisi sisi-kanan" style="background-image:url('<?= htmlspecialchars(image_url($fc['image_right'])) ?>');">
+          <a class="teks-kanan" href="<?= htmlspecialchars($fc['cta_link'] ?: '#') ?>" style="text-decoration:none;">
+            <span class="nama"><?= htmlspecialchars($fc['eyebrow']) ?></span>
+            <?php if (!empty($fc['meta'])): ?><span class="tahun"><?= htmlspecialchars($fc['meta']) ?></span><?php endif; ?>
+          </a>
+        </div>
       </section>
       <?php endif; ?>
       <!-- ============================================-->
