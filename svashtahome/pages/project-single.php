@@ -40,8 +40,7 @@ require __DIR__ . '/inc/nav.php';
     /* Project detail page — same tone as product/category (.pdp-*/.pdf-*) */
     /* Jarak judul ke foto pertama dirapatkan (catatan Canva hal. 3:
        "judul dan foto pertama terlalu jauh jaraknya ... jarak lbh dekat"). */
-    .pdf-hero { padding: 120px 0 10px; background: #fff; }
-    .pdf-hero .container, .pdf-hero .pdf-title, .pdf-hero .pdf-meta, .pdf-hero p { text-align: center !important; }
+    .pdf-hero { padding: 130px 0 18px; text-align: center; background: #fff; }
     @media (max-width: 767.98px) { .pdf-hero { padding: 100px 0 14px; } }
     .pdf-eyebrow {
       display: block; font-family: 'Jost', sans-serif; font-weight: 500;
@@ -52,10 +51,6 @@ require __DIR__ . '/inc/nav.php';
       font-size: clamp(30px, 4.5vw, 52px); letter-spacing: 0.3px; line-height: 1.05;
       color: #1c1a17; margin-bottom: 0;
     }
-    .pdf-meta {
-      font-family: 'Jost', sans-serif; font-weight: 300; font-size: 15px;
-      color: #5c564b; margin: 10px 0 0;
-    }
     .pdf-page { background: #fff; }
     .pdf-desc {
       font-family: 'Jost', sans-serif; font-weight: 300; font-size: 17px;
@@ -64,7 +59,7 @@ require __DIR__ . '/inc/nav.php';
 
     .pdf-project-gallery {
       display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
-      margin-top: 10px; background: #fff;
+      margin-top: 24px; background: #fff;
     }
     /* Cerita proyek dibikin rata tengah dan selebar terbatas, biar judul, cerita,
        dan foto pertama terbaca sebagai satu blok. */
@@ -80,23 +75,17 @@ require __DIR__ . '/inc/nav.php';
 
   <section class="pdf-hero">
     <div class="container">
-      <?php // Susunan mengikuti mockup Canva hal. 3: nama proyek di tengah, lalu
-            // baris "Project | tahun" tepat di bawahnya. Eyebrow lama dihapus karena
-            // catatan meminta judulnya dipindah ke susunan ini.
-            $tahunProyek = date('Y', strtotime($project['created_at'] ?? 'now')); ?>
+      <span class="pdf-eyebrow">PROJECT<?= $project['collection'] ? ' — ' . htmlspecialchars(strtoupper($project['collection'])) : '' ?></span>
       <h1 class="pdf-title"><?= htmlspecialchars($project['name']) ?></h1>
-      <p class="pdf-meta">Project<?= $project['collection'] ? ' | ' . htmlspecialchars($project['collection']) : '' ?> | <?= $tahunProyek ?></p>
       <?php if ($project['location']): ?>
-        <p class="mt-2 text-uppercase ls-2 fs--1" style="color:#8b8578;"><?= htmlspecialchars($project['location']) ?></p>
+        <p class="mt-3 text-uppercase ls-2 fs--1" style="color:#8b8578;"><?= htmlspecialchars($project['location']) ?></p>
       <?php endif; ?>
     </div>
   </section>
 
-  <section class="pt-0 pb-4 pdf-page">
+  <section class="py-4 pdf-page">
     <div class="container" style="max-width:1000px;">
-      <?php if (trim((string) $project['story']) !== ''): ?>
-        <p class="pdf-desc"><?= nl2br(htmlspecialchars($project['story'])) ?></p>
-      <?php endif; ?>
+      <p class="pdf-desc"><?= nl2br(htmlspecialchars($project['story'])) ?></p>
     </div>
 
     <?php if ($project['gallery']): ?>

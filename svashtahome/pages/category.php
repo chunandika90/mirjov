@@ -96,30 +96,6 @@ require __DIR__ . '/inc/nav.php';
     border: none; text-decoration: none; transition: background .3s ease;
   }
   .pdp-btn:hover { background: #a8895a; color: #1c1a17 !important; }
-  /* Kartu katalog — mengikuti referensi di catatan Canva hal. 2: foto di latar
-     bersih, nama produk tercetak di bawah fotonya, jarak antar produk lega. */
-  .pl-kartu { cursor: pointer; display: block; }
-  .pl-foto-bingkai {
-    background: #fff; overflow: hidden; aspect-ratio: 4/3;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .pl-kartu img.thumbnail-gridder {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-    transition: transform .6s ease;
-  }
-  .pl-kartu:hover img.thumbnail-gridder { transform: scale(1.03); }
-  .pl-nama {
-    font-family: 'Jost', sans-serif; font-weight: 500; font-size: 11px;
-    letter-spacing: 3px; text-transform: uppercase; color: #1c1a17;
-    text-align: center; margin: 14px 0 0; transition: color .25s ease;
-  }
-  .pl-kartu:hover .pl-nama { color: #a8895a; }
-  .pl-kategori {
-    font-family: 'Jost', sans-serif; font-weight: 400; font-size: 9.5px;
-    letter-spacing: 2px; text-transform: uppercase; color: #a39c90;
-    text-align: center; margin: 4px 0 0;
-  }
-
   @media (min-width: 992px) {
     .thumbnail-grid-content { max-height: 74vh; overflow-y: auto; }
   }
@@ -137,26 +113,14 @@ require __DIR__ . '/inc/nav.php';
     <?php if (!$products): ?>
       <p class="text-center text-body-secondary js-empty-msg">Belum ada produk di kategori ini.</p>
     <?php else: ?>
-    <div class="row g-4 g-lg-5 position-relative thumbnail-grid-container" id="selector">
+    <div class="row g-2 position-relative thumbnail-grid-container" id="selector">
       <?php foreach ($products as $i => $p):
         $prevTarget = $i > 0 ? '#collapse-' . ($i - 1) : '#!';
         $nextTarget = $i < count($products) - 1 ? '#collapse-' . ($i + 1) : '#!';
         $itemHidden = $cat !== '' && $p['category'] !== $cat;
       ?>
       <div class="col-12 col-sm-6 col-lg-4 thumbnail-grid-item js-product-item<?= $itemHidden ? ' d-none' : '' ?>" data-cat="<?= htmlspecialchars($p['category']) ?>">
-        <?php // Foto sampul di daftar sengaja BOLEH beda dari foto di dalam
-              // (catatan Canva hal. 2). Kalau thumb_image kosong, jatuh kembali
-              // ke cover_image, jadi produk lama tampil persis seperti sekarang.
-              $fotoSampul = !empty($p['thumb_image']) ? $p['thumb_image'] : $p['cover_image']; ?>
-        <div class="pl-kartu" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $i ?>" aria-expanded="false" aria-controls="collapse-<?= $i ?>" role="button" tabindex="0">
-          <div class="pl-foto-bingkai">
-            <img class="thumbnail-gridder" src="<?= htmlspecialchars(image_thumb_url($fotoSampul)) ?>" alt="<?= htmlspecialchars($p['name']) ?>" />
-          </div>
-          <p class="pl-nama"><?= htmlspecialchars($p['name']) ?></p>
-          <?php if (!empty(CATEGORY_LABELS[$p['category']])): ?>
-            <p class="pl-kategori"><?= htmlspecialchars(CATEGORY_LABELS[$p['category']]) ?></p>
-          <?php endif; ?>
-        </div>
+        <img class="thumbnail-gridder" src="<?= htmlspecialchars(image_thumb_url($p['cover_image'])) ?>" alt="<?= htmlspecialchars($p['name']) ?>" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $i ?>" aria-expanded="false" aria-controls="collapse-<?= $i ?>" />
         <div class="position-absolute start-0">
           <div class="collapse thumbnail-grid-content" data-bs-parent="#selector" id="collapse-<?= $i ?>">
             <div class="card card-body border-0 pdp-card m-0 px-3 py-2">
